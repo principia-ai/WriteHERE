@@ -33,6 +33,7 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import InfoIcon from '@mui/icons-material/Info';
 import { generateStory, pingAPI } from '../utils/api';
 import HistoryPanel from '../components/HistoryPanel';
+import { useTranslation } from 'react-i18next';
 
 // Recommended model options
 const commonModels = [
@@ -49,6 +50,7 @@ const examplePrompts = [
 ];
 
 const StoryGenerationPage = () => {
+  const { t } = useTranslation();
   const [prompt, setPrompt] = useState('');
   const [model, setModel] = useState('gpt-4o');
   const [apiKeys, setApiKeys] = useState({
@@ -77,18 +79,18 @@ const StoryGenerationPage = () => {
         await pingAPI();
         // API is available, nothing to do
       } catch (err) {
-        setError('Cannot connect to the backend server. Please make sure it is running at http://localhost:5001.');
+        setError(t('storyGeneration.errors.backendConnection'));
       }
     }
     
     checkAPIConnection();
-  }, []);
+  }, [t]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!prompt) {
-      setError('Please provide a prompt for story generation.');
+      setError(t('storyGeneration.errors.emptyPrompt'));
       return;
     }
     
@@ -97,13 +99,13 @@ const StoryGenerationPage = () => {
     const isClaudeModel = model.toLowerCase().includes('claude');
     
     if (isOpenAIModel && !apiKeys.openai) {
-      setError('Please provide your OpenAI API key in the settings section.');
+      setError(t('storyGeneration.errors.missingOpenAIKey'));
       setShowApiSection(true);
       return;
     }
     
     if (isClaudeModel && !apiKeys.claude) {
-      setError('Please provide your Anthropic Claude API key in the settings section.');
+      setError(t('storyGeneration.errors.missingClaudeKey'));
       setShowApiSection(true);
       return;
     }
@@ -112,13 +114,13 @@ const StoryGenerationPage = () => {
     try {
       await pingAPI();
     } catch (err) {
-      setError('Cannot connect to the backend server. Please make sure it is running at http://localhost:5001.');
+      setError(t('storyGeneration.errors.backendConnection'));
       return;
     }
     
     setLoading(true);
     setError('');
-    setStatusMessage('Initiating story generation...');
+    setStatusMessage(t('storyGeneration.status.initiating'));
     setShowStatus(true);
     
     try {
@@ -134,7 +136,7 @@ const StoryGenerationPage = () => {
       
       // Navigate to the results page with the task ID
       if (response && response.taskId) {
-        setStatusMessage('Story generation started successfully!');
+        setStatusMessage(t('storyGeneration.status.started'));
         navigate(`/results/${response.taskId}`, { 
           state: { 
             taskId: response.taskId,
@@ -145,12 +147,12 @@ const StoryGenerationPage = () => {
           } 
         });
       } else {
-        throw new Error('No task ID returned from the server');
+        throw new Error(t('storyGeneration.errors.noTaskId'));
       }
     } catch (err) {
       setLoading(false);
       setStatusMessage('');
-      setError('Error starting story generation: ' + (err.message || 'Unknown error'));
+      setError(t('storyGeneration.errors.generationError') + ' ' + (err.message || t('storyGeneration.errors.unknown')));
       console.error('Story generation error:', err);
     }
   };
@@ -170,12 +172,10 @@ const StoryGenerationPage = () => {
     <Container maxWidth="lg">
       <Box sx={{ mt: 4, mb: 6 }}>
         <Typography variant="h3" component="h1" gutterBottom>
-          Creative Story Generation
+          {t('storyGeneration.title')}
         </Typography>
         <Typography variant="body1" paragraph>
-          Generate creative stories using our Heterogeneous Recursive Planning framework. 
-          Provide a prompt describing the story you want to create, and our system will 
-          recursively plan and generate a cohesive narrative.
+          {t('storyGeneration.description')}
         </Typography>
       </Box>
 
@@ -199,14 +199,14 @@ const StoryGenerationPage = () => {
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <TextField
-                label="Story Prompt"
+                label={t('storyGeneration.promptLabel')}
                 multiline
                 rows={6}
                 fullWidth
                 required
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Describe the story you want to generate..."
+                placeholder={t('storyGeneration.promptPlaceholder')}
                 variant="outlined"
               />
             </Grid>
@@ -239,11 +239,11 @@ const StoryGenerationPage = () => {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="Model"
+                    label={t('storyGeneration.modelLabel')}
                     variant="outlined"
                     fullWidth
-                    placeholder="Enter or select a model"
-                    helperText="Enter any model name or select from suggestions"
+                    placeholder={t('storyGeneration.modelPlaceholder')}
+                    helperText={t('storyGeneration.modelHelperText')}
                   />
                 )}
                 renderOption={(props, option) => (
@@ -277,7 +277,7 @@ const StoryGenerationPage = () => {
                 fullWidth
                 disabled={loading || !prompt}
               >
-                {loading ? <CircularProgress size={24} color="inherit" /> : 'Generate Story'}
+                {loading ? <CircularProgress size={24} color="inherit" /> : t('storyGeneration.generateStory')}
               </Button>
             </Grid>
             
@@ -304,8 +304,8 @@ const StoryGenerationPage = () => {
                   sx={{ borderRadius: 2 }}
                 >
                   <Typography variant="subtitle1" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center' }}>
-                    API Settings
-                    <Tooltip title="Your API keys are stored locally in your browser and are never sent to our servers">
+                    {t('storyGeneration.apiKeySettings')}
+                    <Tooltip title={t('storyGeneration.apiKeyInfo')}>
                       <IconButton size="small" sx={{ ml: 1 }}>
                         <InfoIcon fontSize="small" color="action" />
                       </IconButton>
@@ -316,14 +316,14 @@ const StoryGenerationPage = () => {
                   <Grid container spacing={3}>
                     <Grid item xs={12} md={6}>
                       <TextField
-                        label="OpenAI API Key"
+                        label={t('storyGeneration.openaiApiKey')}
                         fullWidth
                         variant="outlined"
                         value={apiKeys.openai}
                         onChange={(e) => handleApiKeyChange('openai', e.target.value)}
                         type={showOpenAIKey ? 'text' : 'password'}
                         placeholder="sk-..."
-                        helperText="Required for GPT models"
+                        helperText={t('storyGeneration.openaiHelperText')}
                         InputProps={{
                           endAdornment: (
                             <InputAdornment position="end">
@@ -341,14 +341,14 @@ const StoryGenerationPage = () => {
                     </Grid>
                     <Grid item xs={12} md={6}>
                       <TextField
-                        label="Anthropic API Key"
+                        label={t('storyGeneration.claudeApiKey')}
                         fullWidth
                         variant="outlined"
                         value={apiKeys.claude}
                         onChange={(e) => handleApiKeyChange('claude', e.target.value)}
                         type={showClaudeKey ? 'text' : 'password'}
                         placeholder="sk-ant-..."
-                        helperText="Required for Claude models"
+                        helperText={t('storyGeneration.claudeHelperText')}
                         InputProps={{
                           endAdornment: (
                             <InputAdornment position="end">
@@ -366,8 +366,7 @@ const StoryGenerationPage = () => {
                     </Grid>
                     <Grid item xs={12}>
                       <Typography variant="caption" color="text.secondary">
-                        Your API keys are stored securely in your browser's local storage and are never sent to our servers.
-                        They are only used to make direct API calls to the respective services from your browser.
+                        {t('storyGeneration.apiKeyPrivacyNote')}
                       </Typography>
                     </Grid>
                   </Grid>
@@ -380,14 +379,18 @@ const StoryGenerationPage = () => {
 
       <Box sx={{ mb: 6 }}>
         <Typography variant="h5" gutterBottom>
-          Example Prompts
+          {t('storyGeneration.examplePromptsTitle')}
         </Typography>
         <Typography variant="body2" paragraph>
-          Click on any example to use it as your prompt:
+          {t('storyGeneration.examplePromptsSubtitle')}
         </Typography>
         
         <Grid container spacing={3}>
-          {examplePrompts.map((example, index) => (
+          {[
+            t('storyGeneration.examplePrompt1'),
+            t('storyGeneration.examplePrompt2'),
+            t('storyGeneration.examplePrompt3')
+          ].map((example, index) => (
             <Grid item xs={12} md={4} key={index}>
               <Card 
                 sx={{ 
@@ -414,35 +417,32 @@ const StoryGenerationPage = () => {
 
       <Paper elevation={3} sx={{ p: 4, mb: 6 }}>
         <Typography variant="h5" gutterBottom>
-          Tips for Effective Story Prompts
+          {t('storyGeneration.tipsTitle')}
         </Typography>
         <Divider sx={{ mb: 2 }} />
         <Grid container spacing={2}>
           <Grid item xs={12} md={4}>
             <Typography variant="subtitle1" fontWeight="bold">
-              Be Specific
+              {t('storyGeneration.beSpecificTitle')}
             </Typography>
             <Typography variant="body2">
-              Provide specific details about the characters, setting, and plot elements 
-              you want in your story.
+              {t('storyGeneration.beSpecificDescription')}
             </Typography>
           </Grid>
           <Grid item xs={12} md={4}>
             <Typography variant="subtitle1" fontWeight="bold">
-              Define Parameters
+              {t('storyGeneration.defineParametersTitle')}
             </Typography>
             <Typography variant="body2">
-              Specify the perspective (first-person, third-person), tone (humorous, serious),
-              and length of the story you want.
+              {t('storyGeneration.defineParametersDescription')}
             </Typography>
           </Grid>
           <Grid item xs={12} md={4}>
             <Typography variant="subtitle1" fontWeight="bold">
-              Allow Creativity
+              {t('storyGeneration.allowCreativityTitle')}
             </Typography>
             <Typography variant="body2">
-              While providing guidance, leave room for the system to develop creative
-              elements that enhance your story.
+              {t('storyGeneration.allowCreativityDescription')}
             </Typography>
           </Grid>
         </Grid>

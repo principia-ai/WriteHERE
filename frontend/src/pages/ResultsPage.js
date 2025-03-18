@@ -22,6 +22,7 @@ import LiveTaskList from '../components/LiveTaskList';
 import DownloadIcon from '@mui/icons-material/Download';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { getGenerationStatus, getGenerationResult, getTaskGraph, reloadTasks } from '../utils/api';
+import { useTranslation } from 'react-i18next';
 
 // Mock data for task graph - this would come from your backend in a real implementation
 const mockGraphData = {
@@ -160,6 +161,7 @@ As technology continues to advance, the commercial value of these tools will lik
 // Pass the task graph directly to the TaskList component which handles hierarchy internally
 
 const ResultsPage = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -175,8 +177,8 @@ const ResultsPage = () => {
 
   // Get the generation details from location state
   const generationDetails = location.state || {
-    prompt: 'Loading prompt...',
-    model: 'Loading model...',
+    prompt: t('results.promptLabel'),
+    model: t('results.modelUsed'),
     type: 'unknown',
     status: 'unknown'
   };
@@ -370,21 +372,21 @@ const ResultsPage = () => {
           
           <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
             <Typography variant="h6" gutterBottom>
-              Generation Details
+              {t('results.title')}
             </Typography>
             <Divider sx={{ mb: 2 }} />
             
             <Typography variant="body1" sx={{ mb: 2 }}>
-              <strong>Prompt:</strong> {generationDetails.prompt.slice(0, 150)}{generationDetails.prompt.length > 150 ? '...' : ''}
+              <strong>{t('results.promptLabel')}</strong> {generationDetails.prompt.slice(0, 150)}{generationDetails.prompt.length > 150 ? '...' : ''}
             </Typography>
             
             <Typography variant="body1" sx={{ mb: 2 }}>
-              <strong>Model:</strong> {generationDetails.model}
+              <strong>{t('results.modelUsed')}</strong> {generationDetails.model}
             </Typography>
             
             {generationDetails.searchEngine && (
               <Typography variant="body1" sx={{ mb: 2 }}>
-                <strong>Search Engine:</strong> {generationDetails.searchEngine}
+                <strong>{t('results.searchEngineUsed')}</strong> {generationDetails.searchEngine}
               </Typography>
             )}
             
@@ -400,12 +402,12 @@ const ResultsPage = () => {
               />
               
               <Typography variant="body2" color="text.secondary" align="right">
-                {progress}% complete {elapsedTime > 0 ? `· ${elapsedTime} seconds elapsed` : ''}
+                {progress}% {t('results.complete')} {elapsedTime > 0 ? `· ${elapsedTime} ${t('results.secondsElapsed')}` : ''}
               </Typography>
             </Box>
             
             <Typography variant="body2" color="text.secondary">
-              This may take several minutes depending on the complexity of the task.
+              {t('results.generationTimeEstimate')}
             </Typography>
           </Paper>
           
@@ -424,7 +426,7 @@ const ResultsPage = () => {
         </Alert>
         <Box sx={{ mt: 2, textAlign: 'center' }}>
           <Button variant="contained" onClick={() => navigate(-1)}>
-            Go Back
+            {t('common.back')}
           </Button>
         </Box>
       </Container>
@@ -435,98 +437,104 @@ const ResultsPage = () => {
     <Container maxWidth="lg">
       <Box sx={{ mt: 4, mb: 6 }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          {generationDetails.type === 'story' ? 'Generated Story' : 'Generated Report'}
+          {generationDetails.type === 'story' ? t('results.generatedStory') : t('results.generatedReport')}
         </Typography>
         
         <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
           <Typography variant="h6" gutterBottom>
-            Generation Details
+            {t('results.title')}
           </Typography>
           <Divider sx={{ mb: 2 }} />
           <Grid container spacing={2}>
             <Grid item xs={12} md={8}>
               <Typography variant="body1">
-                <strong>Prompt:</strong> {generationDetails.prompt}
+                <strong>{t('results.promptLabel')}</strong> {generationDetails.prompt}
               </Typography>
             </Grid>
             <Grid item xs={12} md={4}>
               <Typography variant="body1">
-                <strong>Model:</strong> {generationDetails.model}
+                <strong>{t('results.modelUsed')}</strong> {generationDetails.model}
               </Typography>
             </Grid>
             {generationDetails.searchEngine && (
               <Grid item xs={12} md={4}>
                 <Typography variant="body1">
-                  <strong>Search Engine:</strong> {generationDetails.searchEngine}
+                  <strong>{t('results.searchEngineUsed')}</strong> {generationDetails.searchEngine}
                 </Typography>
               </Grid>
             )}
             <Grid item xs={12}>
               <Typography variant="body1">
-                <strong>Status:</strong> {generationStatus === 'completed' ? 
-                  <span style={{ color: 'green' }}>Complete</span> : 
-                  <span style={{ color: 'orange' }}>In Progress</span>
+                <strong>{t('results.statusLabel')}</strong> {generationStatus === 'completed' ? 
+                  <span style={{ color: 'green' }}>{t('results.statusCompleted')}</span> : 
+                  <span style={{ color: 'orange' }}>{t('results.statusGenerating')}</span>
                 }
               </Typography>
             </Grid>
           </Grid>
         </Paper>
-      </Box>
 
-      <Box sx={{ mb: 4 }}>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
-          <Tabs value={activeTab} onChange={handleTabChange} aria-label="result tabs">
-            <Tab label={generationStatus === 'completed' ? "Result" : "Generating..."} />
-            <Tab 
-              label={
-                generationStatus === 'completed' ? 
-                "Task List" : 
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  Live Tasks
-                  {generationStatus !== 'completed' && 
-                    <Chip size="small" color="primary" label="Active" sx={{ height: 20 }} />
-                  }
-                </Box>
-              } 
-            />
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+          <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)}>
+            <Tab label={t('results.resultTitle')} />
+            <Tab label={t('results.taskGraphTitle')} />
           </Tabs>
         </Box>
 
-        {activeTab === 0 && (
+        {activeTab === 0 ? (
           <Paper elevation={3} sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2, gap: 1 }}>
-              <Button 
-                variant="outlined" 
+            <Box sx={{ mb: 2, display: 'flex', gap: 1 }}>
+              <Button
                 startIcon={<ContentCopyIcon />}
                 onClick={handleCopyToClipboard}
+                variant="outlined"
+                size="small"
               >
-                Copy to Clipboard
+                {copySuccess || t('results.copyToClipboard')}
               </Button>
-              <Button 
-                variant="outlined" 
+              <Button
                 startIcon={<DownloadIcon />}
-                onClick={handleDownload}
+                onClick={() => handleDownload('text')}
+                variant="outlined"
+                size="small"
               >
-                Download
+                {t('results.downloadAsText')}
+              </Button>
+              <Button
+                startIcon={<DownloadIcon />}
+                onClick={() => handleDownload('markdown')}
+                variant="outlined"
+                size="small"
+              >
+                {t('results.downloadAsMarkdown')}
               </Button>
             </Box>
-            {copySuccess && (
-              <Alert severity="success" sx={{ mb: 2 }}>
-                {copySuccess}
-              </Alert>
-            )}
-            <Box className="markdown-content">
+            <Box sx={{ 
+              maxHeight: '60vh', 
+              overflow: 'auto',
+              p: 2,
+              backgroundColor: '#f5f5f5',
+              borderRadius: 1
+            }}>
               <ReactMarkdown>
-                {result}
+                {result || ''}
               </ReactMarkdown>
             </Box>
           </Paper>
+        ) : (
+          <Paper elevation={3} sx={{ p: 3 }}>
+            <TaskList tasks={taskList} onTaskClick={handleTaskClick} />
+          </Paper>
         )}
 
-        {activeTab === 1 && (
-          // Always use LiveTaskList for consistent display
-          <LiveTaskList taskId={id} onTaskClick={handleTaskClick} />
-        )}
+        <Box sx={{ mt: 3, textAlign: 'center' }}>
+          <Button 
+            variant="contained" 
+            onClick={() => navigate(`/${generationDetails.type}-generation`)}
+          >
+            {t('results.returnToGenerator')}
+          </Button>
+        </Box>
       </Box>
     </Container>
   );

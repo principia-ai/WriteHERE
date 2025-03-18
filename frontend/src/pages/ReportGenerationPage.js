@@ -35,6 +35,7 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import InfoIcon from '@mui/icons-material/Info';
 import { generateReport, pingAPI } from '../utils/api';
 import HistoryPanel from '../components/HistoryPanel';
+import { useTranslation } from 'react-i18next';
 
 // Recommended model options
 const commonModels = [
@@ -51,6 +52,7 @@ const examplePrompts = [
 ];
 
 const ReportGenerationPage = () => {
+  const { t } = useTranslation();
   const [prompt, setPrompt] = useState('');
   const [model, setModel] = useState('claude-3-5-sonnet-20241022');
   const [searchEngine, setSearchEngine] = useState('bing');
@@ -91,18 +93,18 @@ const ReportGenerationPage = () => {
         await pingAPI();
         // API is available, nothing to do
       } catch (err) {
-        setError('Cannot connect to the backend server. Please make sure it is running at http://localhost:5001.');
+        setError(t('reportGeneration.errors.backendConnection'));
       }
     }
     
     checkAPIConnection();
-  }, []);
+  }, [t]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!prompt) {
-      setError('Please provide a prompt for report generation.');
+      setError(t('reportGeneration.errors.emptyPrompt'));
       return;
     }
     
@@ -111,19 +113,19 @@ const ReportGenerationPage = () => {
     const isClaudeModel = model.toLowerCase().includes('claude');
     
     if (isOpenAIModel && !apiKeys.openai) {
-      setError('Please provide your OpenAI API key in the settings section.');
+      setError(t('reportGeneration.errors.missingOpenAIKey'));
       setShowApiSection(true);
       return;
     }
     
     if (isClaudeModel && !apiKeys.claude) {
-      setError('Please provide your Anthropic Claude API key in the settings section.');
+      setError(t('reportGeneration.errors.missingClaudeKey'));
       setShowApiSection(true);
       return;
     }
     
     if (enableSearch && !apiKeys.serpapi) {
-      setError('Please provide your SerpAPI key in the settings section to enable search functionality.');
+      setError(t('reportGeneration.errors.missingSerpapiKey'));
       setShowApiSection(true);
       return;
     }
@@ -132,13 +134,13 @@ const ReportGenerationPage = () => {
     try {
       await pingAPI();
     } catch (err) {
-      setError('Cannot connect to the backend server. Please make sure it is running at http://localhost:5001.');
+      setError(t('reportGeneration.errors.backendConnection'));
       return;
     }
     
     setLoading(true);
     setError('');
-    setStatusMessage('Initiating report generation...');
+    setStatusMessage(t('reportGeneration.status.initiating'));
     setShowStatus(true);
     
     try {
@@ -157,7 +159,7 @@ const ReportGenerationPage = () => {
       
       // Navigate to the results page with the task ID
       if (response && response.taskId) {
-        setStatusMessage('Report generation started successfully!');
+        setStatusMessage(t('reportGeneration.status.started'));
         navigate(`/results/${response.taskId}`, { 
           state: { 
             taskId: response.taskId,
@@ -169,12 +171,12 @@ const ReportGenerationPage = () => {
           } 
         });
       } else {
-        throw new Error('No task ID returned from the server');
+        throw new Error(t('reportGeneration.errors.noTaskId'));
       }
     } catch (err) {
       setLoading(false);
       setStatusMessage('');
-      setError('Error starting report generation: ' + (err.message || 'Unknown error'));
+      setError(t('reportGeneration.errors.generationError') + ' ' + (err.message || t('reportGeneration.errors.unknown')));
       console.error('Report generation error:', err);
     }
   };
@@ -187,12 +189,10 @@ const ReportGenerationPage = () => {
     <Container maxWidth="lg">
       <Box sx={{ mt: 4, mb: 6 }}>
         <Typography variant="h3" component="h1" gutterBottom>
-          Technical Report Generation
+          {t('reportGeneration.title')}
         </Typography>
         <Typography variant="body1" paragraph>
-          Generate comprehensive technical reports using our Heterogeneous Recursive Planning framework.
-          The system integrates information retrieval, logical reasoning, and content composition to 
-          create well-structured and informative reports.
+          {t('reportGeneration.description')}
         </Typography>
       </Box>
 
@@ -216,14 +216,14 @@ const ReportGenerationPage = () => {
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <TextField
-                label="Report Topic"
+                label={t('reportGeneration.promptLabel')}
                 multiline
                 rows={6}
                 fullWidth
                 required
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Describe the technical report you want to generate..."
+                placeholder={t('reportGeneration.promptPlaceholder')}
                 variant="outlined"
               />
             </Grid>
@@ -256,11 +256,11 @@ const ReportGenerationPage = () => {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="Model"
+                    label={t('reportGeneration.modelLabel')}
                     variant="outlined"
                     fullWidth
-                    placeholder="Enter or select a model"
-                    helperText="Enter any model name or select from suggestions"
+                    placeholder={t('reportGeneration.modelPlaceholder')}
+                    helperText={t('reportGeneration.modelHelperText')}
                   />
                 )}
                 renderOption={(props, option) => (
@@ -293,20 +293,20 @@ const ReportGenerationPage = () => {
                     onChange={(e) => setEnableSearch(e.target.checked)} 
                   />
                 }
-                label="Enable Search"
+                label={t('reportGeneration.enableSearchLabel')}
               />
               
               <FormControl fullWidth sx={{ mt: 1 }} disabled={!enableSearch}>
-                <InputLabel id="search-engine-label">Search Engine</InputLabel>
+                <InputLabel id="search-engine-label">{t('reportGeneration.searchEngineLabel')}</InputLabel>
                 <Select
                   labelId="search-engine-label"
                   id="search-engine-select"
                   value={searchEngine}
-                  label="Search Engine"
+                  label={t('reportGeneration.searchEngineLabel')}
                   onChange={(e) => setSearchEngine(e.target.value)}
                 >
-                  {/* <MenuItem value="google">Google</MenuItem> */}
-                  <MenuItem value="bing">Bing</MenuItem>
+                  {/* <MenuItem value="google">{t('reportGeneration.searchEngines.google')}</MenuItem> */}
+                  <MenuItem value="bing">{t('reportGeneration.searchEngines.bing')}</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -320,7 +320,7 @@ const ReportGenerationPage = () => {
                 fullWidth
                 disabled={loading || !prompt}
               >
-                {loading ? <CircularProgress size={24} color="inherit" /> : 'Generate Report'}
+                {loading ? <CircularProgress size={24} color="inherit" /> : t('reportGeneration.generateReport')}
               </Button>
             </Grid>
             
@@ -347,8 +347,8 @@ const ReportGenerationPage = () => {
                   sx={{ borderRadius: 2 }}
                 >
                   <Typography variant="subtitle1" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center' }}>
-                    API Settings
-                    <Tooltip title="Your API keys are stored locally in your browser and are never sent to our servers">
+                    {t('reportGeneration.apiKeySettings')}
+                    <Tooltip title={t('reportGeneration.apiKeyInfo')}>
                       <IconButton size="small" sx={{ ml: 1 }}>
                         <InfoIcon fontSize="small" color="action" />
                       </IconButton>
@@ -359,14 +359,14 @@ const ReportGenerationPage = () => {
                   <Grid container spacing={3}>
                     <Grid item xs={12} md={4}>
                       <TextField
-                        label="OpenAI API Key"
+                        label={t('reportGeneration.openaiApiKey')}
                         fullWidth
                         variant="outlined"
                         value={apiKeys.openai}
                         onChange={(e) => handleApiKeyChange('openai', e.target.value)}
                         type={showOpenAIKey ? 'text' : 'password'}
                         placeholder="sk-..."
-                        helperText="Required for GPT models"
+                        helperText={t('reportGeneration.openaiHelperText')}
                         InputProps={{
                           endAdornment: (
                             <InputAdornment position="end">
@@ -384,14 +384,14 @@ const ReportGenerationPage = () => {
                     </Grid>
                     <Grid item xs={12} md={4}>
                       <TextField
-                        label="Anthropic API Key"
+                        label={t('reportGeneration.claudeApiKey')}
                         fullWidth
                         variant="outlined"
                         value={apiKeys.claude}
                         onChange={(e) => handleApiKeyChange('claude', e.target.value)}
                         type={showClaudeKey ? 'text' : 'password'}
                         placeholder="sk-ant-..."
-                        helperText="Required for Claude models"
+                        helperText={t('reportGeneration.claudeHelperText')}
                         InputProps={{
                           endAdornment: (
                             <InputAdornment position="end">
@@ -409,14 +409,14 @@ const ReportGenerationPage = () => {
                     </Grid>
                     <Grid item xs={12} md={4}>
                       <TextField
-                        label="SerpAPI Key"
+                        label={t('reportGeneration.serpapiKeyLabel')}
                         fullWidth
                         variant="outlined"
                         value={apiKeys.serpapi}
                         onChange={(e) => handleApiKeyChange('serpapi', e.target.value)}
                         type={showSerpApiKey ? 'text' : 'password'}
                         placeholder="..."
-                        helperText="Required for search functionality"
+                        helperText={t('reportGeneration.serpapiHelperText')}
                         InputProps={{
                           endAdornment: (
                             <InputAdornment position="end">
@@ -434,8 +434,7 @@ const ReportGenerationPage = () => {
                     </Grid>
                     <Grid item xs={12}>
                       <Typography variant="caption" color="text.secondary">
-                        Your API keys are stored securely in your browser's local storage and are never sent to our servers.
-                        They are only used to make direct API calls to the respective services from your browser.
+                        {t('reportGeneration.apiKeyPrivacyNote')}
                       </Typography>
                     </Grid>
                   </Grid>
@@ -448,14 +447,18 @@ const ReportGenerationPage = () => {
 
       <Box sx={{ mb: 6 }}>
         <Typography variant="h5" gutterBottom>
-          Example Topics
+          {t('reportGeneration.examplePromptsTitle')}
         </Typography>
         <Typography variant="body2" paragraph>
-          Click on any example to use it as your prompt:
+          {t('reportGeneration.examplePromptsSubtitle')}
         </Typography>
         
         <Grid container spacing={3}>
-          {examplePrompts.map((example, index) => (
+          {[
+            t('reportGeneration.examplePrompt1'),
+            t('reportGeneration.examplePrompt2'),
+            t('reportGeneration.examplePrompt3')
+          ].map((example, index) => (
             <Grid item xs={12} md={4} key={index}>
               <Card 
                 sx={{ 
@@ -482,35 +485,32 @@ const ReportGenerationPage = () => {
 
       <Paper elevation={3} sx={{ p: 4, mb: 6 }}>
         <Typography variant="h5" gutterBottom>
-          Tips for Effective Report Prompts
+          {t('reportGeneration.tipsTitle')}
         </Typography>
         <Divider sx={{ mb: 2 }} />
         <Grid container spacing={2}>
           <Grid item xs={12} md={4}>
             <Typography variant="subtitle1" fontWeight="bold">
-              Define Scope
+              {t('reportGeneration.defineScopeTitle')}
             </Typography>
             <Typography variant="body2">
-              Clearly specify the scope and focus of your report to ensure the content
-              addresses your specific needs.
+              {t('reportGeneration.defineScopeDescription')}
             </Typography>
           </Grid>
           <Grid item xs={12} md={4}>
             <Typography variant="subtitle1" fontWeight="bold">
-              Indicate Structure
+              {t('reportGeneration.indicateStructureTitle')}
             </Typography>
             <Typography variant="body2">
-              If you have specific requirements for the structure or sections of the report,
-              mention them in your prompt.
+              {t('reportGeneration.indicateStructureDescription')}
             </Typography>
           </Grid>
           <Grid item xs={12} md={4}>
             <Typography variant="subtitle1" fontWeight="bold">
-              Specify Depth
+              {t('reportGeneration.specifyDepthTitle')}
             </Typography>
             <Typography variant="body2">
-              Indicate whether you need a general overview or an in-depth analysis with
-              detailed technical information and citations.
+              {t('reportGeneration.specifyDepthDescription')}
             </Typography>
           </Grid>
         </Grid>
