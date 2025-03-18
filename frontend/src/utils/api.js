@@ -34,32 +34,25 @@ export const pingAPI = async () => {
  * @param {Object} params - Generation parameters
  * @param {string} params.prompt - The story prompt
  * @param {string} params.model - The model to use (e.g., 'gpt-4o', 'claude-3-5-sonnet-20241022')
- * @param {string} params.promptLanguage - The language of the prompt
+ * @param {string} params.outputLanguage - The desired output language (english/chinese)
  * @param {Object} params.apiKeys - API keys for different services
  * @param {string} params.apiKeys.openai - OpenAI API key
  * @param {string} params.apiKeys.claude - Claude API key
  * @returns {Promise} - Promise that resolves with generation result
  */
-export const generateStory = async ({ prompt, model, promptLanguage, apiKeys }) => {
-  const response = await fetch('/api/generate/story', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-OpenAI-Key': apiKeys.openai,
-      'X-Claude-Key': apiKeys.claude
-    },
-    body: JSON.stringify({
+export const generateStory = async ({ prompt, model, outputLanguage, apiKeys }) => {
+  try {
+    const response = await apiClient.post('/generate-story', {
       prompt,
       model,
-      promptLanguage
-    })
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+      outputLanguage,
+      apiKeys
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Story generation error:', error);
+    throw error;
   }
-
-  return await response.json();
 };
 
 /**

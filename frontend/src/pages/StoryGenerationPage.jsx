@@ -10,6 +10,7 @@ const StoryGenerationPage = () => {
   const [prompt, setPrompt] = useState('');
   const [model, setModel] = useState('gpt-4o');
   const [promptLanguage, setPromptLanguage] = useState('english');
+  const [outputLanguage, setOutputLanguage] = useState('english');
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
   const [error, setError] = useState('');
@@ -25,7 +26,7 @@ const StoryGenerationPage = () => {
       const response = await generateStory({
         prompt,
         model,
-        promptLanguage,
+        outputLanguage,
         apiKeys: {
           openai: apiKeys.openai,
           claude: apiKeys.claude
@@ -40,7 +41,7 @@ const StoryGenerationPage = () => {
             taskId: response.taskId,
             prompt,
             model,
-            promptLanguage,
+            outputLanguage,
             type: 'story',
             status: 'generating'
           } 
@@ -86,6 +87,20 @@ const StoryGenerationPage = () => {
               <Autocomplete
                 // ... existing model selection Autocomplete ...
               />
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel>{t('storyGeneration.languageOutputLabel')}</InputLabel>
+                <Select
+                  value={outputLanguage}
+                  label={t('storyGeneration.languageOutputLabel')}
+                  onChange={(e) => setOutputLanguage(e.target.value)}
+                >
+                  <MenuItem value="english">{t('storyGeneration.outputEnglish')}</MenuItem>
+                  <MenuItem value="chinese">{t('storyGeneration.outputChinese')}</MenuItem>
+                </Select>
+              </FormControl>
             </Grid>
 
             <Grid item xs={12} md={4} sx={{ display: 'flex', alignItems: 'center' }}>

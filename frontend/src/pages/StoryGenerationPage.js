@@ -53,6 +53,7 @@ const StoryGenerationPage = () => {
   const { t } = useTranslation();
   const [prompt, setPrompt] = useState('');
   const [model, setModel] = useState('gpt-4o');
+  const [outputLanguage, setOutputLanguage] = useState('english');
   const [apiKeys, setApiKeys] = useState({
     openai: localStorage.getItem('openai_api_key') || '',
     claude: localStorage.getItem('claude_api_key') || '',
@@ -128,6 +129,7 @@ const StoryGenerationPage = () => {
       const response = await generateStory({
         prompt,
         model,
+        outputLanguage,
         apiKeys: {
           openai: apiKeys.openai,
           claude: apiKeys.claude
@@ -266,6 +268,20 @@ const StoryGenerationPage = () => {
                   ))
                 }
               />
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel>{t('storyGeneration.languageOutputLabel')}</InputLabel>
+                <Select
+                  value={outputLanguage}
+                  label={t('storyGeneration.languageOutputLabel')}
+                  onChange={(e) => setOutputLanguage(e.target.value)}
+                >
+                  <MenuItem value="english">{t('storyGeneration.outputEnglish')}</MenuItem>
+                  <MenuItem value="chinese">{t('storyGeneration.outputChinese')}</MenuItem>
+                </Select>
+              </FormControl>
             </Grid>
 
             <Grid item xs={12} md={6} sx={{ display: 'flex', alignItems: 'center' }}>

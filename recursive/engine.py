@@ -185,8 +185,16 @@ def story_writing(input_filename,
                   global_use_model,
                   nodes_json_file=None):
     
+    # Read input parameters
+    with open(input_filename, 'r') as f:
+        input_data = json.load(f)
+    
+    # Get output language from input parameters
+    output_language = input_data.get('outputLanguage', 'english')
+    language_code = 'zh' if output_language == 'chinese' else 'en'
+    
     config = {
-        "language": "en", 
+        "language": language_code, 
         "action_mapping": {
             "plan": ["UpdateAtomPlanningAgent", {}],
             "update": ["DummyRandomUpdateAgent", {}],
