@@ -6,7 +6,6 @@ export default {
     home: 'Home',
     storyGeneration: 'Story Generation',
     reportGeneration: 'Report Generation',
-    algorithmExecution: 'Algorithm Execution',
     about: 'About',
     generate: 'Generate',
     loading: 'Loading...',
@@ -150,28 +149,5 @@ export default {
     reportType: 'Report',
     deleteConfirm: 'Are you sure you want to delete this generation?',
     deleted: 'Generation deleted successfully'
-  },
-  algorithmExecution: {
-    title: 'Algorithm Execution',
-    description: 'Execute algorithms in multiple programming languages. Write your code, select a language, and run it to see the results.',
-    language: 'Programming Language',
-    codeEditorLabel: 'Code Editor',
-    inputDataLabel: 'Input Data (Optional)',
-    inputDataPlaceholder: 'Enter input data to pass to your program...',
-    loadTemplate: 'Load Template',
-    execute: 'Execute Algorithm',
-    executing: 'Executing...',
-    resultsLabel: 'Execution Results',
-    executionStatus: 'Status',
-    stdout: 'Standard Output',
-    stderr: 'Standard Error',
-    exitCode: 'Exit Code',
-    success: 'Success',
-    failed: 'Failed',
-    noOutput: 'No output produced',
-    noCodeError: 'Please enter some code to execute',
-    executionError: 'An error occurred during execution',
-    waitingForResults: 'Executing code, please wait...',
-    noResultsYet: 'Execute your code to see results'
   }
 }; 

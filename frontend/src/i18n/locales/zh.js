@@ -6,7 +6,6 @@ export default {
     home: '首页',
     storyGeneration: '故事生成',
     reportGeneration: '报告生成',
-    algorithmExecution: '算法执行',
     about: '关于',
     generate: '生成',
     loading: '加载中...',
@@ -150,28 +149,5 @@ export default {
     reportType: '报告',
     deleteConfirm: '您确定要删除这个生成吗？',
     deleted: '生成已成功删除'
-  },
-  algorithmExecution: {
-    title: '算法执行',
-    description: '在多种编程语言中执行算法。编写代码，选择语言，然后运行查看结果。',
-    language: '编程语言',
-    codeEditorLabel: '代码编辑器',
-    inputDataLabel: '输入数据（可选）',
-    inputDataPlaceholder: '输入要传递给程序的数据...',
-    loadTemplate: '加载模板',
-    execute: '执行算法',
-    executing: '执行中...',
-    resultsLabel: '执行结果',
-    executionStatus: '状态',
-    stdout: '标准输出',
-    stderr: '标准错误',
-    exitCode: '退出代码',
-    success: '成功',
-    failed: '失败',
-    noOutput: '没有产生输出',
-    noCodeError: '请输入一些代码来执行',
-    executionError: '执行过程中发生错误',
-    waitingForResults: '正在执行代码，请稍候...',
-    noResultsYet: '执行代码以查看结果'
   }
 }; 

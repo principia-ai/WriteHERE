@@ -66,7 +66,6 @@ const Header = () => {
     { text: t('common.home'), path: '/' },
     { text: t('common.storyGeneration'), path: '/story-generation' },
     { text: t('common.reportGeneration'), path: '/report-generation' },
-    { text: t('common.algorithmExecution'), path: '/algorithm-execution' },
     { text: t('common.about'), path: '/about' }
   ];
 
