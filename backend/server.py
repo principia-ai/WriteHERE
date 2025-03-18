@@ -82,193 +82,140 @@ def reload_task_storage():
 # Load existing tasks on startup
 reload_task_storage()
 
-def run_story_generation(task_id, prompt, model, api_keys):
-    """
-    Run the story generation script as a subprocess
-    """
-    task_dir = os.path.join(RESULTS_DIR, task_id)
-    os.makedirs(task_dir, exist_ok=True)
-    
-    # Create a records directory for nodes.json
-    records_dir = os.path.join(task_dir, 'records')
-    os.makedirs(records_dir, exist_ok=True)
-    
-    # Create a temporary input file with the prompt
-    input_file = os.path.join(task_dir, 'input.jsonl')
-    with open(input_file, 'w') as f:
-        json.dump({
-            "id": task_id,
-            "field": "inputs",
-            "value": prompt,
-            "ori": {"example_id": task_id, "inputs": prompt, "subset": "user"}
-        }, f)
-        f.write('\n')
-    
-    output_file = os.path.join(task_dir, 'result.jsonl')
-    done_file = os.path.join(task_dir, 'done.txt')
-    nodes_file = os.path.join(records_dir, 'nodes.json')
-    
-    # Create environment file with API keys
-    env_file = os.path.join(task_dir, 'api_key.env')
-    with open(env_file, 'w') as f:
-        if 'openai' in api_keys and api_keys['openai']:
-            f.write(f"OPENAI={api_keys['openai']}\n")
-        if 'claude' in api_keys and api_keys['claude']:
-            f.write(f"CLAUDE={api_keys['claude']}\n")
-        if 'serpapi' in api_keys and api_keys['serpapi']:
-            f.write(f"SERPAPI={api_keys['serpapi']}\n")
-    
-    # Create a script to run the engine with the appropriate environment
-    script_path = os.path.join(task_dir, 'run.sh')
-    with open(script_path, 'w') as f:
-        f.write(f"""#!/bin/bash
-cd {os.path.abspath(os.path.join(os.path.dirname(__file__), '../recursive'))}
-source {env_file}
-python engine.py --filename {input_file} --output-filename {output_file} --done-flag-file {done_file} --model {model} --mode story --nodes-json-file {nodes_file}
-""")
-    
-    os.chmod(script_path, 0o755)
-    
-    # Update task status to "running"
-    task_storage[task_id] = {
-        "status": "running", 
-        "start_time": time.time(),
-        "model": model
-    }
-    
-    # Start task progress monitoring in a background thread
-    monitoring_thread = threading.Thread(
-        target=monitor_task_progress,
-        args=(task_id, records_dir)
-    )
-    monitoring_thread.daemon = True
-    monitoring_thread.start()
-    
+def run_story_generation(task_id, prompt, model, output_language, api_keys):
+    """Run story generation in a background thread"""
     try:
-        # Run the script
-        process = subprocess.Popen(['/bin/bash', script_path], 
-                                   stdout=subprocess.PIPE, 
-                                   stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate()
+        # Create task directory
+        task_dir = os.path.join(RESULTS_DIR, task_id)
+        os.makedirs(task_dir, exist_ok=True)
         
-        # Check if the process completed successfully
-        if process.returncode == 0:
-            task_storage[task_id]["status"] = "completed"
-            # Store the result if available
-            if os.path.exists(output_file):
-                with open(output_file, 'r') as f:
-                    result_data = json.load(f)
-                    task_storage[task_id]["result"] = result_data.get("result", "No result available")
-            else:
-                task_storage[task_id]["status"] = "error"
-                task_storage[task_id]["error"] = "Output file not generated"
-        else:
-            task_storage[task_id]["status"] = "error"
-            task_storage[task_id]["error"] = stderr.decode('utf-8')
-    except Exception as e:
-        task_storage[task_id]["status"] = "error"
-        task_storage[task_id]["error"] = str(e)
+        # Add language-specific instructions to the prompt
+        if output_language == 'chinese':
+            # Translate the prompt instructions to Chinese
+            prompt = f"""请用中文写一个故事。
 
-def run_report_generation(task_id, prompt, model, enable_search, search_engine, api_keys):
-    """
-    Run the report generation script as a subprocess
-    """
-    task_dir = os.path.join(RESULTS_DIR, task_id)
-    os.makedirs(task_dir, exist_ok=True)
-    
-    # Create a records directory for nodes.json
-    records_dir = os.path.join(task_dir, 'records')
-    os.makedirs(records_dir, exist_ok=True)
-    
-    # Create a temporary input file with the prompt
-    input_file = os.path.join(task_dir, 'input.jsonl')
-    with open(input_file, 'w') as f:
-        json.dump({
-            "topic": "",
-            "intent": "",
-            "domain": "",
-            "id": task_id,
-            "prompt": prompt
-        }, f)
-        f.write('\n')
-    
-    output_file = os.path.join(task_dir, 'result.jsonl')
-    done_file = os.path.join(task_dir, 'done.txt')
-    nodes_file = os.path.join(records_dir, 'nodes.json')
-    
-    # Create environment file with API keys
-    env_file = os.path.join(task_dir, 'api_key.env')
-    with open(env_file, 'w') as f:
-        if 'openai' in api_keys and api_keys['openai']:
-            f.write(f"OPENAI={api_keys['openai']}\n")
-        if 'claude' in api_keys and api_keys['claude']:
-            f.write(f"CLAUDE={api_keys['claude']}\n")
-        if 'serpapi' in api_keys and api_keys['serpapi']:
-            f.write(f"SERPAPI={api_keys['serpapi']}\n")
-    
-    # Create a script to run the engine with the appropriate environment
-    script_path = os.path.join(task_dir, 'run.sh')
-    engine_backend = search_engine if enable_search else "none"
-    
-    with open(script_path, 'w') as f:
-        f.write(f"""#!/bin/bash
-cd {os.path.abspath(os.path.join(os.path.dirname(__file__), '../recursive'))}
-source {env_file}
-python engine.py --filename {input_file} --output-filename {output_file} --done-flag-file {done_file} --model {model} --engine-backend {engine_backend} --mode report --nodes-json-file {nodes_file}
-""")
-    
-    os.chmod(script_path, 0o755)
-    
-    # Update task status to "running"
-    task_storage[task_id] = {
-        "status": "running", 
-        "start_time": time.time(),
-        "model": model,
-        "search_engine": engine_backend if enable_search else None
-    }
-    
-    # Start task progress monitoring in a background thread
-    monitoring_thread = threading.Thread(
-        target=monitor_task_progress,
-        args=(task_id, records_dir)
-    )
-    monitoring_thread.daemon = True
-    monitoring_thread.start()
-    
-    try:
-        # Run the script
-        process = subprocess.Popen(['/bin/bash', script_path], 
-                                   stdout=subprocess.PIPE, 
-                                   stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate()
-        
-        # Check if the process completed successfully
-        if process.returncode == 0:
-            task_storage[task_id]["status"] = "completed"
-            # Store the result if available
-            if os.path.exists(output_file):
-                with open(output_file, 'r') as f:
-                    result_data = json.load(f)
-                    task_storage[task_id]["result"] = result_data.get("result", "No result available")
-            else:
-                task_storage[task_id]["status"] = "error"
-                task_storage[task_id]["error"] = "Output file not generated"
+要求：
+1. 故事要有清晰的情节发展
+2. 角色描写要生动形象
+3. 语言要流畅自然
+4. 故事要富有创意和想象力
+
+具体要求：
+{prompt}"""
         else:
-            task_storage[task_id]["status"] = "error"
-            task_storage[task_id]["error"] = stderr.decode('utf-8')
+            prompt = f"""Please write a story in English.
+
+Requirements:
+1. Clear plot development
+2. Vivid character descriptions
+3. Smooth and natural language
+4. Creative and imaginative storytelling
+
+Specific requirements:
+{prompt}"""
+        
+        # Save input parameters
+        input_file = os.path.join(task_dir, 'input.jsonl')
+        with open(input_file, 'w') as f:
+            json.dump({
+                'prompt': prompt,
+                'model': model,
+                'outputLanguage': output_language
+            }, f)
+        
+        # Set up environment variables for API keys
+        os.environ['OPENAI_API_KEY'] = api_keys.get('openai', '')
+        os.environ['ANTHROPIC_API_KEY'] = api_keys.get('claude', '')
+        
+        # Run the story generation
+        output_file = os.path.join(task_dir, 'result.jsonl')
+        done_flag_file = os.path.join(task_dir, 'done.flag')
+        
+        # Run the story generation engine
+        story_writing(input_file, output_file, 0, -1, done_flag_file, model)
+        
     except Exception as e:
-        task_storage[task_id]["status"] = "error"
-        task_storage[task_id]["error"] = str(e)
+        # Save error information
+        error_file = os.path.join(task_dir, 'error.txt')
+        with open(error_file, 'w') as f:
+            f.write(str(e))
+        raise
+
+def run_report_generation(task_id, prompt, model, output_language, enable_search, search_engine, api_keys):
+    """Run report generation in a background thread"""
+    try:
+        # Create task directory
+        task_dir = os.path.join(RESULTS_DIR, task_id)
+        os.makedirs(task_dir, exist_ok=True)
+        
+        # Add language-specific instructions to the prompt
+        if output_language == 'chinese':
+            # Translate the prompt instructions to Chinese
+            prompt = f"""请用中文撰写一份专业报告。
+
+要求：
+1. 内容要准确、客观
+2. 结构要清晰、逻辑性强
+3. 数据和论据要充分
+4. 语言要专业、严谨
+
+具体要求：
+{prompt}"""
+        else:
+            prompt = f"""Please write a professional report in English.
+
+Requirements:
+1. Accurate and objective content
+2. Clear structure and logical flow
+3. Sufficient data and arguments
+4. Professional and rigorous language
+
+Specific requirements:
+{prompt}"""
+        
+        # Save input parameters
+        input_file = os.path.join(task_dir, 'input.jsonl')
+        with open(input_file, 'w') as f:
+            json.dump({
+                'prompt': prompt,
+                'model': model,
+                'outputLanguage': output_language,
+                'enableSearch': enable_search,
+                'searchEngine': search_engine
+            }, f)
+        
+        # Set up environment variables for API keys
+        os.environ['OPENAI_API_KEY'] = api_keys.get('openai', '')
+        os.environ['ANTHROPIC_API_KEY'] = api_keys.get('claude', '')
+        os.environ['SERPAPI_API_KEY'] = api_keys.get('serpapi', '')
+        
+        # Run the report generation
+        output_file = os.path.join(task_dir, 'result.jsonl')
+        done_flag_file = os.path.join(task_dir, 'done.flag')
+        
+        # Run the report generation engine
+        report_writing(input_file, output_file, 0, -1, done_flag_file, model, search_engine if enable_search else None)
+        
+    except Exception as e:
+        # Save error information
+        error_file = os.path.join(task_dir, 'error.txt')
+        with open(error_file, 'w') as f:
+            f.write(str(e))
+        raise
 
 @app.route('/api/generate-story', methods=['POST'])
 def api_generate_story():
     data = request.json
     
     # Validate request
-    required_fields = ['prompt', 'model', 'apiKeys']
+    required_fields = ['prompt', 'model', 'apiKeys', 'outputLanguage']
     for field in required_fields:
         if field not in data:
             return jsonify({"error": f"Missing required field: {field}"}), 400
+            
+    # Validate output language
+    if data['outputLanguage'] not in ['english', 'chinese']:
+        return jsonify({"error": "Invalid output language. Must be 'english' or 'chinese'"}), 400
     
     # Generate a unique task ID
     task_id = f"story-{uuid.uuid4()}"
@@ -276,7 +223,7 @@ def api_generate_story():
     # Start the generation in a background thread
     thread = threading.Thread(
         target=run_story_generation,
-        args=(task_id, data['prompt'], data['model'], data['apiKeys'])
+        args=(task_id, data['prompt'], data['model'], data['outputLanguage'], data['apiKeys'])
     )
     thread.start()
     
@@ -290,10 +237,14 @@ def api_generate_report():
     data = request.json
     
     # Validate request
-    required_fields = ['prompt', 'model', 'apiKeys']
+    required_fields = ['prompt', 'model', 'apiKeys', 'outputLanguage']
     for field in required_fields:
         if field not in data:
             return jsonify({"error": f"Missing required field: {field}"}), 400
+            
+    # Validate output language
+    if data['outputLanguage'] not in ['english', 'chinese']:
+        return jsonify({"error": "Invalid output language. Must be 'english' or 'chinese'"}), 400
     
     # Set defaults
     enable_search = data.get('enableSearch', True)
@@ -305,7 +256,7 @@ def api_generate_report():
     # Start the generation in a background thread
     thread = threading.Thread(
         target=run_report_generation,
-        args=(task_id, data['prompt'], data['model'], enable_search, search_engine, data['apiKeys'])
+        args=(task_id, data['prompt'], data['model'], data['outputLanguage'], enable_search, search_engine, data['apiKeys'])
     )
     thread.start()
     
