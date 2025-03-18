@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   AppBar, 
   Toolbar, 
@@ -13,16 +13,29 @@ import {
   useMediaQuery, 
   useTheme,
   Container,
-  Divider 
+  Divider,
+  Menu,
+  MenuItem,
+  AccordionSummary,
+  Tooltip
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
-import CreateIcon from '@mui/icons-material/Create';
 import EditNoteIcon from '@mui/icons-material/EditNote';
+import LanguageIcon from '@mui/icons-material/Language';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { useTranslation } from 'react-i18next';
+import { changeLanguage } from '../i18n';
 
 const Header = () => {
+  const { t } = useTranslation();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [languageMenu, setLanguageMenu] = useState(null);
+  const [currentLanguage, setCurrentLanguage] = useState(() => {
+    return localStorage.getItem('preferredLanguage') || 'english';
+  });
+  
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -30,11 +43,30 @@ const Header = () => {
     setDrawerOpen(!drawerOpen);
   };
 
+  const handleLanguageMenuOpen = (event) => {
+    setLanguageMenu(event.currentTarget);
+  };
+
+  const handleLanguageMenuClose = () => {
+    setLanguageMenu(null);
+  };
+
+  const handleLanguageChange = (language) => {
+    setCurrentLanguage(language);
+    localStorage.setItem('preferredLanguage', language);
+    changeLanguage(language);
+    handleLanguageMenuClose();
+  };
+
+  useEffect(() => {
+    document.documentElement.setAttribute('lang', currentLanguage === 'chinese' ? 'zh' : 'en');
+  }, [currentLanguage]);
+
   const menuItems = [
-    { text: 'Home', path: '/' },
-    { text: 'Story Generation', path: '/story-generation' },
-    { text: 'Report Generation', path: '/report-generation' },
-    { text: 'About', path: '/about' }
+    { text: t('common.home'), path: '/' },
+    { text: t('common.storyGeneration'), path: '/story-generation' },
+    { text: t('common.reportGeneration'), path: '/report-generation' },
+    { text: t('common.about'), path: '/about' }
   ];
 
   const drawer = (
@@ -111,7 +143,49 @@ const Header = () => {
             />
           </ListItem>
         ))}
+        <ListItem 
+          button 
+          onClick={handleLanguageMenuOpen}
+          sx={{
+            borderRadius: 2,
+            mb: 1,
+            '&:hover': {
+              backgroundColor: 'grey.50',
+            },
+          }}
+        >
+          <ListItemText 
+            primary={t('common.language')} 
+            secondary={currentLanguage === 'english' ? 'English' : '中文'} 
+            primaryTypographyProps={{ 
+              fontWeight: 500,
+              fontSize: '1rem'
+            }} 
+          />
+          <LanguageIcon color="action" sx={{ ml: 1 }} />
+        </ListItem>
       </List>
+      <Menu
+        anchorEl={languageMenu}
+        open={Boolean(languageMenu)}
+        onClose={handleLanguageMenuClose}
+        PaperProps={{
+          sx: { width: 180, maxWidth: '100%' }
+        }}
+      >
+        <MenuItem 
+          selected={currentLanguage === 'english'} 
+          onClick={() => handleLanguageChange('english')}
+        >
+          English
+        </MenuItem>
+        <MenuItem 
+          selected={currentLanguage === 'chinese'} 
+          onClick={() => handleLanguageChange('chinese')}
+        >
+          中文
+        </MenuItem>
+      </Menu>
     </Box>
   );
 
@@ -221,8 +295,43 @@ const Header = () => {
                   {item.text}
                 </Button>
               ))}
+              <IconButton 
+                color="inherit"
+                onClick={handleLanguageMenuOpen}
+                sx={{ 
+                  ml: 1,
+                  color: 'text.secondary',
+                  '&:hover': {
+                    backgroundColor: 'grey.50',
+                  },
+                }}
+              >
+                <LanguageIcon />
+              </IconButton>
             </Box>
           )}
+          
+          <Menu
+            anchorEl={languageMenu}
+            open={Boolean(languageMenu)}
+            onClose={handleLanguageMenuClose}
+            PaperProps={{
+              sx: { width: 180, maxWidth: '100%' }
+            }}
+          >
+            <MenuItem 
+              selected={currentLanguage === 'english'} 
+              onClick={() => handleLanguageChange('english')}
+            >
+              English
+            </MenuItem>
+            <MenuItem 
+              selected={currentLanguage === 'chinese'} 
+              onClick={() => handleLanguageChange('chinese')}
+            >
+              中文
+            </MenuItem>
+          </Menu>
           
           <Drawer
             anchor="right"

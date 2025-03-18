@@ -28,3 +28,6 @@ env/
 .venv/
 ENV/
 .env/
+
+# 
+.env*

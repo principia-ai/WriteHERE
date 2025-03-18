@@ -36,7 +36,7 @@ const getSocket = () => {
   if (!socket) {
     // Initialize socket connection - make sure this matches your backend URL
     // Using a dynamic approach that works with both development and production
-    const socketUrl = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+    const socketUrl = process.env.REACT_APP_API_URL || 'http://localhost:5002';
     console.log('Creating new WebSocket connection to:', socketUrl);
     
     socket = io(socketUrl, {
@@ -153,7 +153,7 @@ const LiveTaskList = ({ taskId, onTaskClick }) => {
     const fetchTaskGraph = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:5001/api/task-graph/${taskId}`);
+        const response = await fetch(`http://localhost:5002/api/task-graph/${taskId}`);
         if (response.ok) {
           const data = await response.json();
           if (data.taskGraph) {

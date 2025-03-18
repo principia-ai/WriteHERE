@@ -42,10 +42,10 @@ is_port_in_use() {
 start_backend() {
   log "Starting backend server..."
   
-  # Check if port 5001 is already in use
-  if is_port_in_use 5001; then
-    error_log "Port 5001 is already in use. The backend server may already be running."
-    error_log "Please stop any services using port 5001 before continuing."
+  # Check if port 3010 is already in use
+  if is_port_in_use 3010; then
+    error_log "Port 3010 is already in use. The backend server may already be running."
+    error_log "Please stop any services using port 3010 before continuing."
     exit 1
   fi
   
@@ -81,7 +81,7 @@ start_backend() {
   fi
   
   # Start backend server
-  log "Starting backend server on port 5001..."
+  log "Starting backend server on port 3010..."
   cd backend
   python server.py &
   backend_pid=$!
@@ -113,10 +113,10 @@ start_backend() {
 start_frontend() {
   log "Starting frontend..."
   
-  # Check if port 3000 is already in use
-  if is_port_in_use 3000; then
-    error_log "Port 3000 is already in use. The frontend server may already be running."
-    error_log "Please stop any services using port 3000 before continuing."
+  # Check if port 3010 is already in use
+  if is_port_in_use 3010; then
+    error_log "Port 3010 is already in use. The frontend server may already be running."
+    error_log "Please stop any services using port 3010 before continuing."
     exit 1
   fi
   
@@ -133,7 +133,7 @@ start_frontend() {
   fi
   
   # Start frontend development server
-  log "Starting frontend server on port 3000..."
+  log "Starting frontend server on port 3010..."
   cd frontend
   npm start &
   frontend_pid=$!
@@ -168,21 +168,21 @@ start_frontend
 
 log "==============================="
 log "WriteHERE is now running!"
-log "  - Backend server: http://localhost:5001"
-log "  - Frontend app:   http://localhost:3000"
+log "  - Backend server: http://localhost:3010"
+log "  - Frontend app:   http://localhost:3010"
 log "  - Press Ctrl+C to stop both servers"
 log "==============================="
 
 # Open the browser automatically if possible
 if command -v open >/dev/null 2>&1; then
   log "Opening browser..."
-  open http://localhost:3000
+  open http://localhost:3010
 elif command -v xdg-open >/dev/null 2>&1; then
   log "Opening browser..."
-  xdg-open http://localhost:3000
+  xdg-open http://localhost:3010
 elif command -v start >/dev/null 2>&1; then
   log "Opening browser..."
-  start http://localhost:3000
+  start http://localhost:3010
 fi
 
 # Handle graceful shutdown
