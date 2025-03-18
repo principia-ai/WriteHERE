@@ -65,6 +65,12 @@ export default {
     status: {
       initiating: 'Starting story generation...',
       started: 'Story generation started'
+    },
+    promptLanguageLabel: 'Prompt Language',
+    promptLanguageHelperText: 'Choose the language for generation prompts',
+    promptLanguages: {
+      english: 'English Prompt',
+      chinese: 'Chinese Prompt'
     }
   },
   reportGeneration: {
@@ -75,8 +81,9 @@ export default {
     modelLabel: 'Select Model',
     modelHelperText: 'Choose the AI model for report generation',
     languageOutputLabel: 'Output Language',
-    outputEnglish: 'English',
-    outputChinese: 'Chinese',
+    languageOutputHelperText: 'Choose the language for generated content',
+    outputEnglish: 'Generate in English',
+    outputChinese: 'Generate in Chinese',
     generateReport: 'Generate Report',
     apiKeySettings: 'API Key Settings',
     apiKeyInfo: 'Configure your API keys for different AI models',
@@ -84,6 +91,8 @@ export default {
     openaiHelperText: 'Required for GPT models',
     claudeApiKey: 'Claude API Key',
     claudeHelperText: 'Required for Claude models',
+    serpapiKeyLabel: 'Serpapi API Key',
+    serpapiHelperText: 'Required for search functionality',
     apiKeyPrivacyNote: 'Your API keys are stored securely in your browser and never shared.',
     examplePromptsTitle: 'Example Prompts',
     examplePromptsSubtitle: 'Here are some example prompts to help you get started',
@@ -108,6 +117,7 @@ export default {
       emptyPrompt: 'Please enter a report prompt.',
       missingOpenAIKey: 'OpenAI API key is required for GPT models.',
       missingClaudeKey: 'Claude API key is required for Claude models.',
+      missingSerpapiKey: 'Serpapi API key is required for search functionality.',
       noTaskId: 'Failed to start report generation.',
       generationError: 'Error generating report:',
       unknown: 'An unknown error occurred.'
@@ -124,6 +134,12 @@ export default {
       bing: 'Bing',
       google: 'Google',
       custom: 'Custom'
+    },
+    promptLanguageLabel: 'Prompt Language',
+    promptLanguageHelperText: 'Choose the language for writing prompts',
+    promptLanguages: {
+      english: 'Write prompts in English',
+      chinese: 'Write prompts in Chinese'
     }
   },
   results: {

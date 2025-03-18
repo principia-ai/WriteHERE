@@ -34,34 +34,32 @@ export const pingAPI = async () => {
  * @param {Object} params - Generation parameters
  * @param {string} params.prompt - The story prompt
  * @param {string} params.model - The model to use (e.g., 'gpt-4o', 'claude-3-5-sonnet-20241022')
- * @param {string} params.outputLanguage - The desired output language ('english' or 'chinese')
+ * @param {string} params.promptLanguage - The language of the prompt
  * @param {Object} params.apiKeys - API keys for different services
  * @param {string} params.apiKeys.openai - OpenAI API key
  * @param {string} params.apiKeys.claude - Claude API key
  * @returns {Promise} - Promise that resolves with generation result
  */
-export const generateStory = async (params) => {
-  try {
-    console.log('Sending story generation request to:', `${API_BASE_URL}/generate-story`);
-    const response = await apiClient.post('/generate-story', params);
-    return response.data;
-  } catch (error) {
-    console.error('Error generating story:', error);
-    if (error.response) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx
-      console.error('Error response data:', error.response.data);
-      console.error('Error response status:', error.response.status);
-      throw new Error(`Server error: ${error.response.data.error || error.response.statusText}`);
-    } else if (error.request) {
-      // The request was made but no response was received
-      console.error('Error request:', error.request);
-      throw new Error('No response from server. Please make sure the backend is running.');
-    } else {
-      // Something happened in setting up the request that triggered an Error
-      throw error;
-    }
+export const generateStory = async ({ prompt, model, promptLanguage, apiKeys }) => {
+  const response = await fetch('/api/generate/story', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-OpenAI-Key': apiKeys.openai,
+      'X-Claude-Key': apiKeys.claude
+    },
+    body: JSON.stringify({
+      prompt,
+      model,
+      promptLanguage
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
   }
+
+  return await response.json();
 };
 
 /**
@@ -69,7 +67,7 @@ export const generateStory = async (params) => {
  * @param {Object} params - Generation parameters
  * @param {string} params.prompt - The report prompt
  * @param {string} params.model - The model to use
- * @param {string} params.outputLanguage - The desired output language ('english' or 'chinese')
+ * @param {string} params.promptLanguage - The language of the prompt
  * @param {boolean} params.enableSearch - Whether to enable search
  * @param {string} params.searchEngine - Search engine to use ('google' or 'bing')
  * @param {Object} params.apiKeys - API keys for different services
@@ -78,24 +76,29 @@ export const generateStory = async (params) => {
  * @param {string} params.apiKeys.serpapi - SerpAPI key for search
  * @returns {Promise} - Promise that resolves with generation result
  */
-export const generateReport = async (params) => {
-  try {
-    console.log('Sending report generation request to:', `${API_BASE_URL}/generate-report`);
-    const response = await apiClient.post('/generate-report', params);
-    return response.data;
-  } catch (error) {
-    console.error('Error generating report:', error);
-    if (error.response) {
-      console.error('Error response data:', error.response.data);
-      console.error('Error response status:', error.response.status);
-      throw new Error(`Server error: ${error.response.data.error || error.response.statusText}`);
-    } else if (error.request) {
-      console.error('Error request:', error.request);
-      throw new Error('No response from server. Please make sure the backend is running.');
-    } else {
-      throw error;
-    }
+export const generateReport = async ({ prompt, model, promptLanguage, enableSearch, searchEngine, apiKeys }) => {
+  const response = await fetch('/api/generate/report', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-OpenAI-Key': apiKeys.openai,
+      'X-Claude-Key': apiKeys.claude,
+      'X-Serpapi-Key': apiKeys.serpapi
+    },
+    body: JSON.stringify({
+      prompt,
+      model,
+      promptLanguage,
+      enableSearch,
+      searchEngine
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
   }
+
+  return await response.json();
 };
 
 /**

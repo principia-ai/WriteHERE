@@ -65,6 +65,12 @@ export default {
       status: {
         initiating: '正在启动故事生成...',
         started: '故事生成已启动'
+      },
+      promptLanguageLabel: '提示语言',
+      promptLanguageHelperText: '选择用于生成的提示语言',
+      promptLanguages: {
+        english: '英文提示',
+        chinese: '中文提示'
       }
     },
     reportGeneration: {
@@ -75,8 +81,9 @@ export default {
       modelLabel: '选择模型',
       modelHelperText: '选择用于生成报告的AI模型',
       languageOutputLabel: '输出语言',
-      outputEnglish: '英文',
-      outputChinese: '中文',
+      languageOutputHelperText: '选择生成内容的语言',
+      outputEnglish: '生成英文内容',
+      outputChinese: '生成中文内容',
       generateReport: '生成报告',
       apiKeySettings: 'API密钥设置',
       apiKeyInfo: '配置不同AI模型的API密钥',
@@ -84,6 +91,8 @@ export default {
       openaiHelperText: 'GPT模型需要',
       claudeApiKey: 'Claude API密钥',
       claudeHelperText: 'Claude模型需要',
+      serpapiKeyLabel: 'Serpapi API密钥',
+      serpapiHelperText: '搜索功能需要',
       apiKeyPrivacyNote: '您的API密钥安全存储在浏览器中，绝不会被共享。',
       examplePromptsTitle: '示例提示',
       examplePromptsSubtitle: '以下是一些可以帮助您开始的示例提示',
@@ -108,6 +117,7 @@ export default {
         emptyPrompt: '请输入报告提示。',
         missingOpenAIKey: 'GPT模型需要OpenAI API密钥。',
         missingClaudeKey: 'Claude模型需要Claude API密钥。',
+        missingSerpapiKey: '搜索功能需要Serpapi API密钥。',
         noTaskId: '启动报告生成失败。',
         generationError: '生成报告时出错：',
         unknown: '发生未知错误。'
@@ -124,6 +134,12 @@ export default {
         bing: '必应',
         google: '谷歌',
         custom: '自定义'
+      },
+      promptLanguageLabel: '提示语言',
+      promptLanguageHelperText: '选择编写提示的语言',
+      promptLanguages: {
+        english: '使用英文提示',
+        chinese: '使用中文提示'
       }
     },
     results: {
