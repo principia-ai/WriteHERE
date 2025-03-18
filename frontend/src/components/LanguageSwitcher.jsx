@@ -32,9 +32,19 @@ function LanguageSwitcher() {
         onClick={handleClick}
         startIcon={<LanguageIcon />}
         endIcon={<KeyboardArrowDownIcon />}
-        sx={{ textTransform: 'none' }}
+        sx={{ 
+          textTransform: 'none',
+          color: 'text.secondary',
+          '&:hover': {
+            backgroundColor: 'grey.50',
+            color: 'primary.main',
+          },
+          fontWeight: 500,
+          px: 2,
+          borderRadius: 2,
+        }}
       >
-        {t('common.language')}
+        {i18n.language === 'zh' ? '中文' : 'English'}
       </Button>
       <Menu
         id="language-menu"
@@ -44,18 +54,32 @@ function LanguageSwitcher() {
         MenuListProps={{
           'aria-labelledby': 'language-button',
         }}
+        PaperProps={{
+          sx: {
+            mt: 1,
+            borderRadius: 2,
+          }
+        }}
       >
         <MenuItem 
           onClick={() => changeLanguage('en')} 
           selected={i18n.language === 'en'}
+          sx={{
+            minWidth: 120,
+            fontWeight: i18n.language === 'en' ? 600 : 400,
+          }}
         >
-          {t('common.english')}
+          English
         </MenuItem>
         <MenuItem 
           onClick={() => changeLanguage('zh')} 
           selected={i18n.language === 'zh'}
+          sx={{
+            minWidth: 120,
+            fontWeight: i18n.language === 'zh' ? 600 : 400,
+          }}
         >
-          {t('common.chinese')}
+          中文
         </MenuItem>
       </Menu>
     </>

@@ -20,21 +20,24 @@ import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import CreateIcon from '@mui/icons-material/Create';
 import EditNoteIcon from '@mui/icons-material/EditNote';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const Header = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { t } = useTranslation();
 
   const toggleDrawer = () => {
     setDrawerOpen(!drawerOpen);
   };
 
   const menuItems = [
-    { text: 'Home', path: '/' },
-    { text: 'Story Generation', path: '/story-generation' },
-    { text: 'Report Generation', path: '/report-generation' },
-    { text: 'About', path: '/about' }
+    { text: t('common.home'), path: '/' },
+    { text: t('common.storyGeneration'), path: '/story-generation' },
+    { text: t('common.reportGeneration'), path: '/report-generation' },
+    { text: t('common.about'), path: '/about' }
   ];
 
   const drawer = (
@@ -185,19 +188,22 @@ const Header = () => {
           </Box>
           
           {isMobile ? (
-            <IconButton 
-              edge="end" 
-              aria-label="menu" 
-              onClick={toggleDrawer}
-              sx={{ 
-                color: 'text.primary',
-                '&:hover': {
-                  backgroundColor: 'grey.50',
-                },
-              }}
-            >
-              <MenuIcon />
-            </IconButton>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <LanguageSwitcher />
+              <IconButton 
+                edge="end" 
+                aria-label="menu" 
+                onClick={toggleDrawer}
+                sx={{ 
+                  color: 'text.primary',
+                  '&:hover': {
+                    backgroundColor: 'grey.50',
+                  },
+                }}
+              >
+                <MenuIcon />
+              </IconButton>
+            </Box>
           ) : (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               {menuItems.map((item) => (
@@ -221,6 +227,7 @@ const Header = () => {
                   {item.text}
                 </Button>
               ))}
+              <LanguageSwitcher />
             </Box>
           )}
           
