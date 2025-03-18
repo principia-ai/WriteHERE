@@ -8,51 +8,49 @@ import {
   Divider,
   Link
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 const AboutPage = () => {
+  const { t } = useTranslation();
+
   return (
     <Container maxWidth="lg">
       <Box sx={{ mt: 4, mb: 6 }}>
         <Typography variant="h3" component="h1" gutterBottom>
-          About the Project
+          {t('about.title')}
         </Typography>
         <Typography variant="body1" paragraph>
-          Heterogeneous Recursive Planning represents a significant advancement in AI-powered content generation,
-          enabling more adaptive and human-like writing through innovative task decomposition and planning.
+          {t('about.introduction')}
         </Typography>
       </Box>
 
       <Paper elevation={3} sx={{ p: 4, mb: 6 }}>
         <Typography variant="h4" gutterBottom>
-          Overview
+          {t('about.overview')}
         </Typography>
         <Divider sx={{ mb: 3 }} />
         <Typography variant="body1" paragraph>
-          Heterogeneous Recursive Planning is a general agent framework for long-form writing that achieves 
-          human-like adaptive writing through recursive task decomposition and dynamic integration of three 
-          fundamental task types: retrieval, reasoning, and composition.
+          {t('about.overviewDescription')}
         </Typography>
         
         <Typography variant="body1" paragraph>
-          Unlike traditional approaches that rely on predetermined workflows and rigid thinking patterns, 
-          this framework:
+          {t('about.traditionalApproach')}
         </Typography>
         
         <Box sx={{ pl: 3, mb: 3 }}>
           <Typography variant="body1" paragraph>
-            1. <strong>Eliminates workflow restrictions</strong> through a planning mechanism that interleaves recursive task decomposition and execution
+            1. <strong>{t('about.feature1')}</strong>
           </Typography>
           <Typography variant="body1" paragraph>
-            2. <strong>Facilitates heterogeneous task decomposition</strong> by integrating different task types
+            2. <strong>{t('about.feature2')}</strong>
           </Typography>
           <Typography variant="body1" paragraph>
-            3. <strong>Adapts dynamically</strong> during the writing process, similar to human writing behavior
+            3. <strong>{t('about.feature3')}</strong>
           </Typography>
         </Box>
         
         <Typography variant="body1" paragraph>
-          Our evaluations on both fiction writing and technical report generation demonstrate that this 
-          method consistently outperforms state-of-the-art approaches across all evaluation metrics.
+          {t('about.evaluationResult')}
         </Typography>
       </Paper>
 
@@ -60,28 +58,28 @@ const AboutPage = () => {
         <Grid item xs={12} md={6}>
           <Paper elevation={3} sx={{ p: 4, height: '100%' }}>
             <Typography variant="h5" gutterBottom>
-              Key Features
+              {t('about.keyFeatures')}
             </Typography>
             <Divider sx={{ mb: 2 }} />
             <Box component="ul" sx={{ pl: 2 }}>
               <Box component="li" sx={{ mb: 1 }}>
                 <Typography variant="body1">
-                  <strong>Recursive task decomposition and execution</strong> - Breaking complex writing tasks into manageable sub-tasks
+                  <strong>{t('about.recursiveTask')}</strong> - {t('about.recursiveTaskDesc')}
                 </Typography>
               </Box>
               <Box component="li" sx={{ mb: 1 }}>
                 <Typography variant="body1">
-                  <strong>Dynamic integration of diverse task types</strong> - Seamlessly combining retrieval, reasoning, and composition
+                  <strong>{t('about.dynamicIntegration')}</strong> - {t('about.dynamicIntegrationDesc')}
                 </Typography>
               </Box>
               <Box component="li" sx={{ mb: 1 }}>
                 <Typography variant="body1">
-                  <strong>Flexible adaptation during writing</strong> - Adjusting the plan as context evolves
+                  <strong>{t('about.flexibleAdaptation')}</strong> - {t('about.flexibleAdaptationDesc')}
                 </Typography>
               </Box>
               <Box component="li" sx={{ mb: 1 }}>
                 <Typography variant="body1">
-                  <strong>Support for multiple writing domains</strong> - Works for both creative fiction and technical reports
+                  <strong>{t('about.multiDomainSupport')}</strong> - {t('about.multiDomainSupportDesc')}
                 </Typography>
               </Box>
             </Box>
@@ -91,29 +89,27 @@ const AboutPage = () => {
         <Grid item xs={12} md={6}>
           <Paper elevation={3} sx={{ p: 4, height: '100%' }}>
             <Typography variant="h5" gutterBottom>
-              Technical Implementation
+              {t('about.technicalImplementation')}
             </Typography>
             <Divider sx={{ mb: 2 }} />
             <Typography variant="body1" paragraph>
-              The framework is built on a task graph architecture that represents writing tasks as nodes with dependencies.
-              Each node can be one of three types:
+              {t('about.taskGraphDesc')}
             </Typography>
             
             <Box sx={{ mb: 2 }}>
               <Typography variant="body1">
-                <strong>Composition (Write)</strong> - Creating actual content
+                <strong>{t('about.compositionType')}</strong> - {t('about.compositionTypeDesc')}
               </Typography>
               <Typography variant="body1">
-                <strong>Retrieval (Search)</strong> - Gathering information
+                <strong>{t('about.retrievalType')}</strong> - {t('about.retrievalTypeDesc')}
               </Typography>
               <Typography variant="body1">
-                <strong>Reasoning (Think)</strong> - Analyzing and planning
+                <strong>{t('about.reasoningType')}</strong> - {t('about.reasoningTypeDesc')}
               </Typography>
             </Box>
             
             <Typography variant="body1">
-              The system uses advanced language models (LLMs) like GPT-4 and Claude to execute these tasks,
-              with a recursive planning mechanism that can decompose tasks and adapt plans dynamically.
+              {t('about.systemImplementation')}
             </Typography>
           </Paper>
         </Grid>
@@ -121,11 +117,11 @@ const AboutPage = () => {
 
       <Paper elevation={3} sx={{ p: 4, mb: 6 }}>
         <Typography variant="h4" gutterBottom>
-          Research Publication
+          {t('about.researchPublication')}
         </Typography>
         <Divider sx={{ mb: 3 }} />
         <Typography variant="body1" paragraph>
-          This project is based on research described in the paper:
+          {t('about.paperIntro')}
         </Typography>
         
         <Box sx={{ p: 3, backgroundColor: '#f5f5f5', borderRadius: 2, mb: 3 }}>
@@ -160,7 +156,7 @@ const AboutPage = () => {
 
       <Paper elevation={3} sx={{ p: 4, mb: 6 }}>
         <Typography variant="h4" gutterBottom>
-          Project Team
+          {t('about.projectTeam')}
         </Typography>
         <Divider sx={{ mb: 3 }} />
         <Grid container spacing={3}>

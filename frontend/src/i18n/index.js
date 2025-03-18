@@ -6,11 +6,11 @@ import zh from './locales/zh';
 import en from './locales/en';
 
 i18n
-  // 检测用户语言
+  // Detect user language
   .use(LanguageDetector)
-  // 将i18n实例传递给react-i18next
+  // Pass i18n instance to react-i18next
   .use(initReactI18next)
-  // 初始化i18next
+  // Initialize i18next
   .init({
     resources: {
       en: { translation: en },
@@ -19,7 +19,7 @@ i18n
     fallbackLng: 'en',
     debug: process.env.NODE_ENV === 'development',
     interpolation: {
-      escapeValue: false, // 不需要React转义
+      escapeValue: false, // React already escapes by default
     },
     detection: {
       order: ['localStorage', 'navigator'],

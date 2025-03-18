@@ -21,10 +21,12 @@ import SearchIcon from '@mui/icons-material/Search';
 import PsychologyIcon from '@mui/icons-material/Psychology';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { useTranslation } from 'react-i18next';
 
 const HomePage = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
+  const { t } = useTranslation();
   
   return (
     <Container maxWidth="lg">
@@ -52,7 +54,7 @@ const HomePage = () => {
         <Box sx={{ maxWidth: 800, mx: 'auto' }}>
           <Chip 
             icon={<AutoAwesomeIcon />} 
-            label="Advanced AI Writing Framework" 
+            label={t('home.advancedAIWriting')}
             color="primary" 
             variant="outlined" 
             sx={{ mb: 3 }} 
@@ -71,7 +73,7 @@ const HomePage = () => {
               mb: 2,
             }}
           >
-            Open Framework for Human-like Long-form Writing
+            {t('home.title')}
           </Typography>
           <Typography 
             variant="h5" 
@@ -85,8 +87,7 @@ const HomePage = () => {
               lineHeight: 1.5
             }}
           >
-            A general agent framework for long-form writing that achieves adaptive content generation
-            through recursive task decomposition and dynamic integration of heterogeneous tasks/tools.
+            {t('home.description')}
           </Typography>
           
           <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
@@ -103,7 +104,7 @@ const HomePage = () => {
                 fontSize: '1rem'
               }}
             >
-              Get Started
+              {t('home.getStarted')}
             </Button>
             <Button 
               component={RouterLink}
@@ -122,7 +123,7 @@ const HomePage = () => {
                 }
               }}
             >
-              Learn More
+              {t('home.learnMore')}
             </Button>
           </Box>
         </Box>
@@ -148,11 +149,10 @@ const HomePage = () => {
               color: 'text.primary'
             }}
           >
-            How It Works
+            {t('home.howItWorks')}
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 700, mx: 'auto' }}>
-            Heterogeneous Recursive Planning goes beyond traditional writing approaches by mimicking
-            human cognitive processes through adaptive task decomposition.
+            {t('home.howItWorksDescription')}
           </Typography>
         </Box>
         
@@ -185,11 +185,10 @@ const HomePage = () => {
                 <SearchIcon fontSize="medium" />
               </Box>
               <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-                Retrieval
+                {t('home.retrieval')}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Dynamically searches for relevant information during the writing process,
-                ensuring factual accuracy and comprehensive coverage of the topic.
+                {t('home.retrievalDescription')}
               </Typography>
             </Box>
           </Grid>
@@ -222,11 +221,10 @@ const HomePage = () => {
                 <PsychologyIcon fontSize="medium" />
               </Box>
               <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-                Reasoning
+                {t('home.reasoning')}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Applies logical analysis to plan, organize, and refine content structure,
-                ensuring coherent and well-structured output that follows a logical flow.
+                {t('home.reasoningDescription')}
               </Typography>
             </Box>
           </Grid>
@@ -259,11 +257,10 @@ const HomePage = () => {
                 <EditNoteIcon fontSize="medium" />
               </Box>
               <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-                Composition
+                {t('home.composition')}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Generates articulate and engaging content based on the retrieved information
-                and reasoning, adapting to context and maintaining consistent style and tone.
+                {t('home.compositionDescription')}
               </Typography>
             </Box>
           </Grid>
@@ -282,10 +279,10 @@ const HomePage = () => {
               color: 'text.primary'
             }}
           >
-            Generate Content
+            {t('home.generateContent')}
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 700, mx: 'auto', mb: 4 }}>
-            Choose the type of content you want to create and experience the power of heterogeneous recursive planning.
+            {t('home.generateContentDescription')}
           </Typography>
         </Box>
         
@@ -326,24 +323,22 @@ const HomePage = () => {
                 />
                 <CreateIcon sx={{ fontSize: 60, color: 'white', mb: 2 }} />
                 <Typography variant="h4" component="div" sx={{ color: 'white', fontWeight: 700, mb: 1 }}>
-                  Creative Story Generation
+                  {t('home.creativeStoryGeneration')}
                 </Typography>
                 <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
-                  Craft engaging narratives and fiction
+                  {t('home.craftNarratives')}
                 </Typography>
               </Box>
               
               <CardContent sx={{ flexGrow: 1, p: 4 }}>
                 <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-                  Generate creative narratives, fiction, and stories using our heterogeneous 
-                  recursive planning approach. Perfect for creative writing, entertainment, 
-                  and educational content.
+                  {t('home.storyDescription')}
                 </Typography>
                 
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 3 }}>
-                  <Chip size="small" label="Fiction" />
-                  <Chip size="small" label="Short Stories" />
-                  <Chip size="small" label="Creative Writing" />
+                  <Chip size="small" label={t('home.fiction')} />
+                  <Chip size="small" label={t('home.shortStories')} />
+                  <Chip size="small" label={t('home.creativeWriting')} />
                 </Box>
                 
                 <Button 
@@ -359,7 +354,7 @@ const HomePage = () => {
                     width: '100%',
                   }}
                 >
-                  Generate Story
+                  {t('home.generateStory')}
                 </Button>
               </CardContent>
             </Card>
@@ -401,23 +396,22 @@ const HomePage = () => {
                 />
                 <DescriptionIcon sx={{ fontSize: 60, color: 'white', mb: 2 }} />
                 <Typography variant="h4" component="div" sx={{ color: 'white', fontWeight: 700, mb: 1 }}>
-                  Technical Report Generation
+                  {t('home.technicalReportGeneration')}
                 </Typography>
                 <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
-                  Create comprehensive, fact-based documents
+                  {t('home.createDocuments')}
                 </Typography>
               </Box>
               
               <CardContent sx={{ flexGrow: 1, p: 4 }}>
                 <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-                  Create comprehensive technical reports and documentation with accurate information 
-                  retrieval and logical reasoning. Ideal for business, academic, and technical documentation.
+                  {t('home.reportDescription')}
                 </Typography>
                 
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 3 }}>
-                  <Chip size="small" label="Research" />
-                  <Chip size="small" label="Analysis" />
-                  <Chip size="small" label="Documentation" />
+                  <Chip size="small" label={t('home.research')} />
+                  <Chip size="small" label={t('home.analysis')} />
+                  <Chip size="small" label={t('home.documentation')} />
                 </Box>
                 
                 <Button 
@@ -433,7 +427,7 @@ const HomePage = () => {
                     width: '100%',
                   }}
                 >
-                  Generate Report
+                  {t('home.generateReport')}
                 </Button>
               </CardContent>
             </Card>
@@ -464,12 +458,10 @@ const HomePage = () => {
                 mb: 2
               }}
             >
-              Visualize the Writing Process
+              {t('home.visualizeProcess')}
             </Typography>
             <Typography variant="body1" color="text.secondary" paragraph>
-              Our framework makes the writing process transparent by providing a detailed task list
-              showing how complex writing tasks are broken down into manageable sub-tasks that integrate
-              retrieval, reasoning, and composition.
+              {t('home.visualizeDescription')}
             </Typography>
             <Divider sx={{ my: 3 }} />
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -488,7 +480,7 @@ const HomePage = () => {
                   1
                 </Box>
                 <Typography variant="body1" fontWeight={500}>
-                  Initial decomposition of the main writing task
+                  {t('home.step1')}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -506,7 +498,7 @@ const HomePage = () => {
                   2
                 </Box>
                 <Typography variant="body1" fontWeight={500}>
-                  Recursive planning and subtask generation
+                  {t('home.step2')}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -524,7 +516,7 @@ const HomePage = () => {
                   3
                 </Box>
                 <Typography variant="body1" fontWeight={500}>
-                  Dynamic integration of retrieval, reasoning, and composition
+                  {t('home.step3')}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -542,7 +534,7 @@ const HomePage = () => {
                   4
                 </Box>
                 <Typography variant="body1" fontWeight={500}>
-                  Content generation with coherent, high-quality output
+                  {t('home.step4')}
                 </Typography>
               </Box>
             </Box>
@@ -597,10 +589,10 @@ const HomePage = () => {
               mb: 2
             }}
           >
-            Ready to transform your writing process?
+            {t('home.readyToTransform')}
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 600, mx: 'auto' }}>
-            Experience the next generation of AI-assisted writing with our heterogeneous recursive planning framework.
+            {t('home.transformDescription')}
           </Typography>
           
           <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
@@ -617,7 +609,7 @@ const HomePage = () => {
                 fontSize: '1rem'
               }}
             >
-              Try Story Generation
+              {t('home.tryStoryGeneration')}
             </Button>
             <Button 
               component={RouterLink}
@@ -632,7 +624,7 @@ const HomePage = () => {
                 fontSize: '1rem'
               }}
             >
-              Try Report Generation
+              {t('home.tryReportGeneration')}
             </Button>
           </Box>
         </Box>
