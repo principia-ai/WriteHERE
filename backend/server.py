@@ -82,7 +82,7 @@ def reload_task_storage():
 # Load existing tasks on startup
 reload_task_storage()
 
-def run_story_generation(task_id, prompt, model, api_keys):
+def run_story_generation(task_id, prompt, model, api_keys, language="english"):
     """
     Run the story generation script as a subprocess
     """
@@ -120,11 +120,15 @@ def run_story_generation(task_id, prompt, model, api_keys):
     
     # Create a script to run the engine with the appropriate environment
     script_path = os.path.join(task_dir, 'run.sh')
+    
+    # Add language parameter to the command
+    lang_mode = f"--language {language}"
+    
     with open(script_path, 'w') as f:
         f.write(f"""#!/bin/bash
 cd {os.path.abspath(os.path.join(os.path.dirname(__file__), '../recursive'))}
 source {env_file}
-python engine.py --filename {input_file} --output-filename {output_file} --done-flag-file {done_file} --model {model} --mode story --nodes-json-file {nodes_file}
+python engine.py --filename {input_file} --output-filename {output_file} --done-flag-file {done_file} --model {model} --mode story {lang_mode} --nodes-json-file {nodes_file}
 """)
     
     os.chmod(script_path, 0o755)
@@ -133,7 +137,8 @@ python engine.py --filename {input_file} --output-filename {output_file} --done-
     task_storage[task_id] = {
         "status": "running", 
         "start_time": time.time(),
-        "model": model
+        "model": model,
+        "language": language
     }
     
     # Start task progress monitoring in a background thread
@@ -270,19 +275,23 @@ def api_generate_story():
         if field not in data:
             return jsonify({"error": f"Missing required field: {field}"}), 400
     
+    # Get language parameter (default to "english" if not provided)
+    language = data.get('language', 'english')
+    
     # Generate a unique task ID
     task_id = f"story-{uuid.uuid4()}"
     
     # Start the generation in a background thread
     thread = threading.Thread(
         target=run_story_generation,
-        args=(task_id, data['prompt'], data['model'], data['apiKeys'])
+        args=(task_id, data['prompt'], data['model'], data['apiKeys'], language)
     )
     thread.start()
     
     return jsonify({
         "taskId": task_id,
-        "status": "started"
+        "status": "started",
+        "language": language
     })
 
 @app.route('/api/generate-report', methods=['POST'])
@@ -827,4 +836,4 @@ def handle_subscribe(data):
     emit('task_update', {'taskId': task_id, 'taskGraph': initial_graph})
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, port=5001, allow_unsafe_werkzeug=True)
+    socketio.run(app, debug=True, port=5002, allow_unsafe_werkzeug=True)

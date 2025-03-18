@@ -3,7 +3,7 @@ import axios from 'axios';
 // Base URL for API requests - adjust as needed for production/development
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
   ? '/api' 
-  : 'http://localhost:5001/api';
+  : 'http://localhost:5002/api';
 
 // Create an axios instance with CORS headers
 const apiClient = axios.create({
@@ -34,6 +34,7 @@ export const pingAPI = async () => {
  * @param {Object} params - Generation parameters
  * @param {string} params.prompt - The story prompt
  * @param {string} params.model - The model to use (e.g., 'gpt-4o', 'claude-3-5-sonnet-20241022')
+ * @param {string} [params.language='english'] - The language for prompts ('english' or 'chinese')
  * @param {Object} params.apiKeys - API keys for different services
  * @param {string} params.apiKeys.openai - OpenAI API key
  * @param {string} params.apiKeys.claude - Claude API key
@@ -42,7 +43,11 @@ export const pingAPI = async () => {
 export const generateStory = async (params) => {
   try {
     console.log('Sending story generation request to:', `${API_BASE_URL}/generate-story`);
-    const response = await apiClient.post('/generate-story', params);
+    const requestParams = {
+      ...params,
+      language: params.language || 'english'
+    };
+    const response = await apiClient.post('/generate-story', requestParams);
     return response.data;
   } catch (error) {
     console.error('Error generating story:', error);
@@ -70,6 +75,7 @@ export const generateStory = async (params) => {
  * @param {string} params.model - The model to use
  * @param {boolean} params.enableSearch - Whether to enable search
  * @param {string} params.searchEngine - Search engine to use ('google' or 'bing')
+ * @param {string} [params.language='english'] - The language for output ('english' or 'chinese')
  * @param {Object} params.apiKeys - API keys for different services
  * @param {string} params.apiKeys.openai - OpenAI API key
  * @param {string} params.apiKeys.claude - Claude API key
@@ -79,7 +85,11 @@ export const generateStory = async (params) => {
 export const generateReport = async (params) => {
   try {
     console.log('Sending report generation request to:', `${API_BASE_URL}/generate-report`);
-    const response = await apiClient.post('/generate-report', params);
+    const requestParams = {
+      ...params,
+      language: params.language || 'english'
+    };
+    const response = await apiClient.post('/generate-report', requestParams);
     return response.data;
   } catch (error) {
     console.error('Error generating report:', error);

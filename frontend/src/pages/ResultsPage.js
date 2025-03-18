@@ -178,7 +178,8 @@ const ResultsPage = () => {
     prompt: 'Loading prompt...',
     model: 'Loading model...',
     type: 'unknown',
-    status: 'unknown'
+    status: 'unknown',
+    language: 'english'
   };
 
   // Poll status and fetch result when ready
@@ -321,7 +322,7 @@ const ResultsPage = () => {
     fetchStatus();
     
     // Set up polling every 5 seconds
-    pollInterval = setInterval(fetchStatus, 5001);
+    pollInterval = setInterval(fetchStatus, 5002);
     
     return () => {
       clearInterval(pollInterval);
