@@ -82,7 +82,7 @@ def reload_task_storage():
 # Load existing tasks on startup
 reload_task_storage()
 
-def run_story_generation(task_id, prompt, model, api_keys):
+def run_story_generation(task_id, prompt, model, api_keys, language="english"):
     """
     Run the story generation script as a subprocess
     """
@@ -120,11 +120,15 @@ def run_story_generation(task_id, prompt, model, api_keys):
     
     # Create a script to run the engine with the appropriate environment
     script_path = os.path.join(task_dir, 'run.sh')
+    
+    # Add language parameter to the command
+    lang_mode = f"--language {language}"
+    
     with open(script_path, 'w') as f:
         f.write(f"""#!/bin/bash
 cd {os.path.abspath(os.path.join(os.path.dirname(__file__), '../recursive'))}
 source {env_file}
-python engine.py --filename {input_file} --output-filename {output_file} --done-flag-file {done_file} --model {model} --mode story --nodes-json-file {nodes_file}
+python engine.py --filename {input_file} --output-filename {output_file} --done-flag-file {done_file} --model {model} --mode story {lang_mode} --nodes-json-file {nodes_file}
 """)
     
     os.chmod(script_path, 0o755)
@@ -133,7 +137,8 @@ python engine.py --filename {input_file} --output-filename {output_file} --done-
     task_storage[task_id] = {
         "status": "running", 
         "start_time": time.time(),
-        "model": model
+        "model": model,
+        "language": language
     }
     
     # Start task progress monitoring in a background thread
@@ -270,19 +275,23 @@ def api_generate_story():
         if field not in data:
             return jsonify({"error": f"Missing required field: {field}"}), 400
     
+    # Get language parameter (default to "english" if not provided)
+    language = data.get('language', 'english')
+    
     # Generate a unique task ID
     task_id = f"story-{uuid.uuid4()}"
     
     # Start the generation in a background thread
     thread = threading.Thread(
         target=run_story_generation,
-        args=(task_id, data['prompt'], data['model'], data['apiKeys'])
+        args=(task_id, data['prompt'], data['model'], data['apiKeys'], language)
     )
     thread.start()
     
     return jsonify({
         "taskId": task_id,
-        "status": "started"
+        "status": "started",
+        "language": language
     })
 
 @app.route('/api/generate-report', methods=['POST'])
@@ -399,12 +408,93 @@ def api_get_result(task_id):
     if "result" not in task:
         return jsonify({"error": "Task result not available"}), 400
     
+    # Return the task result
     return jsonify({
         "taskId": task_id,
-        "result": task.get("result", "No result available"),
+        "result": task["result"],
+        "status": task["status"],
         "model": task.get("model", "unknown"),
         "searchEngine": task.get("search_engine")
     })
+
+@app.route('/api/execute-algorithm', methods=['POST'])
+def api_execute_algorithm():
+    """
+    Execute code in the specified programming language.
+    
+    Required fields in the request:
+    - code: The code to execute
+    - language: The programming language (python, javascript, shell)
+    
+    Optional fields:
+    - input_data: Input data to pass to the program
+    """
+    data = request.json
+    
+    # Validate request
+    required_fields = ['code', 'language']
+    for field in required_fields:
+        if field not in data:
+            return jsonify({"error": f"Missing required field: {field}"}), 400
+    
+    # Get the code and language
+    code = data['code']
+    language = data['language'].lower()
+    input_data = data.get('input_data', None)
+    
+    # Generate a unique task ID
+    task_id = f"algorithm-{uuid.uuid4()}"
+    
+    # Create a directory for this task
+    task_dir = os.path.join(RESULTS_DIR, task_id)
+    os.makedirs(task_dir, exist_ok=True)
+    
+    # Update task status to "running"
+    task_storage[task_id] = {
+        "status": "running", 
+        "start_time": time.time(),
+        "language": language
+    }
+    
+    try:
+        # Import the algorithm executor
+        from recursive.executor.actions import get_tool
+        
+        # Get the algorithm executor
+        algorithm_executor = get_tool("MultiLangAlgorithmExecutor")
+        
+        # Execute the code
+        execution_result = algorithm_executor.run(code=code, language=language, input_data=input_data)
+        
+        # Save the result
+        result_file = os.path.join(task_dir, 'result.jsonl')
+        with open(result_file, 'w') as f:
+            json.dump({"result": execution_result.result}, f, indent=4)
+        
+        # Mark the task as completed
+        done_file = os.path.join(task_dir, 'done.txt')
+        with open(done_file, 'w') as f:
+            f.write('done')
+        
+        # Update task status
+        task_storage[task_id]["status"] = "completed"
+        task_storage[task_id]["result"] = execution_result.result
+        
+        # Return immediate response with result
+        return jsonify({
+            "taskId": task_id,
+            "status": "completed",
+            "result": execution_result.result
+        })
+        
+    except Exception as e:
+        task_storage[task_id]["status"] = "error"
+        task_storage[task_id]["error"] = str(e)
+        return jsonify({
+            "taskId": task_id,
+            "status": "error",
+            "error": str(e)
+        }), 500
 
 def transform_node_to_graph(node, seen_nodes=None, root=False):
     """
@@ -827,4 +917,4 @@ def handle_subscribe(data):
     emit('task_update', {'taskId': task_id, 'taskGraph': initial_graph})
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, port=5001, allow_unsafe_werkzeug=True)
+    socketio.run(app, debug=True, port=5002, allow_unsafe_werkzeug=True)

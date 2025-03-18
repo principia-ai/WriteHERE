@@ -183,10 +183,29 @@ def story_writing(input_filename,
                   end,
                   done_flag_file,
                   global_use_model,
-                  nodes_json_file=None):
+                  nodes_json_file=None,
+                  language="english"):
+    
+ 
+    if language.lower() == "chinese":
+        writer_prompt_version = "StoryWrtingNLWriterCN"
+        reasoner_prompt_version = "StoryWrtingNLReasonerCN"
+        reasoner_final_prompt_version = "StoryWritingReasonerFinalAggregateCN"
+        atom_without_update_prompt_version = "StoryWritingNLWriteAtomCN"
+        atom_with_update_prompt_version = "StoryWritingNLWriteAtomWithUpdateCN"
+        planning_prompt_version = "StoryWritingNLPlanningCN"
+        config_language = "zh"
+    else:  
+        writer_prompt_version = "StoryWrtingNLWriterEN"
+        reasoner_prompt_version = "StoryWrtingNLReasonerEN"
+        reasoner_final_prompt_version = "StoryWritingReasonerFinalAggregate"
+        atom_without_update_prompt_version = "StoryWritingNLWriteAtomEN"
+        atom_with_update_prompt_version = "StoryWritingNLWriteAtomWithUpdateEN"
+        planning_prompt_version = "StoryWritingNLPlanningEN"
+        config_language = "en"
     
     config = {
-        "language": "en", 
+        "language": config_language, 
         "action_mapping": {
             "plan": ["UpdateAtomPlanningAgent", {}],
             "update": ["DummyRandomUpdateAgent", {}],
@@ -208,7 +227,7 @@ def story_writing(input_filename,
         },
         "COMPOSITION": {
             "execute": {
-                "prompt_version": "StoryWrtingNLWriterEN",
+                "prompt_version": writer_prompt_version,
                 "llm_args": {
                     "model": global_use_model,
                     "temperature": 0.3
@@ -219,8 +238,8 @@ def story_writing(input_filename,
             },
             "atom": {
                 "update_diff": True,
-                "without_update_prompt_version": "StoryWritingNLWriteAtomEN",
-                "with_update_prompt_version": "StoryWritingNLWriteAtomWithUpdateEN",
+                "without_update_prompt_version": atom_without_update_prompt_version,
+                "with_update_prompt_version": atom_with_update_prompt_version,
                 "llm_args": {
                     "model": global_use_model,
                     "temperature": 0.1
@@ -233,7 +252,7 @@ def story_writing(input_filename,
                 "atom_result_flag": "atomic"
             },            
             "planning": {
-                "prompt_version": "StoryWritingNLPlanningEN",
+                "prompt_version": planning_prompt_version,
                 "llm_args": {
                     "model": global_use_model,
                     "temperature": 0.1
@@ -251,7 +270,7 @@ def story_writing(input_filename,
         },
         "REASONING": {
             "execute": { 
-                "prompt_version": "StoryWrtingNLReasonerEN",
+                "prompt_version": reasoner_prompt_version,
                 "llm_args": {
                     "model": global_use_model,
                     "temperature": 0.3
@@ -266,7 +285,7 @@ def story_writing(input_filename,
             "planning": {},
             "update": {},
             "final_aggregate": {
-                "prompt_version": "StoryWritingReasonerFinalAggregate",
+                "prompt_version": reasoner_final_prompt_version,
                 "mode": "llm",
                 "parse_arg_dict": {
                     "result": ["result"],
@@ -578,6 +597,7 @@ def define_args():
     parser.add_argument("--mode", type=str, choices=["story", "report"], required=True)
     parser.add_argument("--output-filename", type=str, required=True)
     parser.add_argument("--model", type=str, required=True)
+    parser.add_argument("--language", type=str, choices=["english", "chinese"], default="english", help="Language for prompts (english or chinese)")
     parser.add_argument("--length", type=int)
     parser.add_argument("--engine-backend", type=str)
     parser.add_argument("--nodes-json-file", type=str, help="Path to save nodes.json for real-time visualization")
@@ -596,7 +616,8 @@ if __name__ == "__main__":
     if args.mode == "story":
         story_writing(args.filename, args.output_filename,
                       args.start, args.end, args.done_flag_file, args.model,
-                      nodes_json_file=args.nodes_json_file)
+                      nodes_json_file=args.nodes_json_file,
+                      language=args.language)
     else:
         report_writing(args.filename, args.output_filename,
                        args.start, args.end, args.done_flag_file, args.model, args.engine_backend,

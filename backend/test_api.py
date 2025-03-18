@@ -8,7 +8,7 @@ import sys
 import requests
 import time
 
-API_URL = "http://localhost:5001/api"
+API_URL = "http://localhost:5002/api"
 
 def test_ping():
     """Test the API ping endpoint"""
@@ -24,7 +24,7 @@ def test_ping():
             print(f"❌ API server returned unexpected status code: {response.status_code}")
             return False
     except requests.exceptions.ConnectionError:
-        print("❌ Could not connect to API server at http://localhost:5001")
+        print("❌ Could not connect to API server at http://localhost:5002")
         print("   Make sure the backend server is running:")
         print("   1. Navigate to the backend directory: cd backend")
         print("   2. Start the server: python server.py")

@@ -46,9 +46,9 @@ For the easiest start, just run:
 This will:
 1. Create a clean Python virtual environment
 2. Install all required dependencies
-3. Start the backend server on port 5001
-4. Start the frontend on port 3000
-5. Open your browser at http://localhost:3000
+3. Start the backend server on port 5002
+4. Start the frontend on port 3010
+5. Open your browser at http://localhost:3010
 
 #### For Anaconda/Miniconda Users
 
