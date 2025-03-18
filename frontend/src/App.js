@@ -11,6 +11,7 @@ import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
 import StoryGenerationPage from './pages/StoryGenerationPage';
 import ReportGenerationPage from './pages/ReportGenerationPage';
+import AlgorithmExecutionPage from './pages/AlgorithmExecutionPage';
 import ResultsPage from './pages/ResultsPage';
 import AboutPage from './pages/AboutPage';
 
@@ -176,6 +177,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/story-generation" element={<StoryGenerationPage />} />
             <Route path="/report-generation" element={<ReportGenerationPage />} />
+            <Route path="/algorithm-execution" element={<AlgorithmExecutionPage />} />
             <Route path="/results/:id" element={<ResultsPage />} />
             <Route path="/about" element={<AboutPage />} />
           </Routes>
