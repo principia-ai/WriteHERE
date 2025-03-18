@@ -200,16 +200,25 @@ class UpdateAtomPlanningAgent(Agent):
         else:
             succ = False
             retry_cnt = 0
-            while not succ and retry_cnt < 10:
-                atom_llm_result = get_llm_output(
-                    node, self, memory, "atom", retry_cnt > 0, *args, **kwargs
-                )
-            # Determine if it failed. If atom_result is not one of "atomic" or "complex" then it's a failure, otherwise it's successful
-                succ = (atom_llm_result["atom_result"].strip() in ("atomic", "complex"))
-                if not succ:
-                    logger.error("ATOM Judgement for {} is failed, Get Response: {}, retry_cnt={}".format(node, 
-                                                                                                          atom_llm_result["original"],
-                                                                                                          retry_cnt))
+            max_retries = 3  # Reduced from 10 to 3
+            
+            while not succ and retry_cnt < max_retries:
+                try:
+                    atom_llm_result = get_llm_output(
+                        node, self, memory, "atom", retry_cnt > 0, *args, **kwargs
+                    )
+                    # Check if it's a valid result
+                    succ = (atom_llm_result["atom_result"].strip() in ("atomic", "complex"))
+                    if not succ:
+                        logger.error("ATOM Judgement for {} failed, Response: {}, retry_cnt={}".format(node, 
+                                                                                                      atom_llm_result["original"],
+                                                                                                      retry_cnt))
+                        retry_cnt += 1
+                except Exception as e:
+                    logger.error(f"Error during atom judgement: {str(e)}")
+                    if "API Key Error" in str(e):
+                        # Don't retry on API key errors
+                        raise
                     retry_cnt += 1
 
             atom_llm_result["atom_original"] = atom_llm_result.pop("original")
@@ -226,25 +235,33 @@ class UpdateAtomPlanningAgent(Agent):
                 succ = False
                 retry_cnt = 0
                 plan_result = []
-                while not succ and retry_cnt < 10:
-                    plan_llm_result = get_llm_output(
-                        node, self, memory, "planning", retry_cnt > 0, *args, **kwargs
-                    )
+                while not succ and retry_cnt < max_retries:  # Use same max_retries
                     try:
-                        plan_result = self.parse_result(plan_llm_result["plan_result"])
-                    except Exception as e: 
-                        # Incorrect format, cannot get plan_result, first check if planning can be extracted directly from the response
-                        source = plan_llm_result["plan_result"].strip() if plan_llm_result["plan_result"].strip() != "" else plan_llm_result["original"]
-                        plan_llm_result["plan_result"] = extract_json_content(source) # If fail to fetch, return None
-                        try: 
+                        plan_llm_result = get_llm_output(
+                            node, self, memory, "planning", retry_cnt > 0, *args, **kwargs
+                        )
+                        try:
                             plan_result = self.parse_result(plan_llm_result["plan_result"])
-                        except Exception as e:
-                            logger.error("Planning for {} failed, original is {}, retry {}".format(
-                                node, plan_llm_result["original"], retry_cnt
-                            ))
-                            retry_cnt += 1
-                            continue 
-                    succ = True
+                            succ = True
+                        except Exception as e: 
+                            # Incorrect format, cannot get plan_result, first check if planning can be extracted directly from the response
+                            source = plan_llm_result["plan_result"].strip() if plan_llm_result["plan_result"].strip() != "" else plan_llm_result["original"]
+                            plan_llm_result["plan_result"] = extract_json_content(source) # If fail to fetch, return None
+                            try: 
+                                plan_result = self.parse_result(plan_llm_result["plan_result"])
+                                succ = True
+                            except Exception as e:
+                                logger.error("Planning for {} failed, original is {}, retry {}".format(
+                                    node, plan_llm_result["original"], retry_cnt
+                                ))
+                                retry_cnt += 1
+                                continue
+                    except Exception as e:
+                        logger.error(f"Error during planning: {str(e)}")
+                        if "API Key Error" in str(e):
+                            # Don't retry on API key errors
+                            raise
+                        retry_cnt += 1
                         
                 plan_llm_result["result"] = plan_result
                 return_result.update(plan_llm_result)
@@ -368,18 +385,27 @@ class SimpleExcutor(Agent):
         else:
             succ = False 
             retry_cnt = 0
-            while not succ and retry_cnt < 50:
-                llm_result = get_llm_output(
-                    node, self, memory, "execute", retry_cnt > 0, *args, **kwargs
-                )
-                # 判定是否失败，如果result不为空则为成功
-                succ = (llm_result["result"].strip() != "")
-                if not succ:
-                    logger.error("Execute for {} is failed, Get Response: {}, retry_cnt={}".format(node, 
-                                                                                                   llm_result["original"],
-                                                                                                   retry_cnt))
+            max_retries = 3  # Reduced from 50 to 3
+            
+            while not succ and retry_cnt < max_retries:
+                try:
+                    llm_result = get_llm_output(
+                        node, self, memory, "execute", retry_cnt > 0, *args, **kwargs
+                    )
+                    # Check if this is a success
+                    succ = (llm_result["result"].strip() != "")
+                    if not succ:
+                        logger.error("Execute for {} failed, Response: {}, retry_cnt={}".format(node, 
+                                                                                               llm_result["original"],
+                                                                                               retry_cnt))
+                        retry_cnt += 1
+                except Exception as e:
+                    logger.error(f"Error during execution: {str(e)}")
+                    if "API Key Error" in str(e):
+                        # Don't retry on API key errors
+                        raise
                     retry_cnt += 1
-                
+                    
             # for write
             if node.task_type_tag == "COMPOSITION":
                 memory.article += "\n\n" + llm_result["result"]

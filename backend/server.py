@@ -90,6 +90,18 @@ def run_story_generation(task_id, prompt, model, output_language, api_keys):
         task_dir = os.path.join(RESULTS_DIR, task_id)
         os.makedirs(task_dir, exist_ok=True)
         
+        # Initialize task status
+        task_storage[task_id] = {
+            "status": "running",
+            "start_time": time.time()
+        }
+        
+        # Validate API keys before running
+        if 'gpt' in model.lower() and not api_keys.get('openai'):
+            raise ValueError("OpenAI API key is required for GPT models")
+        if 'claude' in model.lower() and not api_keys.get('claude'):
+            raise ValueError("Claude API key is required for Claude models")
+        
         # Add language-specific instructions to the prompt
         if output_language == 'chinese':
             # Translate the prompt instructions to Chinese
@@ -139,14 +151,48 @@ Specific requirements:
         # Create records directory
         os.makedirs(os.path.join(task_dir, 'records'), exist_ok=True)
         
-        # Run the story generation engine
-        story_writing(input_file, output_file, 0, 1, done_flag_file, model, nodes_json_file=nodes_json_file)
-        
+        try:
+            # Run the story generation engine
+            story_writing(input_file, output_file, 0, 1, done_flag_file, model, nodes_json_file=nodes_json_file)
+            task_storage[task_id]["status"] = "completed"
+            
+            # Notify frontend of completion
+            socketio.emit('task_update', {
+                'taskId': task_id,
+                'status': 'completed'
+            })
+            
+        except Exception as e:
+            # Update task status and save error information
+            task_storage[task_id]["status"] = "error"
+            task_storage[task_id]["error"] = str(e)
+            error_file = os.path.join(task_dir, 'error.txt')
+            with open(error_file, 'w') as f:
+                f.write(str(e))
+                
+            # Notify frontend of error
+            socketio.emit('task_update', {
+                'taskId': task_id,
+                'status': 'error',
+                'error': str(e)
+            })
+            raise
+            
     except Exception as e:
         # Save error information
         error_file = os.path.join(task_dir, 'error.txt')
         with open(error_file, 'w') as f:
             f.write(str(e))
+        # Update task status if it exists
+        if task_id in task_storage:
+            task_storage[task_id]["status"] = "error"
+            task_storage[task_id]["error"] = str(e)
+            # Notify frontend of error
+            socketio.emit('task_update', {
+                'taskId': task_id,
+                'status': 'error',
+                'error': str(e)
+            })
         raise
 
 def run_report_generation(task_id, prompt, model, output_language, enable_search, search_engine, api_keys):
@@ -660,8 +706,31 @@ def monitor_task_progress(task_id, nodes_dir):
     """
     try:
         print(f"Starting task progress monitoring for task: {task_id}")
-        print(f"Monitoring directory: {nodes_dir}")
         
+        # Check if task already has an error
+        if task_storage.get(task_id, {}).get('error'):
+            error_msg = task_storage[task_id]["error"]
+            error_graph = {
+                "id": "0",
+                "goal": "Task failed",
+                "task_type": "error",
+                "status": "FAILED",
+                "sub_tasks": [{
+                    "id": "error",
+                    "goal": error_msg,
+                    "task_type": "error",
+                    "status": "FAILED",
+                    "sub_tasks": []
+                }]
+            }
+            socketio.emit('task_update', {
+                'taskId': task_id,
+                'taskGraph': error_graph,
+                'status': 'error',
+                'error': error_msg
+            })
+            return
+            
         # Create a basic task structure to start with
         task_graph = {
             "id": "0",
@@ -671,63 +740,27 @@ def monitor_task_progress(task_id, nodes_dir):
             "sub_tasks": []
         }
         
-        print(f"Sending initial task_update for {task_id}")
         socketio.emit('task_update', {'taskId': task_id, 'taskGraph': task_graph})
         
         # Monitor the nodes.json file for changes
-        last_modified = 0
         nodes_file = os.path.join(nodes_dir, 'nodes.json')
-        print(f"Watching for changes to: {nodes_file}")
         
-        while task_storage.get(task_id, {}).get('status') not in ['completed', 'error']:
+        # If task is already completed, send final update
+        if task_storage.get(task_id, {}).get('status') == 'completed':
             if os.path.exists(nodes_file):
-                current_modified = os.path.getmtime(nodes_file)
-                
-                if current_modified > last_modified:
-                    last_modified = current_modified
-                    print(f"Detected changes to nodes.json, reading file")
-                    
-                    try:
-                        with open(nodes_file, 'r') as f:
-                            nodes_data = json.load(f)
-                            
-                        # Transform the data for frontend
-                        transformed_graph = transform_node_to_graph(nodes_data, root=True)
-                        
-                        # Send update via WebSocket
-                        print(f"Sending task_update with {len(transformed_graph.get('sub_tasks', []))} sub-tasks")
-                        socketio.emit('task_update', {
-                            'taskId': task_id, 
-                            'taskGraph': transformed_graph
-                        })
-                    except Exception as e:
-                        print(f"Error reading nodes.json: {str(e)}")
-            else:
-                print(f"Waiting for nodes.json file to be created at: {nodes_file}")
+                try:
+                    with open(nodes_file, 'r') as f:
+                        nodes_data = json.load(f)
+                    transformed_graph = transform_node_to_graph(nodes_data, root=True)
+                    socketio.emit('task_update', {
+                        'taskId': task_id, 
+                        'taskGraph': transformed_graph,
+                        'status': 'completed'
+                    })
+                except Exception as e:
+                    print(f"Error reading final nodes.json: {str(e)}")
+            return
             
-            # Sleep for a short time to avoid high CPU usage
-            time.sleep(1)
-            
-        print(f"Task {task_id} status changed to {task_storage.get(task_id, {}).get('status')}")
-        # Send one final update once the task is complete
-        if os.path.exists(nodes_file):
-            try:
-                print(f"Reading final state from nodes.json")
-                with open(nodes_file, 'r') as f:
-                    nodes_data = json.load(f)
-                    
-                transformed_graph = transform_node_to_graph(nodes_data, root=True)
-                print(f"Sending final task_update with status {task_storage.get(task_id, {}).get('status')}")
-                socketio.emit('task_update', {
-                    'taskId': task_id, 
-                    'taskGraph': transformed_graph,
-                    'status': task_storage.get(task_id, {}).get('status', 'unknown')
-                })
-            except Exception as e:
-                print(f"Error reading final nodes.json: {str(e)}")
-        else:
-            print(f"Warning: nodes.json file not found for final update: {nodes_file}")
-    
     except Exception as e:
         print(f"Error in monitor_task_progress: {str(e)}")
         import traceback

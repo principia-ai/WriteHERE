@@ -12,8 +12,14 @@ import time
 from loguru import logger
 from recursive.memory import caches
 from dotenv import load_dotenv
+from pathlib import Path
 
-load_dotenv(dotenv_path='api_key.env')
+# Get the recursive directory (where api_key.env is located)
+project_root = Path(__file__).parent.parent
+env_path = project_root / 'api_key.env'
+
+# Load environment variables
+load_dotenv(dotenv_path=env_path)
 
 class OpenAIApiException(Exception):
     def __init__(self, msg, error_code):
@@ -55,20 +61,28 @@ def format_tool_response_to_claude(tool_response):
 class OpenAIApiProxy():
     def __init__(self, verbose=True):
         retry_strategy = Retry(
-            total=5,  # Maximum number of retry attempts (including the initial request)
-            backoff_factor=1,  # Wait time factor between retries
-            status_forcelist=[429, 500, 502, 503, 504],  # List of status codes that require retry
-            allowed_methods=["POST"]  # Only retry POST requests
+            total=5,
+            backoff_factor=1,
+            status_forcelist=[429, 500, 502, 503, 504],
+            allowed_methods=["POST"]
         )
         adapter = HTTPAdapter()
         self.session = requests.Session()
         self.session.mount("https://", adapter)
         self.session.mount("http://", adapter)
-        self.MAX_RETRIES = 100
-        self.BACKOFF_FACTOR = 0.1
-        self.RETRY_CODES = (400, 401, 429, 404, 500, 502, 503, 504, 529)
+        self.MAX_RETRIES = 5
+        self.BACKOFF_FACTOR = 1
+        self.RETRY_CODES = (429, 500, 502, 503, 504)
         self.verbose = verbose
-    
+        
+        # Load API keys from environment
+        self.openai_api_key = os.getenv('OPENAI')
+        self.claude_api_key = os.getenv('CLAUDE')
+        self.serpapi_key = os.getenv('SERPAPI')
+        
+        if not self.openai_api_key or not self.claude_api_key:
+            raise ValueError("API keys not found in environment variables")
+
     def call_embedding(self, model, text):
         url = "http://oneapi-svip.bc-inner.com"
         api_key = ''
@@ -120,7 +134,7 @@ class OpenAIApiProxy():
         use_official = None
         messages = copy.deepcopy(messages)
 
-        is_gpt = True if "gpt" or "o1" in model else False
+        is_gpt = True if "gpt" in model or "o1" in model else False
     
         params_gpt = {
             "model": model,
@@ -143,10 +157,10 @@ class OpenAIApiProxy():
             params_gpt["max_tokens"] = 32768
         elif "gpt" in model:
             url = "https://api.openai.com/v1/chat/completions"
-            api_key = str(os.getenv('OPENAI'))
+            api_key = self.openai_api_key
         elif "claude" in model:
             url = 'https://api.anthropic.com/v1/messages'
-            api_key = str(os.getenv('CLAUDE'))
+            api_key = self.claude_api_key
         elif "deepseek" in model:
             url = ''
             api_key = ''
@@ -158,8 +172,17 @@ class OpenAIApiProxy():
             if "temperature" in params_gpt:
                 del params_gpt["temperature"]
         
-        headers['Content-Type'] = headers['Content-Type'] if 'Content-Type' in headers else 'application/json'
-        headers['Authorization'] = "Bearer " + api_key
+        if use_official == 'anthropic':
+            headers = {
+                'content-type': 'application/json',
+                'anthropic-version': '2023-06-01',
+                'Authorization': f'Bearer {api_key}'
+            }
+            if messages[0]['role'] == 'system':
+                params_gpt['system'] = messages.pop(0)['content']
+        else:
+            headers['Content-Type'] = headers['Content-Type'] if 'Content-Type' in headers else 'application/json'
+            headers['Authorization'] = "Bearer " + api_key
 
         params_gpt.update(kwargs)
         
@@ -176,15 +199,6 @@ class OpenAIApiProxy():
                 if cache_result is not None:
                     return cache_result
         
-        if use_official == 'anthropic':
-            headers = {
-                'content-type': 'application/json',
-                'anthropic-version': '2023-06-01',
-                'x-api-key': api_key
-            }
-            if messages[0]['role'] == 'system':
-                params_gpt['system'] = messages.pop(0)['content']
-
         for attempt in range(self.MAX_RETRIES):
             current_headers = headers.copy()
             try:
@@ -194,13 +208,17 @@ class OpenAIApiProxy():
                     json=params_gpt, 
                     timeout=300, 
                 )
+                # Immediately return if API key is invalid
+                if response.status_code == 401:
+                    error_data = response.json()
+                    raise Exception(f"API Key Error: {error_data.get('error', {}).get('message', 'Invalid API key')}")
+                
                 if response.status_code not in self.RETRY_CODES:
                     response.raise_for_status()
                     break  # Successful response, exit the loop
                 else:
                     if "maximum context length is" in str(response.text) or "maximum length" in str(response.text):
                         logger.error("Error Process {} with the maximum context length exceeds. Sys messages is {}".format(model, messages[0]))
-                        # just return None
                         return None
     
                     print(f"Received status code {response.status_code} at attempt={attempt + 1}. Retrying..., the reponse is {response.text}", flush=True)  
@@ -212,7 +230,7 @@ class OpenAIApiProxy():
             
             # Implement exponential backoff
             if attempt < self.MAX_RETRIES - 1:  # No need to sleep after the last attempt
-                sleep_time = self.BACKOFF_FACTOR
+                sleep_time = self.BACKOFF_FACTOR * (2 ** attempt)  # Exponential backoff
                 print(f"Waiting for {sleep_time} seconds before next attempt...", flush=True)
                 time.sleep(sleep_time)
         
