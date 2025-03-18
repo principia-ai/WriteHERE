@@ -186,7 +186,7 @@ def story_writing(input_filename,
                   nodes_json_file=None,
                   language="english"):
     
-    # 根据语言参数设置提示模板
+ 
     if language.lower() == "chinese":
         writer_prompt_version = "StoryWrtingNLWriterCN"
         reasoner_prompt_version = "StoryWrtingNLReasonerCN"
@@ -195,7 +195,7 @@ def story_writing(input_filename,
         atom_with_update_prompt_version = "StoryWritingNLWriteAtomWithUpdateCN"
         planning_prompt_version = "StoryWritingNLPlanningCN"
         config_language = "zh"
-    else:  # 默认使用英文
+    else:  
         writer_prompt_version = "StoryWrtingNLWriterEN"
         reasoner_prompt_version = "StoryWrtingNLReasonerEN"
         reasoner_final_prompt_version = "StoryWritingReasonerFinalAggregate"

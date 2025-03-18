@@ -408,12 +408,93 @@ def api_get_result(task_id):
     if "result" not in task:
         return jsonify({"error": "Task result not available"}), 400
     
+    # Return the task result
     return jsonify({
         "taskId": task_id,
-        "result": task.get("result", "No result available"),
+        "result": task["result"],
+        "status": task["status"],
         "model": task.get("model", "unknown"),
         "searchEngine": task.get("search_engine")
     })
+
+@app.route('/api/execute-algorithm', methods=['POST'])
+def api_execute_algorithm():
+    """
+    Execute code in the specified programming language.
+    
+    Required fields in the request:
+    - code: The code to execute
+    - language: The programming language (python, javascript, shell)
+    
+    Optional fields:
+    - input_data: Input data to pass to the program
+    """
+    data = request.json
+    
+    # Validate request
+    required_fields = ['code', 'language']
+    for field in required_fields:
+        if field not in data:
+            return jsonify({"error": f"Missing required field: {field}"}), 400
+    
+    # Get the code and language
+    code = data['code']
+    language = data['language'].lower()
+    input_data = data.get('input_data', None)
+    
+    # Generate a unique task ID
+    task_id = f"algorithm-{uuid.uuid4()}"
+    
+    # Create a directory for this task
+    task_dir = os.path.join(RESULTS_DIR, task_id)
+    os.makedirs(task_dir, exist_ok=True)
+    
+    # Update task status to "running"
+    task_storage[task_id] = {
+        "status": "running", 
+        "start_time": time.time(),
+        "language": language
+    }
+    
+    try:
+        # Import the algorithm executor
+        from recursive.executor.actions import get_tool
+        
+        # Get the algorithm executor
+        algorithm_executor = get_tool("MultiLangAlgorithmExecutor")
+        
+        # Execute the code
+        execution_result = algorithm_executor.run(code=code, language=language, input_data=input_data)
+        
+        # Save the result
+        result_file = os.path.join(task_dir, 'result.jsonl')
+        with open(result_file, 'w') as f:
+            json.dump({"result": execution_result.result}, f, indent=4)
+        
+        # Mark the task as completed
+        done_file = os.path.join(task_dir, 'done.txt')
+        with open(done_file, 'w') as f:
+            f.write('done')
+        
+        # Update task status
+        task_storage[task_id]["status"] = "completed"
+        task_storage[task_id]["result"] = execution_result.result
+        
+        # Return immediate response with result
+        return jsonify({
+            "taskId": task_id,
+            "status": "completed",
+            "result": execution_result.result
+        })
+        
+    except Exception as e:
+        task_storage[task_id]["status"] = "error"
+        task_storage[task_id]["error"] = str(e)
+        return jsonify({
+            "taskId": task_id,
+            "status": "error",
+            "error": str(e)
+        }), 500
 
 def transform_node_to_graph(node, seen_nodes=None, root=False):
     """

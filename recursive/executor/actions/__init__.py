@@ -5,12 +5,13 @@ from .base_action import TOOL_REGISTRY, BaseAction, tool_api
 from .bing_browser import BingBrowser
 from .builtin_actions import FinishAction, InvalidAction, NoAction
 from .parser import BaseParser, JsonParser, TupleParser
+from .algorithm_executor import MultiLangAlgorithmExecutor
 
 __all__ = [
     'BaseAction', 'ActionExecutor', 'InvalidAction', 'FinishAction',
     'NoAction', 'BaseParser',
     'JsonParser', 'TupleParser', 'tool_api', 'list_tools', 'get_tool_cls',
-    'get_tool', 'BingBrowser'
+    'get_tool', 'BingBrowser', 'MultiLangAlgorithmExecutor'
 ]
 
 
