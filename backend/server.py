@@ -115,13 +115,16 @@ Requirements:
 Specific requirements:
 {prompt}"""
         
-        # Save input parameters
+        # Save input parameters in the expected format
         input_file = os.path.join(task_dir, 'input.jsonl')
         with open(input_file, 'w') as f:
             json.dump({
-                'prompt': prompt,
-                'model': model,
-                'outputLanguage': output_language
+                "ori": {
+                    "inputs": prompt
+                },
+                "id": task_id,
+                "model": model,
+                "outputLanguage": output_language
             }, f)
         
         # Set up environment variables for API keys
@@ -131,9 +134,13 @@ Specific requirements:
         # Run the story generation
         output_file = os.path.join(task_dir, 'result.jsonl')
         done_flag_file = os.path.join(task_dir, 'done.flag')
+        nodes_json_file = os.path.join(task_dir, 'records', 'nodes.json')
+        
+        # Create records directory
+        os.makedirs(os.path.join(task_dir, 'records'), exist_ok=True)
         
         # Run the story generation engine
-        story_writing(input_file, output_file, 0, -1, done_flag_file, model)
+        story_writing(input_file, output_file, 0, 1, done_flag_file, model, nodes_json_file=nodes_json_file)
         
     except Exception as e:
         # Save error information
