@@ -552,7 +552,7 @@ const ResultsPage = () => {
             <Tab 
               label={
                 generationStatus === 'completed' ? 
-                "Task List" : 
+                "Task Decomposition" : 
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   Live Tasks
                   {generationStatus !== 'completed' && 

@@ -914,6 +914,26 @@ def api_get_history():
         "history": history_tasks
     })
 
+@app.route('/api/workspace/<task_id>', methods=['GET'])
+def api_get_workspace(task_id):
+    """Get the article.txt content for a task"""
+    task_dir = os.path.join(RESULTS_DIR, 'records', task_id)
+    article_file = os.path.join(task_dir, 'article.txt')
+    
+    if not os.path.exists(article_file):
+        return jsonify({"error": "Workspace file not found"}), 404
+    
+    try:
+        with open(article_file, 'r', encoding='utf-8') as f:
+            content = f.read()
+        return jsonify({
+            "taskId": task_id,
+            "workspace": content
+        })
+    except Exception as e:
+        print(f"Error reading workspace file: {str(e)}")
+        return jsonify({"error": f"Failed to read workspace file: {str(e)}"}), 500
+
 @app.route('/api/ping', methods=['GET'])
 def api_ping():
     """Simple endpoint to test if the API is reachable"""

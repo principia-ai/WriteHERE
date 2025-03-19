@@ -180,6 +180,24 @@ export const reloadTasks = async () => {
 };
 
 /**
+ * Fetches the workspace content (article.txt) for a task
+ * @param {string} taskId - ID of the generation task
+ * @returns {Promise} - Promise that resolves with workspace content
+ */
+export const getWorkspace = async (taskId) => {
+  try {
+    const response = await apiClient.get(`/workspace/${taskId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching workspace content:', error);
+    if (error.response && error.response.status === 404) {
+      throw new Error('Workspace content not found. It may not be available yet.');
+    }
+    throw error;
+  }
+};
+
+/**
  * Deletes a task and its associated files
  * @param {string} taskId - ID of the task to delete
  * @returns {Promise} - Promise that resolves with delete status

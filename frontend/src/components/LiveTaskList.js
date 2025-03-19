@@ -16,7 +16,10 @@ import {
   IconButton,
   Card,
   CardContent,
-  Tooltip
+  Tooltip,
+  Grid,
+  Tab,
+  Tabs
 } from '@mui/material';
 import CreateIcon from '@mui/icons-material/Create';
 import SearchIcon from '@mui/icons-material/Search';
@@ -26,7 +29,9 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import TokenIcon from '@mui/icons-material/Token';
 import CodeIcon from '@mui/icons-material/Code';
+import ArticleIcon from '@mui/icons-material/Article';
 import io from 'socket.io-client';
+import { getWorkspace } from '../utils/api';
 
 // Get the backend port from environment variable or use default
 const BACKEND_PORT = process.env.REACT_APP_BACKEND_PORT || '5001';
@@ -108,6 +113,10 @@ const LiveTaskList = ({ taskId, onTaskClick }) => {
   const [socket, setSocket] = useState(null);
   const [isTaskComplete, setIsTaskComplete] = useState(false);
   const [expandedTasks, setExpandedTasks] = useState({});
+  const [activeTab, setActiveTab] = useState(0);
+  const [workspace, setWorkspace] = useState('');
+  const [workspaceLoading, setWorkspaceLoading] = useState(false);
+  const [workspaceError, setWorkspaceError] = useState('');
   
   // Function to toggle task details expansion
   const toggleTaskExpansion = (taskId, event) => {
@@ -116,6 +125,39 @@ const LiveTaskList = ({ taskId, onTaskClick }) => {
       ...prev,
       [taskId]: !prev[taskId]
     }));
+  };
+
+  // Function to fetch the workspace content
+  const fetchWorkspace = async () => {
+    if (!taskId) return;
+    
+    setWorkspaceLoading(true);
+    setWorkspaceError('');
+    
+    try {
+      const data = await getWorkspace(taskId);
+      if (data && data.workspace) {
+        setWorkspace(data.workspace);
+      } else {
+        setWorkspace('No content available yet.');
+      }
+    } catch (error) {
+      console.error('Error fetching workspace:', error);
+      setWorkspaceError(error.message || 'Failed to load workspace content');
+      setWorkspace('');
+    } finally {
+      setWorkspaceLoading(false);
+    }
+  };
+
+  // Handle tab change
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
+    
+    // Fetch workspace content when switching to workspace tab
+    if (newValue === 1 && !workspace && !workspaceLoading) {
+      fetchWorkspace();
+    }
   };
 
   // Process tasks hierarchically for better visualization
@@ -174,6 +216,9 @@ const LiveTaskList = ({ taskId, onTaskClick }) => {
                 setIsTaskComplete(true);
               }
             }
+            
+            // Try to fetch the workspace content initially
+            fetchWorkspace();
             
             // Still connect to socket for potential additional updates
             return true;
@@ -281,6 +326,12 @@ const LiveTaskList = ({ taskId, onTaskClick }) => {
             }
             
             setTasks(flatTasks);
+            
+            // Try to fetch workspace content when we receive an update
+            // but only if we're on the workspace tab
+            if (activeTab === 1) {
+              fetchWorkspace();
+            }
           }
         }
       };
@@ -400,9 +451,6 @@ const LiveTaskList = ({ taskId, onTaskClick }) => {
 
   return (
     <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
-      <Typography variant="h6" gutterBottom>
-        Task Hierarchy
-      </Typography>
       <Box sx={{ mb: 2 }}>
         {tasks.length > 0 ? (
           <>
@@ -436,245 +484,344 @@ const LiveTaskList = ({ taskId, onTaskClick }) => {
           </>
         )}
       </Box>
-      <Divider sx={{ mb: 2 }} />
-      <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
-        {tasks.map((task, index) => (
-          <React.Fragment key={task.id || index}>
-            <ListItem 
-              alignItems="flex-start" 
-              button 
-              onClick={() => onTaskClick && onTaskClick(task)}
-              sx={{ 
-                borderLeft: `4px solid ${
-                  task.task_type === 'write' ? '#4CAF50' : 
-                  task.task_type === 'think' ? '#2196F3' : 
-                  task.task_type === 'search' ? '#FF9800' : 
-                  '#9E9E9E'
-                }`,
-                mb: 1,
-                pl: 2 + (task.level || 0) * 3, // Add indentation based on level
-                backgroundColor: task.status === 'DOING' ? 'rgba(33, 150, 243, 0.08)' : 
-                                 task.status === 'FINISH' ? 'rgba(76, 175, 80, 0.05)' : 'inherit',
-                display: 'flex',
-                flexDirection: 'column'
-              }}
-            >
-              <Box sx={{ display: 'flex', width: '100%', alignItems: 'flex-start' }}>
-                <ListItemIcon sx={{ position: 'relative', mt: 0.5 }}>
-                  {/* Show hierarchy connector with a subtle dashed line */}
-                  {(task.level > 0) && (
-                    <>
-                      <Box
-                        sx={{
-                          position: 'absolute',
-                          left: -24 * task.level,
-                          top: '50%',
-                          width: 16,
-                          height: 1,
-                          borderTop: '1px dashed rgba(0, 0, 0, 0.15)',
-                          zIndex: 1
-                        }}
-                      />
-                      <Box
-                        sx={{
-                          position: 'absolute',
-                          left: -24 * task.level,
-                          top: 0,
-                          width: 1,
-                          bottom: '50%',
-                          borderLeft: '1px dashed rgba(0, 0, 0, 0.15)',
-                          zIndex: 1
-                        }}
-                      />
-                    </>
-                  )}
-                  {getTaskIcon(task.task_type)}
-                </ListItemIcon>
-                <ListItemText
-                  primary={
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', pr: 2 }}>
-                      <Typography variant="subtitle1">
-                        {task.id}. {task.goal}
-                      </Typography>
-                      <Chip 
-                        label={task.status === 'FINISH' ? 'FINISHED' : 
-                               task.status === 'DOING' ? 'IN PROGRESS' : 
-                               task.status || 'NOT READY'} 
+      
+      {/* Tab navigation */}
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+        <Tabs 
+          value={activeTab} 
+          onChange={handleTabChange}
+          aria-label="task view tabs"
+        >
+          <Tab 
+            icon={<PsychologyIcon fontSize="small" />} 
+            iconPosition="start" 
+            label="Task Hierarchy" 
+          />
+          <Tab 
+            icon={<ArticleIcon fontSize="small" />} 
+            iconPosition="start" 
+            label="Workspace" 
+          />
+        </Tabs>
+      </Box>
+      
+      {/* Tab panels */}
+      <Box role="tabpanel" hidden={activeTab !== 0}>
+        {activeTab === 0 && (
+          <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
+            {tasks.map((task, index) => (
+              <React.Fragment key={task.id || index}>
+                <ListItem 
+                  alignItems="flex-start" 
+                  button 
+                  onClick={() => onTaskClick && onTaskClick(task)}
+                  sx={{ 
+                    borderLeft: `4px solid ${
+                      task.task_type === 'write' ? '#4CAF50' : 
+                      task.task_type === 'think' ? '#2196F3' : 
+                      task.task_type === 'search' ? '#FF9800' : 
+                      '#9E9E9E'
+                    }`,
+                    mb: 1,
+                    pl: 2 + (task.level || 0) * 3, // Add indentation based on level
+                    backgroundColor: task.status === 'DOING' ? 'rgba(33, 150, 243, 0.08)' : 
+                                    task.status === 'FINISH' ? 'rgba(76, 175, 80, 0.05)' : 'inherit',
+                    display: 'flex',
+                    flexDirection: 'column'
+                  }}
+                >
+                  <Box sx={{ display: 'flex', width: '100%', alignItems: 'flex-start' }}>
+                    <ListItemIcon sx={{ position: 'relative', mt: 0.5 }}>
+                      {/* Show hierarchy connector with a subtle dashed line */}
+                      {(task.level > 0) && (
+                        <>
+                          <Box
+                            sx={{
+                              position: 'absolute',
+                              left: -24 * task.level,
+                              top: '50%',
+                              width: 16,
+                              height: 1,
+                              borderTop: '1px dashed rgba(0, 0, 0, 0.15)',
+                              zIndex: 1
+                            }}
+                          />
+                          <Box
+                            sx={{
+                              position: 'absolute',
+                              left: -24 * task.level,
+                              top: 0,
+                              width: 1,
+                              bottom: '50%',
+                              borderLeft: '1px dashed rgba(0, 0, 0, 0.15)',
+                              zIndex: 1
+                            }}
+                          />
+                        </>
+                      )}
+                      {getTaskIcon(task.task_type)}
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', pr: 2 }}>
+                          <Typography variant="subtitle1">
+                            {task.id}. {task.goal}
+                          </Typography>
+                          <Chip 
+                            label={task.status === 'FINISH' ? 'FINISHED' : 
+                                  task.status === 'DOING' ? 'IN PROGRESS' : 
+                                  task.status || 'NOT READY'} 
+                            size="small" 
+                            color={getStatusColor(task.status)}
+                            sx={{ ml: 1 }}
+                          />
+                          
+                          {task.start_time && task.end_time && (
+                            <Tooltip title="Execution time">
+                              <Chip
+                                icon={<AccessTimeIcon fontSize="small" />}
+                                label={`${Math.round((new Date(task.end_time) - new Date(task.start_time))/1000)}s`}
+                                size="small"
+                                color="default"
+                                variant="outlined"
+                              />
+                            </Tooltip>
+                          )}
+                          
+                          {task.token_usage && (
+                            <Tooltip title="Token usage (input/output)">
+                              <Chip
+                                icon={<TokenIcon fontSize="small" />}
+                                label={`${task.token_usage.input_tokens || 0}/${task.token_usage.output_tokens || 0}`}
+                                size="small"
+                                color="default"
+                                variant="outlined"
+                              />
+                            </Tooltip>
+                          )}
+                        </Box>
+                      }
+                      secondary={
+                        <Box sx={{ mt: 1 }}>
+                          {task.dependency && task.dependency.length > 0 && (
+                            <Typography component="span" variant="body2" color="text.secondary">
+                              Dependencies: {task.dependency.join(', ')}
+                            </Typography>
+                          )}
+                          
+                          {/* Show a brief description or snippet if available */}
+                          {task.description && (
+                            <Typography 
+                              component="p" 
+                              variant="body2" 
+                              color="text.secondary"
+                              sx={{ mt: 0.5, fontStyle: 'italic' }}
+                            >
+                              {task.description.length > 100 ? task.description.substring(0, 100) + '...' : task.description}
+                            </Typography>
+                          )}
+                        </Box>
+                      }
+                      sx={{ pr: 1 }}
+                    />
+                    
+                    {/* Expand/Collapse Button if the task has detailed information */}
+                    {(task.think || task.result) && (
+                      <IconButton 
                         size="small" 
-                        color={getStatusColor(task.status)}
-                        sx={{ ml: 1 }}
-                      />
-                      
-                      {task.start_time && task.end_time && (
-                        <Tooltip title="Execution time">
-                          <Chip
-                            icon={<AccessTimeIcon fontSize="small" />}
-                            label={`${Math.round((new Date(task.end_time) - new Date(task.start_time))/1000)}s`}
-                            size="small"
-                            color="default"
-                            variant="outlined"
-                          />
-                        </Tooltip>
-                      )}
-                      
-                      {task.token_usage && (
-                        <Tooltip title="Token usage (input/output)">
-                          <Chip
-                            icon={<TokenIcon fontSize="small" />}
-                            label={`${task.token_usage.input_tokens || 0}/${task.token_usage.output_tokens || 0}`}
-                            size="small"
-                            color="default"
-                            variant="outlined"
-                          />
-                        </Tooltip>
-                      )}
-                    </Box>
-                  }
-                  secondary={
-                    <Box sx={{ mt: 1 }}>
-                      {task.dependency && task.dependency.length > 0 && (
-                        <Typography component="span" variant="body2" color="text.secondary">
-                          Dependencies: {task.dependency.join(', ')}
-                        </Typography>
-                      )}
-                      
-                      {/* Show a brief description or snippet if available */}
-                      {task.description && (
-                        <Typography 
-                          component="p" 
-                          variant="body2" 
-                          color="text.secondary"
-                          sx={{ mt: 0.5, fontStyle: 'italic' }}
-                        >
-                          {task.description.length > 100 ? task.description.substring(0, 100) + '...' : task.description}
-                        </Typography>
-                      )}
-                    </Box>
-                  }
-                  sx={{ pr: 1 }}
-                />
-                
-                {/* Expand/Collapse Button if the task has detailed information */}
-                {(task.think || task.result) && (
-                  <IconButton 
-                    size="small" 
-                    onClick={(e) => toggleTaskExpansion(task.id, e)}
-                    sx={{ alignSelf: 'flex-start', mt: 0.5 }}
-                  >
-                    {expandedTasks[task.id] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                  </IconButton>
-                )}
+                        onClick={(e) => toggleTaskExpansion(task.id, e)}
+                        sx={{ alignSelf: 'flex-start', mt: 0.5 }}
+                      >
+                        {expandedTasks[task.id] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                      </IconButton>
+                    )}
+                  </Box>
+                  
+                  {/* Expanded content */}
+                  {(task.think || task.result) && (
+                    <Collapse in={expandedTasks[task.id]} timeout="auto" unmountOnExit sx={{ width: '100%', pl: 7 }}>
+                      <Card variant="outlined" sx={{ mt: 1, mb: 1 }}>
+                        <CardContent sx={{ py: 1, '&:last-child': { pb: 1 } }}>
+                          {/* Task Input */}
+                          {task.input && (
+                            <Box sx={{ mb: 2 }}>
+                              <Typography variant="subtitle2" color="text.secondary">Input:</Typography>
+                              <Typography variant="body2" component="pre" 
+                                sx={{ 
+                                  bgcolor: 'rgba(0, 0, 0, 0.04)', 
+                                  p: 1, 
+                                  borderRadius: 1,
+                                  maxHeight: '100px',
+                                  overflow: 'auto',
+                                  fontSize: '0.8rem',
+                                  whiteSpace: 'pre-wrap'
+                                }}
+                              >
+                                {typeof task.input === 'string' ? task.input : JSON.stringify(task.input, null, 2)}
+                              </Typography>
+                            </Box>
+                          )}
+                          
+                          {/* Task Thinking Process - check multiple possible field names */}
+                          {(task.think) && (
+                            <Box sx={{ mb: 2 }}>
+                              <Typography variant="subtitle2" color="text.secondary">Thinking:</Typography>
+                              <Typography variant="body2" component="pre" 
+                                sx={{ 
+                                  bgcolor: 'rgba(0, 0, 0, 0.04)', 
+                                  p: 1, 
+                                  borderRadius: 1,
+                                  maxHeight: '300px',
+                                  overflow: 'auto',
+                                  fontSize: '0.8rem',
+                                  whiteSpace: 'pre-wrap'
+                                }}
+                              >
+                                {(() => {
+                                  // Use the think field from the server
+                                  const thinkingContent = task.think || '';
+                                  return thinkingContent.length > 1000 ? thinkingContent.substring(0, 1000) + '...' : thinkingContent;
+                                })()}
+                              </Typography>
+                            </Box>
+                          )}
+                          
+                          {/* Task Result/Output - check multiple possible field names */}
+                          {(task.result) && (
+                            <Box>
+                              <Typography variant="subtitle2" color="text.secondary">Result:</Typography>
+                              <Typography variant="body2" component="pre" 
+                                sx={{ 
+                                  bgcolor: 'rgba(0, 0, 0, 0.04)', 
+                                  p: 1, 
+                                  borderRadius: 1,
+                                  maxHeight: '150px',
+                                  overflow: 'auto',
+                                  fontSize: '0.8rem',
+                                  whiteSpace: 'pre-wrap'
+                                }}
+                              >
+                                {(() => {
+                                  // Use the result field from the server
+                                  const resultContent = task.result || '';
+                                  if (typeof resultContent === 'string') {
+                                    return resultContent.length > 500 ? resultContent.substring(0, 500) + '...' : resultContent;
+                                  } else {
+                                    return JSON.stringify(resultContent, null, 2);
+                                  }
+                                })()}
+                              </Typography>
+                            </Box>
+                          )}
+                          
+                          {/* Agent Response */}
+                          {(task.agent_response || task.content) && (
+                            <Box sx={{ mt: 2 }}>
+                              <Typography variant="subtitle2" color="text.secondary">Agent Response:</Typography>
+                              <Typography variant="body2" component="pre" 
+                                sx={{ 
+                                  bgcolor: 'rgba(0, 0, 0, 0.04)', 
+                                  p: 1, 
+                                  borderRadius: 1,
+                                  maxHeight: '100px',
+                                  overflow: 'auto',
+                                  fontSize: '0.8rem',
+                                  whiteSpace: 'pre-wrap'
+                                }}
+                              >
+                                {(() => {
+                                  // Find the first available response content
+                                  const responseContent = task.agent_response || task.content || '';
+                                  return responseContent.length > 500 ? responseContent.substring(0, 500) + '...' : responseContent;
+                                })()}
+                              </Typography>
+                            </Box>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </Collapse>
+                  )}
+                </ListItem>
+                {index < tasks.length - 1 && <Divider variant="inset" component="li" />}
+              </React.Fragment>
+            ))}
+          </List>
+        )}
+      </Box>
+      
+      {/* Workspace Tab Panel */}
+      <Box role="tabpanel" hidden={activeTab !== 1}>
+        {activeTab === 1 && (
+          <Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6">
+                Workspace Content (article.txt)
+              </Typography>
+              <Button 
+                variant="outlined" 
+                size="small" 
+                onClick={fetchWorkspace}
+                disabled={workspaceLoading}
+                startIcon={workspaceLoading ? <CircularProgress size={16} /> : <ArticleIcon />}
+              >
+                Refresh
+              </Button>
+            </Box>
+            
+            {workspaceLoading && (
+              <Box sx={{ display: 'flex', justifyContent: 'center', my: 3 }}>
+                <CircularProgress />
               </Box>
-              
-              {/* Expanded content */}
-              {(task.think || task.result) && (
-                <Collapse in={expandedTasks[task.id]} timeout="auto" unmountOnExit sx={{ width: '100%', pl: 7 }}>
-                  <Card variant="outlined" sx={{ mt: 1, mb: 1 }}>
-                    <CardContent sx={{ py: 1, '&:last-child': { pb: 1 } }}>
-                      {/* Task Input */}
-                      {task.input && (
-                        <Box sx={{ mb: 2 }}>
-                          <Typography variant="subtitle2" color="text.secondary">Input:</Typography>
-                          <Typography variant="body2" component="pre" 
-                            sx={{ 
-                              bgcolor: 'rgba(0, 0, 0, 0.04)', 
-                              p: 1, 
-                              borderRadius: 1,
-                              maxHeight: '100px',
-                              overflow: 'auto',
-                              fontSize: '0.8rem',
-                              whiteSpace: 'pre-wrap'
-                            }}
-                          >
-                            {typeof task.input === 'string' ? task.input : JSON.stringify(task.input, null, 2)}
-                          </Typography>
-                        </Box>
-                      )}
-                      
-                      {/* Task Thinking Process - check multiple possible field names */}
-                      {(task.think) && (
-                        <Box sx={{ mb: 2 }}>
-                          <Typography variant="subtitle2" color="text.secondary">Thinking:</Typography>
-                          <Typography variant="body2" component="pre" 
-                            sx={{ 
-                              bgcolor: 'rgba(0, 0, 0, 0.04)', 
-                              p: 1, 
-                              borderRadius: 1,
-                              maxHeight: '300px',
-                              overflow: 'auto',
-                              fontSize: '0.8rem',
-                              whiteSpace: 'pre-wrap'
-                            }}
-                          >
-                            {(() => {
-                              // Use the think field from the server
-                              const thinkingContent = task.think || '';
-                              return thinkingContent.length > 1000 ? thinkingContent.substring(0, 1000) + '...' : thinkingContent;
-                            })()}
-                          </Typography>
-                        </Box>
-                      )}
-                      
-                      {/* Task Result/Output - check multiple possible field names */}
-                      {(task.result) && (
-                        <Box>
-                          <Typography variant="subtitle2" color="text.secondary">Result:</Typography>
-                          <Typography variant="body2" component="pre" 
-                            sx={{ 
-                              bgcolor: 'rgba(0, 0, 0, 0.04)', 
-                              p: 1, 
-                              borderRadius: 1,
-                              maxHeight: '150px',
-                              overflow: 'auto',
-                              fontSize: '0.8rem',
-                              whiteSpace: 'pre-wrap'
-                            }}
-                          >
-                            {(() => {
-                              // Use the result field from the server
-                              const resultContent = task.result || '';
-                              if (typeof resultContent === 'string') {
-                                return resultContent.length > 500 ? resultContent.substring(0, 500) + '...' : resultContent;
-                              } else {
-                                return JSON.stringify(resultContent, null, 2);
-                              }
-                            })()}
-                          </Typography>
-                        </Box>
-                      )}
-                      
-                      {/* Agent Response */}
-                      {(task.agent_response || task.content) && (
-                        <Box sx={{ mt: 2 }}>
-                          <Typography variant="subtitle2" color="text.secondary">Agent Response:</Typography>
-                          <Typography variant="body2" component="pre" 
-                            sx={{ 
-                              bgcolor: 'rgba(0, 0, 0, 0.04)', 
-                              p: 1, 
-                              borderRadius: 1,
-                              maxHeight: '100px',
-                              overflow: 'auto',
-                              fontSize: '0.8rem',
-                              whiteSpace: 'pre-wrap'
-                            }}
-                          >
-                            {(() => {
-                              // Find the first available response content
-                              const responseContent = task.agent_response || task.content || '';
-                              return responseContent.length > 500 ? responseContent.substring(0, 500) + '...' : responseContent;
-                            })()}
-                          </Typography>
-                        </Box>
-                      )}
-                    </CardContent>
-                  </Card>
-                </Collapse>
-              )}
-            </ListItem>
-            {index < tasks.length - 1 && <Divider variant="inset" component="li" />}
-          </React.Fragment>
-        ))}
-      </List>
+            )}
+            
+            {workspaceError && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {workspaceError}
+              </Alert>
+            )}
+            
+            {!workspaceLoading && !workspaceError && workspace && (
+              <Box sx={{ 
+                border: '1px solid rgba(0, 0, 0, 0.12)', 
+                borderRadius: 1, 
+                p: 2,
+                maxHeight: '500px',
+                overflow: 'auto',
+                bgcolor: 'rgba(0, 0, 0, 0.02)'
+              }}>
+                <Typography 
+                  variant="body2" 
+                  component="pre" 
+                  sx={{ 
+                    whiteSpace: 'pre-wrap',
+                    fontFamily: 'monospace',
+                    fontSize: '0.9rem',
+                    lineHeight: 1.5
+                  }}
+                >
+                  {workspace}
+                </Typography>
+              </Box>
+            )}
+            
+            {!workspaceLoading && !workspaceError && !workspace && (
+              <Box sx={{ 
+                textAlign: 'center', 
+                py: 5, 
+                border: '1px dashed rgba(0, 0, 0, 0.12)',
+                borderRadius: 1
+              }}>
+                <Typography variant="body1" color="text.secondary">
+                  No workspace content available yet. 
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  The article.txt file will appear here once the generation has started.
+                </Typography>
+              </Box>
+            )}
+          </Box>
+        )}
+      </Box>
     </Paper>
   );
 };
