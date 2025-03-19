@@ -629,8 +629,8 @@ const LiveTaskList = ({ taskId, onTaskClick }) => {
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: 1,
-                                bgcolor: 'rgba(25, 118, 210, 0.04)',
-                                borderLeft: '2px solid #1976d2',
+                                bgcolor: 'rgba(0, 0, 0, 0.03)',
+                                borderLeft: '2px solid rgba(0, 0, 0, 0.2)',
                                 borderRadius: '3px',
                                 p: 0.7,
                                 pl: 1,
@@ -638,12 +638,12 @@ const LiveTaskList = ({ taskId, onTaskClick }) => {
                                 overflow: 'hidden'
                               }}
                             >
-                              <CodeIcon fontSize="small" sx={{ color: '#1976d2', opacity: 0.8, fontSize: '1rem' }} />
+                              <CodeIcon fontSize="small" sx={{ color: 'rgba(0, 0, 0, 0.5)', opacity: 0.8, fontSize: '1rem' }} />
                               <Typography
                                 sx={{
                                   fontSize: '0.75rem',
                                   fontWeight: 'bold',
-                                  color: '#1976d2',
+                                  color: 'rgba(0, 0, 0, 0.6)',
                                   textTransform: 'uppercase',
                                   letterSpacing: '0.2px',
                                   whiteSpace: 'nowrap'
@@ -653,7 +653,7 @@ const LiveTaskList = ({ taskId, onTaskClick }) => {
                               </Typography>
                               <Typography 
                                 sx={{ 
-                                  color: 'text.secondary', 
+                                  color: 'rgba(0, 0, 0, 0.5)', 
                                   fontSize: '0.75rem',
                                   whiteSpace: 'nowrap',
                                   overflow: 'hidden',
