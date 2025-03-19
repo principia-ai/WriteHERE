@@ -10,6 +10,27 @@ error_log() {
   echo "$(date +"%Y-%m-%d %H:%M:%S") - [ERROR] $1" >&2
 }
 
+# Default port values
+BACKEND_PORT=5001
+FRONTEND_PORT=3000
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --backend-port)
+      BACKEND_PORT="$2"
+      shift 2
+      ;;
+    --frontend-port)
+      FRONTEND_PORT="$2"
+      shift 2
+      ;;
+    *)
+      shift
+      ;;
+  esac
+done
+
 # Check if required API keys are set
 check_api_keys() {
   api_key_env_file="recursive/api_key.env"
@@ -42,10 +63,10 @@ is_port_in_use() {
 start_backend() {
   log "Starting backend server..."
   
-  # Check if port 5001 is already in use
-  if is_port_in_use 5001; then
-    error_log "Port 5001 is already in use. The backend server may already be running."
-    error_log "Please stop any services using port 5001 before continuing."
+  # Check if configured port is already in use
+  if is_port_in_use $BACKEND_PORT; then
+    error_log "Port $BACKEND_PORT is already in use. The backend server may already be running."
+    error_log "Please stop any services using port $BACKEND_PORT or specify a different port with --backend-port."
     exit 1
   fi
   
@@ -81,9 +102,9 @@ start_backend() {
   fi
   
   # Start backend server
-  log "Starting backend server on port 5001..."
+  log "Starting backend server on port $BACKEND_PORT..."
   cd backend
-  python server.py &
+  python server.py --port $BACKEND_PORT &
   backend_pid=$!
   cd ..
   
@@ -99,7 +120,7 @@ start_backend() {
   # Test the API connection
   log "Testing API connection..."
   cd backend
-  python test_api.py
+  python test_api.py --port $BACKEND_PORT
   api_test_result=$?
   cd ..
   
@@ -113,10 +134,10 @@ start_backend() {
 start_frontend() {
   log "Starting frontend..."
   
-  # Check if port 3000 is already in use
-  if is_port_in_use 3000; then
-    error_log "Port 3000 is already in use. The frontend server may already be running."
-    error_log "Please stop any services using port 3000 before continuing."
+  # Check if configured port is already in use
+  if is_port_in_use $FRONTEND_PORT; then
+    error_log "Port $FRONTEND_PORT is already in use. The frontend server may already be running."
+    error_log "Please stop any services using port $FRONTEND_PORT or specify a different port with --frontend-port."
     exit 1
   fi
   
@@ -133,9 +154,9 @@ start_frontend() {
   fi
   
   # Start frontend development server
-  log "Starting frontend server on port 3000..."
+  log "Starting frontend server on port $FRONTEND_PORT..."
   cd frontend
-  npm start &
+  PORT=$FRONTEND_PORT REACT_APP_BACKEND_PORT=$BACKEND_PORT npm start &
   frontend_pid=$!
   cd ..
   
@@ -168,21 +189,21 @@ start_frontend
 
 log "==============================="
 log "WriteHERE is now running!"
-log "  - Backend server: http://localhost:5001"
-log "  - Frontend app:   http://localhost:3000"
+log "  - Backend server: http://localhost:$BACKEND_PORT"
+log "  - Frontend app:   http://localhost:$FRONTEND_PORT"
 log "  - Press Ctrl+C to stop both servers"
 log "==============================="
 
 # Open the browser automatically if possible
 if command -v open >/dev/null 2>&1; then
   log "Opening browser..."
-  open http://localhost:3000
+  open http://localhost:$FRONTEND_PORT
 elif command -v xdg-open >/dev/null 2>&1; then
   log "Opening browser..."
-  xdg-open http://localhost:3000
+  xdg-open http://localhost:$FRONTEND_PORT
 elif command -v start >/dev/null 2>&1; then
   log "Opening browser..."
-  start http://localhost:3000
+  start http://localhost:$FRONTEND_PORT
 fi
 
 # Handle graceful shutdown

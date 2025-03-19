@@ -50,6 +50,12 @@ This will:
 4. Start the frontend on port 3000
 5. Open your browser at http://localhost:3000
 
+You can customize the ports using command-line arguments:
+
+```bash
+./start.sh --backend-port 8080 --frontend-port 8000
+```
+
 #### For Anaconda/Miniconda Users
 
 If you're using Anaconda and encounter dependency conflicts, use:
@@ -59,6 +65,12 @@ If you're using Anaconda and encounter dependency conflicts, use:
 ```
 
 This script will create a dedicated Anaconda environment called 'writehere' with the correct dependencies and run both servers.
+
+You can also customize ports with this script:
+
+```bash
+./run_with_anaconda.sh --backend-port 8080 --frontend-port 8000
+```
 
 #### Troubleshooting
 
@@ -98,6 +110,11 @@ cd backend
 python server.py
 ```
 
+To use a custom port:
+```bash
+python server.py --port 8080
+```
+
 #### Frontend Setup
 
 1. Install frontend dependencies:
@@ -109,6 +126,11 @@ npm install
 2. Start the frontend development server:
 ```bash
 npm start
+```
+
+To use a custom port:
+```bash
+PORT=8000 npm start
 ```
 
 ## Features

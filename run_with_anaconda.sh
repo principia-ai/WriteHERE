@@ -2,6 +2,27 @@
 
 echo "Starting WriteHERE with Anaconda environment..."
 
+# Default port values
+BACKEND_PORT=5001
+FRONTEND_PORT=3000
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --backend-port)
+      BACKEND_PORT="$2"
+      shift 2
+      ;;
+    --frontend-port)
+      FRONTEND_PORT="$2"
+      shift 2
+      ;;
+    *)
+      shift
+      ;;
+  esac
+done
+
 # Create a separate environment for the backend
 conda_create_env() {
     echo "Creating Anaconda environment 'writehere'..."
@@ -36,9 +57,9 @@ if [ ! -f "$api_key_env_file" ]; then
 fi
 
 # Start backend server
-echo "Starting backend server..."
+echo "Starting backend server on port $BACKEND_PORT..."
 cd backend
-python server.py &
+python server.py --port $BACKEND_PORT &
 backend_pid=$!
 cd ..
 
@@ -47,15 +68,15 @@ echo "Waiting for backend to initialize..."
 sleep 3
 
 # Start frontend
-echo "Starting frontend server..."
+echo "Starting frontend server on port $FRONTEND_PORT..."
 cd frontend
-npm start &
+PORT=$FRONTEND_PORT REACT_APP_BACKEND_PORT=$BACKEND_PORT npm start &
 frontend_pid=$!
 cd ..
 
 echo "WriteHERE is now running!"
-echo "  - Backend server: http://localhost:5001 (running in 'writehere' Anaconda environment)"
-echo "  - Frontend app:   http://localhost:3000"
+echo "  - Backend server: http://localhost:$BACKEND_PORT (running in 'writehere' Anaconda environment)"
+echo "  - Frontend app:   http://localhost:$FRONTEND_PORT"
 echo "  - Press Ctrl+C to stop both servers"
 
 # Handle graceful shutdown

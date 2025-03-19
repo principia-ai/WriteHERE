@@ -1,9 +1,10 @@
 import axios from 'axios';
 
 // Base URL for API requests - adjust as needed for production/development
+const BACKEND_PORT = process.env.REACT_APP_BACKEND_PORT || '5001';
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
   ? '/api' 
-  : 'http://localhost:5001/api';
+  : `http://localhost:${BACKEND_PORT}/api`;
 
 // Create an axios instance with CORS headers
 const apiClient = axios.create({

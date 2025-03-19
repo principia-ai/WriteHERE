@@ -11,8 +11,14 @@ import time
 import shutil
 import re
 import signal
+import argparse
 from pathlib import Path
 from datetime import datetime
+
+# Parse command-line arguments
+parser = argparse.ArgumentParser(description='Backend server for WriteHERE application')
+parser.add_argument('--port', type=int, default=5001, help='Port to run the server on')
+args = parser.parse_args()
 
 app = Flask(__name__)
 # Enable CORS with more specific options
@@ -1056,4 +1062,4 @@ def handle_subscribe(data):
     emit('task_update', {'taskId': task_id, 'taskGraph': initial_graph})
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, port=5001, allow_unsafe_werkzeug=True)
+    socketio.run(app, debug=True, port=args.port, allow_unsafe_werkzeug=True)

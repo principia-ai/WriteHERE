@@ -28,6 +28,10 @@ import TokenIcon from '@mui/icons-material/Token';
 import CodeIcon from '@mui/icons-material/Code';
 import io from 'socket.io-client';
 
+// Get the backend port from environment variable or use default
+const BACKEND_PORT = process.env.REACT_APP_BACKEND_PORT || '5001';
+const API_BASE_URL = `http://localhost:${BACKEND_PORT}/api`;
+
 // Create a singleton socket instance for the entire application
 let socket;
 
@@ -36,7 +40,7 @@ const getSocket = () => {
   if (!socket) {
     // Initialize socket connection - make sure this matches your backend URL
     // Using a dynamic approach that works with both development and production
-    const socketUrl = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+    const socketUrl = `http://localhost:${BACKEND_PORT}`;
     console.log('Creating new WebSocket connection to:', socketUrl);
     
     socket = io(socketUrl, {
@@ -153,7 +157,7 @@ const LiveTaskList = ({ taskId, onTaskClick }) => {
     const fetchTaskGraph = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:5001/api/task-graph/${taskId}`);
+        const response = await fetch(`${API_BASE_URL}/task-graph/${taskId}`);
         if (response.ok) {
           const data = await response.json();
           if (data.taskGraph) {
@@ -162,7 +166,7 @@ const LiveTaskList = ({ taskId, onTaskClick }) => {
             setLoading(false);
             
             // Check if the task is already complete
-            const taskStatus = await fetch(`http://localhost:5001/api/status/${taskId}`);
+            const taskStatus = await fetch(`${API_BASE_URL}/status/${taskId}`);
             if (taskStatus.ok) {
               const statusData = await taskStatus.json();
               if (statusData.status && (statusData.status === 'completed' || statusData.status === 'error' || statusData.status === 'stopped')) {

@@ -91,7 +91,7 @@ const ReportGenerationPage = () => {
         await pingAPI();
         // API is available, nothing to do
       } catch (err) {
-        setError('Cannot connect to the backend server. Please make sure it is running at http://localhost:5001.');
+        setError('Cannot connect to the backend server. Please make sure it is running at http://localhost:' + (process.env.REACT_APP_BACKEND_PORT || '5001') + '.');
       }
     }
     
@@ -132,7 +132,7 @@ const ReportGenerationPage = () => {
     try {
       await pingAPI();
     } catch (err) {
-      setError('Cannot connect to the backend server. Please make sure it is running at http://localhost:5001.');
+      setError('Cannot connect to the backend server. Please make sure it is running at http://localhost:' + (process.env.REACT_APP_BACKEND_PORT || '5001') + '.');
       return;
     }
     

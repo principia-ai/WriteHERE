@@ -7,8 +7,14 @@ Run this script to verify that the backend server is working properly.
 import sys
 import requests
 import time
+import argparse
 
-API_URL = "http://localhost:5001/api"
+# Parse command-line arguments
+parser = argparse.ArgumentParser(description='Test the API server connection')
+parser.add_argument('--port', type=int, default=5001, help='Port the server is running on')
+args = parser.parse_args()
+
+API_URL = f"http://localhost:{args.port}/api"
 
 def test_ping():
     """Test the API ping endpoint"""
@@ -24,10 +30,10 @@ def test_ping():
             print(f"❌ API server returned unexpected status code: {response.status_code}")
             return False
     except requests.exceptions.ConnectionError:
-        print("❌ Could not connect to API server at http://localhost:5001")
+        print(f"❌ Could not connect to API server at {API_URL}")
         print("   Make sure the backend server is running:")
         print("   1. Navigate to the backend directory: cd backend")
-        print("   2. Start the server: python server.py")
+        print(f"   2. Start the server: python server.py --port {args.port}")
         return False
     except Exception as e:
         print(f"❌ Error connecting to API server: {e}")
