@@ -51,12 +51,6 @@ def parse_tag_result(content, tag):
     return ""
         
             
-        
-        
-        
-    
-
-
 
 def parse_hierarchy_tags_result(res, tags):
     if len(tags) == 0:

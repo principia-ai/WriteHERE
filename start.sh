@@ -170,9 +170,15 @@ start_frontend() {
   log "Frontend started with PID: $frontend_pid"
 }
 
+# Set up cleanup trap for Ctrl+C and other termination
+trap cleanup_before_exit INT TERM
+
 # Main execution
 log "Starting WriteHERE application..."
 log "==============================="
+
+# First cleanup any existing processes using our ports
+cleanup_ports
 
 # Ensure we have API keys or notify the user
 check_api_keys

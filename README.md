@@ -32,26 +32,61 @@ WriteHERE is developed with these core principles:
   - Anthropic (Claude models)
   - SerpAPI (for search functionality in report generation)
 
-### Quick Start
+### Quickstart
 
-#### Standard Installation
+You can use WriteHERE in two ways: with or without the visualization interface.
 
-For the easiest start, just run:
+#### Running Without Visualization
 
+This is the simpler approach when you don't need real-time visualization or want to use the engine for batch processing.
+
+1. **Setup the environment**:
+```bash
+python -m venv venv
+source venv/bin/activate
+pip install -v -e .
+
+# Create api_key.env file based on example
+cp recursive/api_key.env.example recursive/api_key.env
+# Edit the file to add your keys
+nano recursive/api_key.env
+```
+
+
+2. **Run the engine directly**:
+```bash
+cd recursive
+python engine.py --filename <input_file> --output-filename <output_file> --done-flag-file <done_file> --model <model_name> --mode <story|report>
+```
+
+Example for generating a story:
+```bash
+python engine.py --filename ../test_data/meta_fiction.jsonl --output-filename ./project/story/output.jsonl --done-flag-file ./project/story/done.txt --model gpt-4o --mode story
+```
+
+Example for generating a report:
+```bash
+python engine.py --filename ../test_data/qa_test.jsonl --output-filename ./project/qa/result.jsonl --done-flag-file ./project/qa/done.txt --model claude-3-sonnet --mode report
+```
+
+#### Running With Visualization Interface
+
+This option provides a web interface to visualize and monitor the writing process in real-time.
+
+1. **One-step setup and launch**:
 ```bash
 ./setup_env.sh  # One-time setup of the environment
 ./start.sh      # Start the application
 ```
 
 This will:
-1. Create a clean Python virtual environment
-2. Install all required dependencies
-3. Start the backend server on port 5001
-4. Start the frontend on port 3000
-5. Open your browser at http://localhost:3000
+- Create a clean Python virtual environment
+- Install all required dependencies
+- Start the backend server on port 5001
+- Start the frontend on port 3000
+- Open your browser at http://localhost:3000
 
 You can customize the ports using command-line arguments:
-
 ```bash
 ./start.sh --backend-port 8080 --frontend-port 8000
 ```
@@ -59,24 +94,20 @@ You can customize the ports using command-line arguments:
 #### For Anaconda/Miniconda Users
 
 If you're using Anaconda and encounter dependency conflicts, use:
-
 ```bash
 ./run_with_anaconda.sh
 ```
 
-This script will create a dedicated Anaconda environment called 'writehere' with the correct dependencies and run both servers.
+This script creates a dedicated Anaconda environment called 'writehere' with the correct dependencies and runs both servers.
 
-You can also customize ports with this script:
-
+You can customize ports with this script:
 ```bash
 ./run_with_anaconda.sh --backend-port 8080 --frontend-port 8000
 ```
 
-#### Troubleshooting
-
-If you encounter any issues, please check the [Troubleshooting Guide](TROUBLESHOOTING.md) for common problems and solutions.
-
 ### Manual Installation
+
+If you prefer to set up the components manually:
 
 #### Backend Setup
 
@@ -96,15 +127,7 @@ pip install -v -e .
 pip install -r backend/requirements.txt
 ```
 
-4. API Keys setup (optional - can also be done via the web UI):
-```bash
-# Create api_key.env file based on example
-cp recursive/api_key.env.example recursive/api_key.env
-# Edit the file to add your keys
-nano recursive/api_key.env
-```
-
-5. Start the backend server:
+4. Start the backend server:
 ```bash
 cd backend
 python server.py
@@ -132,6 +155,10 @@ To use a custom port:
 ```bash
 PORT=8000 npm start
 ```
+
+### Troubleshooting
+
+If you encounter any issues, please check the [Troubleshooting Guide](TROUBLESHOOTING.md) for common problems and solutions.
 
 ## Features
 
@@ -167,17 +194,14 @@ PORT=8000 npm start
 
 ## Real-time Task Visualization
 
-The system features real-time visualization of the task execution process. As the agent works on generating content, you can see:
+When using the visualization interface, you can see the task execution process in real-time. As the agent works on generating content, you can observe:
 
 1. The hierarchical decomposition of tasks
 2. Which tasks are currently being worked on
 3. The status of each task (ready, in progress, completed)
 4. The type of each task (retrieval, reasoning, composition)
 
-This visualization gives you insight into the agent's "thinking process" and helps you understand how complex writing tasks are broken down and solved step by step.
-
-To view the task execution in real-time, simply start a generation job and watch the task list update automatically as the agent works.
-
+This visualization provides insight into the agent's "thinking process" and helps you understand how complex writing tasks are broken down and solved step by step.
 
 ## Contributing
 

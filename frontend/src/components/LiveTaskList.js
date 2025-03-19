@@ -276,7 +276,7 @@ const LiveTaskList = ({ taskId, onTaskClick }) => {
       };
       
       const onSubscriptionStatus = (data) => {
-        console.log('Subscription status received:', data);
+        console.log('Subscription status received:', JSON.stringify(data).slice(0, 200)+'...');
         if (data.taskId === taskId) {
           if (data.status === 'subscribed') {
             console.log('Successfully subscribed to task updates');
@@ -338,7 +338,7 @@ const LiveTaskList = ({ taskId, onTaskClick }) => {
       
       // Add a test handler for connection verification
       const onConnectionTest = (data) => {
-        console.log('Received connection test message:', data);
+        console.log('Received connection test message:', JSON.stringify(data).slice(0, 200) + '...');
         setConnected(true);
         setError('');
       };

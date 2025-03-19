@@ -88,7 +88,7 @@ const TaskGraph = ({ data, onNodeClick }) => {
       .attr('transform', `translate(${width / 2}, 80)`);
       
     // Debugging
-    console.log("Graph data received:", JSON.stringify(data, null, 2));
+    console.log("Graph data received:", JSON.stringify(data, null, 2).slice(0, 200) + '...');
       
     // Create a hierarchical layout with special handling for execute nodes
     let processedData;

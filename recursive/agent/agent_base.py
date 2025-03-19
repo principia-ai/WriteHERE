@@ -65,6 +65,17 @@ class Agent(ABC):
             "result": content,
             "reason": reason
         }
+        
+        """  
+        The following code extracts structured information from an LLM's textual response by looking for content within specific XML-like tags. It works by:
+
+        1. Iterating through each key-value pair in parse_arg_dict which maps output keys to tag patterns
+        2. For each pair, it calls parse_hierarchy_tags_result() which extracts text enclosed in those specific XML-like tags
+        3. The extracted content is stripped of whitespace and stored in the result dictionary under the corresponding key
+
+        For example, if the LLM response contains <reasoning>Some analysis here</reasoning> and parse_arg_dict has {"thought": "reasoning"}, the function would extract "Some
+        analysis here" and store it under result["thought"].
+        """
         for key, value in parse_arg_dict.items():
             result[key] = parse_hierarchy_tags_result(content, value).strip()
         return result
