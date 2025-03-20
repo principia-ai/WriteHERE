@@ -1,5 +1,7 @@
-# WriteHERE: Heterogeneous Recursive Planning based Open 
-Writing Project
+# 📝 WriteHERE: Heterogeneous Recursive Planning based Open Writing Project
+
+[![arXiv](https://img.shields.io/badge/arXiv-2503.08275-b31b1b.svg)](https://arxiv.org/abs/2503.08275)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 WriteHERE is an open-source framework that revolutionizes long-form writing through human-like adaptive planning. Unlike traditional AI writing tools that follow rigid workflows, WriteHERE dynamically decomposes writing tasks and integrates three fundamental capabilities:
 
@@ -9,7 +11,7 @@ WriteHERE is an open-source framework that revolutionizes long-form writing thro
 
 Our evaluations show that this approach consistently outperforms state-of-the-art methods in both fiction writing and technical report generation.
 
-## Overview
+## 🔍 Overview
 
 Unlike traditional approaches that rely on predetermined workflows and rigid thinking patterns, this framework:
 
@@ -17,7 +19,7 @@ Unlike traditional approaches that rely on predetermined workflows and rigid thi
 2. **Facilitates heterogeneous task decomposition** by integrating different task types
 3. **Adapts dynamically** during the writing process, similar to human writing behavior
 
-## Open Source Philosophy
+## 🌐 Open Source Philosophy
 
 WriteHERE is developed with these core principles:
 
@@ -26,7 +28,7 @@ WriteHERE is developed with these core principles:
 - **Full Transparency**: The entire system architecture and decision-making processes are transparent to users
 - **Community-Driven**: We welcome contributions, feedback, and collaborative improvements from the community
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
@@ -165,7 +167,7 @@ PORT=8000 npm start
 
 If you encounter any issues, please check the [Troubleshooting Guide](TROUBLESHOOTING.md) for common problems and solutions.
 
-## Features
+## ✨ Features
 
 - **Recursive Task Decomposition**: Breaks down complex writing tasks into manageable subtasks
 - **Dynamic Integration**: Seamlessly combines retrieval, reasoning, and composition tasks
@@ -176,7 +178,7 @@ If you encounter any issues, please check the [Troubleshooting Guide](TROUBLESHO
 - **Transparent Operation**: All agent decisions and processes are visible to users
 - **Fully Customizable**: Modify prompts, parameters, and workflows to suit your needs
 
-## Project Structure
+## 📂 Project Structure
 
 ```
 .
@@ -197,7 +199,7 @@ If you encounter any issues, please check the [Troubleshooting Guide](TROUBLESHO
 └── start.sh               # All-in-one startup script
 ```
 
-## Real-time Task Visualization
+## 📊 Real-time Task Visualization
 
 When using the visualization interface, you can see the task execution process in real-time. As the agent works on generating content, you can observe:
 
@@ -208,7 +210,7 @@ When using the visualization interface, you can see the task execution process i
 
 This visualization provides insight into the agent's "thinking process" and helps you understand how complex writing tasks are broken down and solved step by step.
 
-## Contributing
+## 👥 Contributing
 
 We welcome contributions from the community to help improve WriteHERE! Here's how you can contribute:
 
@@ -246,7 +248,7 @@ We welcome contributions from the community to help improve WriteHERE! Here's ho
 
 By contributing to WriteHERE, you agree that your contributions will be licensed under the project's MIT License.
 
-## Citation
+## 📚 Citation
 
 If you use this code in your research, please cite our paper:
 
@@ -262,7 +264,7 @@ If you use this code in your research, please cite our paper:
 }
 ```
 
-## License
+## ⚖️ License
 
 [MIT License](LICENSE)
 

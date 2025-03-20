@@ -19,9 +19,9 @@ class EvidenceSelectorAPIClientOpenAI:
         language = "en"
     ):
         """
-        初始化 Baichuan API 客户端。
+        Initialize the API client.
 
-        :param url: API 服务器的 URL
+        :param url: URL of the API server
         """
         self.model = model
         self.language = language
@@ -173,9 +173,9 @@ class Summarizier:
         language = "en",
     ):
         """
-        初始化 Baichuan API 客户端。
+        Initialize the API client.
 
-        :param url: API 服务器的 URL
+        :param url: URL of the API server
         """
         self.language = language
         assert language in ("zh", "en")
