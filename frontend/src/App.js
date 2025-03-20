@@ -3,6 +3,9 @@ import { Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 
+// i18n
+import './utils/i18n';
+
 // Components
 import Header from './components/Header';
 import Footer from './components/Footer';

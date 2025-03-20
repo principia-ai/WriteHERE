@@ -74,8 +74,13 @@ def reload_task_storage():
                                 engine_backend = run_script.split("--engine-backend ")[1].split(" ")[0]
                                 if engine_backend != "none":
                                     task_storage[task_id]["search_engine"] = engine_backend
+                                    
+                            # Extract language information
+                            if "--language " in run_script:
+                                language = run_script.split("--language ")[1].split(" ")[0]
+                                task_storage[task_id]["language"] = language
                     except Exception as e:
-                        print(f"Error extracting model info from run.sh for {task_id}: {str(e)}")
+                        print(f"Error extracting info from run.sh for {task_id}: {str(e)}")
                 
                 # Load result if available
                 try:
@@ -89,9 +94,16 @@ def reload_task_storage():
 # Load existing tasks on startup
 reload_task_storage()
 
-def run_story_generation(task_id, prompt, model, api_keys):
+def run_story_generation(task_id, prompt, model, api_keys, language='en'):
     """
     Run the story generation script as a subprocess
+    
+    Args:
+        task_id (str): Unique identifier for the task
+        prompt (str): User prompt for the generation
+        model (str): Model to use for generation
+        api_keys (dict): Dictionary containing API keys
+        language (str, optional): Language for generation - 'en' or 'zh'. Defaults to 'en'.
     """
     task_dir = os.path.join(RESULTS_DIR, task_id)
     os.makedirs(task_dir, exist_ok=True)
@@ -132,7 +144,7 @@ def run_story_generation(task_id, prompt, model, api_keys):
         cd {os.path.abspath(os.path.join(os.path.dirname(__file__), '../recursive'))}
         source {env_file}
         export TASK_ENV_FILE={env_file}
-        python engine.py --filename {input_file} --output-filename {output_file} --done-flag-file {done_file} --model {model} --mode story --nodes-json-file {nodes_file}
+        python engine.py --filename {input_file} --output-filename {output_file} --done-flag-file {done_file} --model {model} --mode story --nodes-json-file {nodes_file} --language {language}
         """)
     
     os.chmod(script_path, 0o755)
@@ -141,7 +153,8 @@ def run_story_generation(task_id, prompt, model, api_keys):
     task_storage[task_id] = {
         "status": "running", 
         "start_time": time.time(),
-        "model": model
+        "model": model,
+        "language": language
     }
     
     # Start task progress monitoring in a background thread
@@ -179,9 +192,18 @@ def run_story_generation(task_id, prompt, model, api_keys):
         task_storage[task_id]["status"] = "error"
         task_storage[task_id]["error"] = str(e)
 
-def run_report_generation(task_id, prompt, model, enable_search, search_engine, api_keys):
+def run_report_generation(task_id, prompt, model, enable_search, search_engine, api_keys, language='en'):
     """
     Run the report generation script as a subprocess
+    
+    Args:
+        task_id (str): Unique identifier for the task
+        prompt (str): User prompt for the generation
+        model (str): Model to use for generation
+        enable_search (bool): Whether to enable search for this report
+        search_engine (str): The search engine to use ('google' or 'bing')
+        api_keys (dict): Dictionary containing API keys
+        language (str, optional): Language for generation - 'en' or 'zh'. Defaults to 'en'.
     """
     task_dir = os.path.join(RESULTS_DIR, task_id)
     os.makedirs(task_dir, exist_ok=True)
@@ -225,7 +247,7 @@ def run_report_generation(task_id, prompt, model, enable_search, search_engine, 
         cd {os.path.abspath(os.path.join(os.path.dirname(__file__), '../recursive'))}
         source {env_file}
         export TASK_ENV_FILE={env_file}
-        python engine.py --filename {input_file} --output-filename {output_file} --done-flag-file {done_file} --model {model} --engine-backend {engine_backend} --mode report --nodes-json-file {nodes_file}
+        python engine.py --filename {input_file} --output-filename {output_file} --done-flag-file {done_file} --model {model} --engine-backend {engine_backend} --mode report --nodes-json-file {nodes_file} --language {language}
         """)
     
     os.chmod(script_path, 0o755)
@@ -235,7 +257,8 @@ def run_report_generation(task_id, prompt, model, enable_search, search_engine, 
         "status": "running", 
         "start_time": time.time(),
         "model": model,
-        "search_engine": engine_backend if enable_search else None
+        "search_engine": engine_backend if enable_search else None,
+        "language": language
     }
     
     # Start task progress monitoring in a background thread
@@ -283,13 +306,16 @@ def api_generate_story():
         if field not in data:
             return jsonify({"error": f"Missing required field: {field}"}), 400
     
+    # Get language parameter, default to English if not provided
+    language = data.get('language', 'en')
+    
     # Generate a unique task ID
     task_id = f"story-{uuid.uuid4()}"
     
     # Start the generation in a background thread
     thread = threading.Thread(
         target=run_story_generation,
-        args=(task_id, data['prompt'], data['model'], data['apiKeys'])
+        args=(task_id, data['prompt'], data['model'], data['apiKeys'], language)
     )
     thread.start()
     
@@ -311,6 +337,7 @@ def api_generate_report():
     # Set defaults
     enable_search = data.get('enableSearch', True)
     search_engine = data.get('searchEngine', 'google')
+    language = data.get('language', 'en')
     
     # Generate a unique task ID
     task_id = f"report-{uuid.uuid4()}"
@@ -318,7 +345,7 @@ def api_generate_report():
     # Start the generation in a background thread
     thread = threading.Thread(
         target=run_report_generation,
-        args=(task_id, data['prompt'], data['model'], enable_search, search_engine, data['apiKeys'])
+        args=(task_id, data['prompt'], data['model'], enable_search, search_engine, data['apiKeys'], language)
     )
     thread.start()
     
@@ -373,7 +400,8 @@ def api_get_status(task_id):
         "error": task.get("error"),
         "elapsedTime": time.time() - task["start_time"],
         "model": task.get("model", "unknown"),
-        "searchEngine": task.get("search_engine")
+        "searchEngine": task.get("search_engine"),
+        "language": task.get("language", "en")
     })
 
 @app.route('/api/result/<task_id>', methods=['GET'])
@@ -423,7 +451,8 @@ def api_get_result(task_id):
         "taskId": task_id,
         "result": task.get("result", "No result available"),
         "model": task.get("model", "unknown"),
-        "searchEngine": task.get("search_engine")
+        "searchEngine": task.get("search_engine"),
+        "language": task.get("language", "en")
     })
 
 
@@ -867,12 +896,26 @@ def api_get_history():
         creation_time = os.path.getctime(result_file)
         creation_date = datetime.fromtimestamp(creation_time).strftime('%Y-%m-%d %H:%M:%S')
         
+        # Try to extract language information from run.sh
+        language = "en"  # Default to English
+        run_sh_file = os.path.join(task_dir, 'run.sh')
+        if os.path.exists(run_sh_file):
+            try:
+                with open(run_sh_file, 'r') as f:
+                    run_script = f.read()
+                    # Extract language parameter from command line arguments
+                    if "--language " in run_script:
+                        language = run_script.split("--language ")[1].split(" ")[0]
+            except Exception as e:
+                print(f"Error extracting language info from run.sh for {task_id}: {str(e)}")
+        
         # Add task info to history list
         history_tasks.append({
             "taskId": task_id,
             "prompt": prompt[:100] + "..." if len(prompt) > 100 else prompt,
             "type": task_type,
-            "createdAt": creation_date
+            "createdAt": creation_date,
+            "language": language
         })
     
     # Sort by creation time, newest first

@@ -1,0 +1,153 @@
+{
+  "header": {
+    "home": "首页",
+    "storyGeneration": "故事生成",
+    "reportGeneration": "报告生成",
+    "about": "关于"
+  },
+  "footer": {
+    "copyright": "© 2025 WriteHERE. 保留所有权利。",
+    "about": "关于",
+    "github": "GitHub"
+  },
+  "homePage": {
+    "title": "欢迎使用 WriteHERE",
+    "subtitle": "AI驱动的故事与报告生成",
+    "description": "我们先进的异构递归规划系统将复杂的创作任务分解为可管理的部分，结合推理、信息检索和写作来提供高质量的内容。",
+    "storyCard": {
+      "title": "故事生成",
+      "description": "创作具有丰富角色、引人入胜的情节和生动描述的故事。",
+      "button": "生成故事"
+    },
+    "reportCard": {
+      "title": "报告生成",
+      "description": "创建包含事实信息、逻辑组织和专业风格的综合报告。",
+      "button": "生成报告"
+    }
+  },
+  "storyPage": {
+    "title": "创意故事生成",
+    "description": "使用我们的异构递归规划框架生成创意故事。提供描述您想要创作的故事的提示，我们的系统将递归地规划并生成一个连贯的叙事。",
+    "form": {
+      "promptLabel": "故事提示",
+      "promptPlaceholder": "描述您想要生成的故事...",
+      "modelLabel": "模型",
+      "modelPlaceholder": "输入或选择一个模型",
+      "modelHelperText": "输入任何模型名称或从建议中选择",
+      "languageLabel": "输出语言",
+      "generateButton": "生成故事",
+      "apiSettings": "API设置",
+      "openaiLabel": "OpenAI API密钥",
+      "claudeLabel": "Anthropic API密钥",
+      "serpapiLabel": "SerpAPI密钥",
+      "apiKeysNote": "您的API密钥安全地存储在浏览器的本地存储中，永远不会发送到我们的服务器。它们仅用于从您的浏览器直接调用相应服务的API。"
+    },
+    "examples": {
+      "title": "示例提示",
+      "description": "点击任意示例作为您的提示："
+    },
+    "tips": {
+      "title": "有效故事提示的技巧",
+      "specific": {
+        "title": "具体描述",
+        "description": "提供您希望在故事中包含的角色、场景和情节元素的具体细节。"
+      },
+      "parameters": {
+        "title": "定义参数",
+        "description": "指定您想要的故事的叙述视角（第一人称、第三人称）、语调（幽默、严肃）和长度。"
+      },
+      "creativity": {
+        "title": "允许创意",
+        "description": "在提供指导的同时，为系统留出发挥创意的空间，以增强您的故事。"
+      }
+    }
+  },
+  "reportPage": {
+    "title": "技术报告生成",
+    "description": "使用我们的异构递归规划框架生成全面的技术报告。系统整合信息检索、逻辑推理和内容创作，创建结构良好且信息丰富的报告。",
+    "form": {
+      "promptLabel": "报告主题",
+      "promptPlaceholder": "描述您想要生成的技术报告...",
+      "modelLabel": "模型",
+      "modelPlaceholder": "输入或选择一个模型",
+      "modelHelperText": "输入任何模型名称或从建议中选择",
+      "languageLabel": "输出语言",
+      "searchLabel": "启用搜索",
+      "searchEngineLabel": "搜索引擎",
+      "generateButton": "生成报告",
+      "apiSettings": "API设置",
+      "openaiLabel": "OpenAI API密钥",
+      "claudeLabel": "Anthropic API密钥",
+      "serpapiLabel": "SerpAPI密钥",
+      "apiKeysNote": "您的API密钥安全地存储在浏览器的本地存储中，永远不会发送到我们的服务器。它们仅用于从您的浏览器直接调用相应服务的API。"
+    },
+    "examples": {
+      "title": "示例主题",
+      "description": "点击任意示例作为您的提示："
+    },
+    "tips": {
+      "title": "有效报告提示的技巧",
+      "scope": {
+        "title": "定义范围",
+        "description": "清晰指定报告的范围和重点，确保内容满足您的特定需求。"
+      },
+      "structure": {
+        "title": "指明结构",
+        "description": "如果您对报告的结构或章节有特定要求，请在提示中提及。"
+      },
+      "depth": {
+        "title": "指定深度",
+        "description": "指明您是需要一般性概述还是带有详细技术信息和引用的深入分析。"
+      }
+    }
+  },
+  "resultsPage": {
+    "title": "生成的内容",
+    "status": {
+      "generating": "正在生成内容... 请稍等。",
+      "completed": "生成已完成。",
+      "error": "生成过程中出现错误。",
+      "stopped": "生成已停止。"
+    },
+    "taskDetails": "任务详情",
+    "taskType": "任务类型",
+    "model": "模型",
+    "searchEngine": "搜索引擎",
+    "prompt": "提示",
+    "viewTaskGraph": "查看任务图",
+    "copyToClipboard": "复制到剪贴板",
+    "copied": "已复制！",
+    "stopGeneration": "停止生成",
+    "deleteResult": "删除结果",
+    "backToGeneration": "返回生成页面",
+    "confirmDelete": "您确定要删除此结果吗？此操作无法撤销。"
+  },
+  "aboutPage": {
+    "title": "关于 WriteHERE",
+    "description": "WriteHERE 是一个先进的 AI 驱动内容生成平台，利用异构递归规划创建高质量的故事和报告。",
+    "teamTitle": "我们的团队",
+    "howItWorksTitle": "工作原理",
+    "heterogeneousTitle": "异构规划",
+    "heterogeneousDescription": "我们的系统整合了多种 AI 能力 - 写作、推理和搜索 - 以处理内容创建过程的不同方面。",
+    "recursiveTitle": "递归规划",
+    "recursiveDescription": "复杂任务被分解为可以在需要时进一步分解的子任务，创建了一个层次化的规划结构。",
+    "modelsTitle": "支持的模型",
+    "apiTitle": "API 集成",
+    "apiDescription": "WriteHERE 通过 API 连接到各种 AI 模型。为了安全起见，您的 API 密钥存储在浏览器本地。"
+  },
+  "common": {
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "cancel": "取消",
+    "confirm": "确认",
+    "delete": "删除",
+    "edit": "编辑",
+    "save": "保存",
+    "language": "语言",
+    "english": "English",
+    "chinese": "中文",
+    "languageChanged": "语言已更改为{{language}}",
+    "selectLanguage": "选择语言"
+  }
+}

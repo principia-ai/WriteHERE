@@ -33,6 +33,7 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import InfoIcon from '@mui/icons-material/Info';
 import { generateStory, pingAPI } from '../utils/api';
 import HistoryPanel from '../components/HistoryPanel';
+import { useTranslation } from 'react-i18next';
 
 // Recommended model options
 const commonModels = [
@@ -52,6 +53,7 @@ const examplePrompts = [
 const StoryGenerationPage = () => {
   const [prompt, setPrompt] = useState('');
   const [model, setModel] = useState('claude-3-7-sonnet-20250219');
+  const [outputLanguage, setOutputLanguage] = useState(localStorage.getItem('outputLanguage') || 'en');
   const [apiKeys, setApiKeys] = useState({
     openai: localStorage.getItem('openai_api_key') || '',
     claude: localStorage.getItem('claude_api_key') || '',
@@ -64,12 +66,17 @@ const StoryGenerationPage = () => {
   const [statusMessage, setStatusMessage] = useState('');
   const [showStatus, setShowStatus] = useState(false);
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
-  // Save API keys to localStorage when they change
+  // Save API keys and language to localStorage when they change
   useEffect(() => {
     if (apiKeys.openai) localStorage.setItem('openai_api_key', apiKeys.openai);
     if (apiKeys.claude) localStorage.setItem('claude_api_key', apiKeys.claude);
   }, [apiKeys]);
+  
+  useEffect(() => {
+    localStorage.setItem('outputLanguage', outputLanguage);
+  }, [outputLanguage]);
 
   // Check if API is available on component mount
   useEffect(() => {
@@ -127,6 +134,7 @@ const StoryGenerationPage = () => {
       const response = await generateStory({
         prompt,
         model,
+        language: outputLanguage,
         apiKeys: {
           openai: apiKeys.openai,
           claude: apiKeys.claude
@@ -141,6 +149,7 @@ const StoryGenerationPage = () => {
             taskId: response.taskId,
             prompt,
             model,
+            language: outputLanguage,
             type: 'story',
             status: 'generating'
           } 
@@ -171,12 +180,10 @@ const StoryGenerationPage = () => {
     <Container maxWidth="lg">
       <Box sx={{ mt: 4, mb: 6 }}>
         <Typography variant="h3" component="h1" gutterBottom>
-          Creative Story Generation
+          {t('storyPage.title')}
         </Typography>
         <Typography variant="body1" paragraph>
-          Generate creative stories using our Heterogeneous Recursive Planning framework. 
-          Provide a prompt describing the story you want to create, and our system will 
-          recursively plan and generate a cohesive narrative.
+          {t('storyPage.description')}
         </Typography>
       </Box>
 
@@ -212,7 +219,7 @@ const StoryGenerationPage = () => {
               />
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={4}>
               <Autocomplete
                 freeSolo
                 options={commonModels}
@@ -240,11 +247,11 @@ const StoryGenerationPage = () => {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="Model"
+                    label={t('storyPage.form.modelLabel')}
                     variant="outlined"
                     fullWidth
-                    placeholder="Enter or select a model"
-                    helperText="Enter any model name or select from suggestions"
+                    placeholder={t('storyPage.form.modelPlaceholder')}
+                    helperText={t('storyPage.form.modelHelperText')}
                   />
                 )}
                 renderOption={(props, option) => (
@@ -269,7 +276,23 @@ const StoryGenerationPage = () => {
               />
             </Grid>
 
-            <Grid item xs={12} md={6} sx={{ display: 'flex', alignItems: 'center' }}>
+            <Grid item xs={12} md={4}>
+              <FormControl fullWidth variant="outlined">
+                <InputLabel id="output-language-label">{t('storyPage.form.languageLabel')}</InputLabel>
+                <Select
+                  labelId="output-language-label"
+                  id="output-language-select"
+                  value={outputLanguage}
+                  onChange={(e) => setOutputLanguage(e.target.value)}
+                  label={t('storyPage.form.languageLabel')}
+                >
+                  <MenuItem value="en">{t('common.english')}</MenuItem>
+                  <MenuItem value="zh">{t('common.chinese')}</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} md={4} sx={{ display: 'flex', alignItems: 'center' }}>
               <Button
                 type="submit"
                 variant="contained"
@@ -278,7 +301,7 @@ const StoryGenerationPage = () => {
                 fullWidth
                 disabled={loading || !prompt}
               >
-                {loading ? <CircularProgress size={24} color="inherit" /> : 'Generate Story'}
+                {loading ? <CircularProgress size={24} color="inherit" /> : t('storyPage.form.generateButton')}
               </Button>
             </Grid>
             
@@ -305,8 +328,8 @@ const StoryGenerationPage = () => {
                   sx={{ borderRadius: 2 }}
                 >
                   <Typography variant="subtitle1" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center' }}>
-                    API Settings
-                    <Tooltip title="Your API keys are stored locally in your browser and are never sent to our servers">
+                    {t('storyPage.form.apiSettings')}
+                    <Tooltip title={t('storyPage.form.apiKeysNote')}>
                       <IconButton size="small" sx={{ ml: 1 }}>
                         <InfoIcon fontSize="small" color="action" />
                       </IconButton>
@@ -317,7 +340,7 @@ const StoryGenerationPage = () => {
                   <Grid container spacing={3}>
                     <Grid item xs={12} md={6}>
                       <TextField
-                        label="OpenAI API Key"
+                        label={t('storyPage.form.openaiLabel')}
                         fullWidth
                         variant="outlined"
                         value={apiKeys.openai}
@@ -342,7 +365,7 @@ const StoryGenerationPage = () => {
                     </Grid>
                     <Grid item xs={12} md={6}>
                       <TextField
-                        label="Anthropic API Key"
+                        label={t('storyPage.form.claudeLabel')}
                         fullWidth
                         variant="outlined"
                         value={apiKeys.claude}
@@ -367,8 +390,7 @@ const StoryGenerationPage = () => {
                     </Grid>
                     <Grid item xs={12}>
                       <Typography variant="caption" color="text.secondary">
-                        Your API keys are stored securely in your browser's local storage and are never sent to our servers.
-                        They are only used to make direct API calls to the respective services from your browser.
+                        {t('storyPage.form.apiKeysNote')}
                       </Typography>
                     </Grid>
                   </Grid>
@@ -381,10 +403,10 @@ const StoryGenerationPage = () => {
 
       <Box sx={{ mb: 6 }}>
         <Typography variant="h5" gutterBottom>
-          Example Prompts
+          {t('storyPage.examples.title')}
         </Typography>
         <Typography variant="body2" paragraph>
-          Click on any example to use it as your prompt:
+          {t('storyPage.examples.description')}
         </Typography>
         
         <Grid container spacing={3}>
@@ -415,35 +437,32 @@ const StoryGenerationPage = () => {
 
       <Paper elevation={3} sx={{ p: 4, mb: 6 }}>
         <Typography variant="h5" gutterBottom>
-          Tips for Effective Story Prompts
+          {t('storyPage.tips.title')}
         </Typography>
         <Divider sx={{ mb: 2 }} />
         <Grid container spacing={2}>
           <Grid item xs={12} md={4}>
             <Typography variant="subtitle1" fontWeight="bold">
-              Be Specific
+              {t('storyPage.tips.specific.title')}
             </Typography>
             <Typography variant="body2">
-              Provide specific details about the characters, setting, and plot elements 
-              you want in your story.
+              {t('storyPage.tips.specific.description')}
             </Typography>
           </Grid>
           <Grid item xs={12} md={4}>
             <Typography variant="subtitle1" fontWeight="bold">
-              Define Parameters
+              {t('storyPage.tips.parameters.title')}
             </Typography>
             <Typography variant="body2">
-              Specify the perspective (first-person, third-person), tone (humorous, serious),
-              and length of the story you want.
+              {t('storyPage.tips.parameters.description')}
             </Typography>
           </Grid>
           <Grid item xs={12} md={4}>
             <Typography variant="subtitle1" fontWeight="bold">
-              Allow Creativity
+              {t('storyPage.tips.creativity.title')}
             </Typography>
             <Typography variant="body2">
-              While providing guidance, leave room for the system to develop creative
-              elements that enhance your story.
+              {t('storyPage.tips.creativity.description')}
             </Typography>
           </Grid>
         </Grid>

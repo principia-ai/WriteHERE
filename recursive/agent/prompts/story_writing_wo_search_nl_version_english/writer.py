@@ -6,7 +6,7 @@ now = datetime.now()
 import json
 
 @prompt_register.register_module()
-class StoryWrtingNLWriterEN(PromptTemplate):
+class StoryWritingNLWriterEN(PromptTemplate):
     def __init__(self) -> None:
         system_message = """
 You are a professional and innovative writer collaborating with other writers to create a user-requested novel.  

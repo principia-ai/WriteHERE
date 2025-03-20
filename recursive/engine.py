@@ -17,6 +17,12 @@ from recursive.memory import caches
 from recursive.cache import Cache
 from recursive.utils.get_index import get_report_with_ref
 
+# Import the fix script to ensure all prompts are registered
+try:
+    from recursive.agent.prompts import fix_prompt_classes
+    logger.info("Successfully imported fix_prompt_classes")
+except Exception as e:
+    logger.warning(f"Could not import fix_prompt_classes: {e}")
     
     
 class GraphRunEngine:
@@ -187,10 +193,27 @@ def story_writing(input_filename,
                   end,
                   done_flag_file,
                   global_use_model,
+                  language="en",
                   nodes_json_file=None):
     
+    # Set language-specific prompt versions
+    if language == "zh":
+        writer_prompt = "StoryWritingNLWriterZH"  # Fixed typo Wrt -> Writ
+        write_atom_prompt = "StoryWritingNLWriteAtomZH"
+        write_atom_update_prompt = "StoryWritingNLWriteAtomWithUpdateZH"
+        planning_prompt = "StoryWritingNLPlanningZH"
+        reasoner_prompt = "StoryWritingNLReasonerZH"  # Fixed typo Wrt -> Writ
+        reasoner_final_prompt = "StoryWritingReasonerFinalAggregateZH"
+    else:  # Default to English
+        writer_prompt = "StoryWritingNLWriterEN"  # Fixed typo Wrt -> Writ
+        write_atom_prompt = "StoryWritingNLWriteAtomEN"
+        write_atom_update_prompt = "StoryWritingNLWriteAtomWithUpdateEN"
+        planning_prompt = "StoryWritingNLPlanningEN"
+        reasoner_prompt = "StoryWritingNLReasonerEN"  # Fixed typo Wrt -> Writ
+        reasoner_final_prompt = "StoryWritingReasonerFinalAggregate"
+    
     config = {
-        "language": "en", 
+        "language": language, 
         "action_mapping": {
             "plan": ["UpdateAtomPlanningAgent", {}],
             "update": ["DummyRandomUpdateAgent", {}],
@@ -212,7 +235,7 @@ def story_writing(input_filename,
         },
         "COMPOSITION": {
             "execute": {
-                "prompt_version": "StoryWrtingNLWriterEN",
+                "prompt_version": writer_prompt,
                 "llm_args": {
                     "model": global_use_model,
                     "temperature": 0.3
@@ -223,8 +246,8 @@ def story_writing(input_filename,
             },
             "atom": {
                 "update_diff": True,
-                "without_update_prompt_version": "StoryWritingNLWriteAtomEN",
-                "with_update_prompt_version": "StoryWritingNLWriteAtomWithUpdateEN",
+                "without_update_prompt_version": write_atom_prompt,
+                "with_update_prompt_version": write_atom_update_prompt,
                 "llm_args": {
                     "model": global_use_model,
                     "temperature": 0.1
@@ -237,7 +260,7 @@ def story_writing(input_filename,
                 "atom_result_flag": "atomic"
             },            
             "planning": {
-                "prompt_version": "StoryWritingNLPlanningEN",
+                "prompt_version": planning_prompt,
                 "llm_args": {
                     "model": global_use_model,
                     "temperature": 0.1
@@ -255,7 +278,7 @@ def story_writing(input_filename,
         },
         "REASONING": {
             "execute": { 
-                "prompt_version": "StoryWrtingNLReasonerEN",
+                "prompt_version": reasoner_prompt,
                 "llm_args": {
                     "model": global_use_model,
                     "temperature": 0.3
@@ -270,7 +293,7 @@ def story_writing(input_filename,
             "planning": {},
             "update": {},
             "final_aggregate": {
-                "prompt_version": "StoryWritingReasonerFinalAggregate",
+                "prompt_version": reasoner_final_prompt,
                 "mode": "llm",
                 "parse_arg_dict": {
                     "result": ["result"],
@@ -357,9 +380,30 @@ def report_writing(input_filename,
                    done_flag_file,
                    global_use_model,
                    engine_backend,
+                   language="en",
                    nodes_json_file=None):
+    # Choose the appropriate prompt versions based on language
+    if language == "zh":
+        search_agent_prompt = "SearchAgentZHPrompt"  # This might need to be created
+        merge_search_result_prompt = "MergeSearchResultVFinalZH"  # This might need to be created
+        report_search_update_prompt = "ReportSearchOnlyUpdateZH"  # This might need to be created
+        report_writer_prompt = "ReportWriterZH"  # This might need to be created
+        report_atom_prompt = "ReportAtomZH"  # This might need to be created
+        report_atom_update_prompt = "ReportAtomWithUpdateZH"  # This might need to be created
+        report_planning_prompt = "ReportPlanningZH"  # This might need to be created
+        report_reasoner_prompt = "ReportReasonerZH"  # This might need to be created
+    else:  # Default to English
+        search_agent_prompt = "SearchAgentENPrompt"
+        merge_search_result_prompt = "MergeSearchResultVFinal"
+        report_search_update_prompt = "ReportSearchOnlyUpdate"
+        report_writer_prompt = "ReportWriter"
+        report_atom_prompt = "ReportAtom"
+        report_atom_update_prompt = "ReportAtomWithUpdate"
+        report_planning_prompt = "ReportPlanning"
+        report_reasoner_prompt = "ReportReasoner"
+    
     config = {
-        "language": "en", 
+        "language": language, 
         # Agent is Defined in recursive.agent.agents.regular
         # update, prior_reflect, planning_post_reflect and execute_post_reflect is skipped, by using Dummy Agent
         # prompt is Defined in recursive.agent.prompts
@@ -385,7 +429,7 @@ def report_writing(input_filename,
         "offer_global_writing_plan": True,
         "COMPOSITION": {
             "execute": {
-                "prompt_version": "ReportWriter",
+                "prompt_version": report_writer_prompt,
                 "llm_args": {
                     "model": global_use_model,
                     "temperature": 0.3
@@ -396,8 +440,8 @@ def report_writing(input_filename,
             },
             "atom": {
                 "update_diff": True,  # Combine Atom and Update, see agent.agents.regular.get_llm_output
-                "without_update_prompt_version": "ReportAtom",
-                "with_update_prompt_version": "ReportAtomWithUpdate",
+                "without_update_prompt_version": report_atom_prompt,
+                "with_update_prompt_version": report_atom_update_prompt,
                 "llm_args": {
                     "model": global_use_model,
                     "temperature": 0.1
@@ -411,7 +455,7 @@ def report_writing(input_filename,
                 "force_atom_layer": 3 # >= 3, force to atom and skip atom judgement
             },            
             "planning": {
-                "prompt_version": "ReportPlanning",
+                "prompt_version": report_planning_prompt,
                 "llm_args": {
                     "model": global_use_model,
                     "temperature": 0.1
@@ -427,7 +471,7 @@ def report_writing(input_filename,
         "RETRIEVAL": {
             "execute": {
                 "react_agent": True, # use Search Agent
-                "prompt_version": "SearchAgentENPrompt", # see recursive.agent.prompts.search_agent.main
+                "prompt_version": search_agent_prompt, # see recursive.agent.prompts.search_agent.main
                 "searcher_type": "SerpApiSearch", # see recursive.executor.actions.bing_browser
                 "llm_args": {
                     "model": global_use_model, # set the llm
@@ -459,7 +503,7 @@ def report_writing(input_filename,
                 "summarizer_model": "gpt-4o-mini",
             },
             "search_merge": {
-                "prompt_version": "MergeSearchResultVFinal", # search merge prompt
+                "prompt_version": merge_search_result_prompt, # search merge prompt
                 "llm_args": {
                     "model": global_use_model,
                 },
@@ -468,7 +512,7 @@ def report_writing(input_filename,
                 }
             },
             "atom": {
-                "prompt_version": "ReportSearchOnlyUpdate",
+                "prompt_version": report_search_update_prompt,
                 "llm_args": {
                     "model": global_use_model,
                 },
@@ -485,7 +529,7 @@ def report_writing(input_filename,
         },
         "REASONING": {
             "execute": {
-                "prompt_version": "ReportReasoner",
+                "prompt_version": report_reasoner_prompt,
                 "llm_args": {
                     "model": global_use_model,
                     "temperature": 0.3
@@ -582,6 +626,7 @@ def define_args():
     parser.add_argument("--mode", type=str, choices=["story", "report"], required=True)
     parser.add_argument("--output-filename", type=str, required=True)
     parser.add_argument("--model", type=str, required=True)
+    parser.add_argument("--language", type=str, choices=["en", "zh"], default="en", help="Output language (en=English, zh=Chinese)")
     parser.add_argument("--length", type=int)
     parser.add_argument("--engine-backend", type=str)
     parser.add_argument("--nodes-json-file", type=str, help="Path to save nodes.json for real-time visualization")
@@ -600,8 +645,10 @@ if __name__ == "__main__":
     if args.mode == "story":
         story_writing(args.filename, args.output_filename,
                       args.start, args.end, args.done_flag_file, args.model,
+                      language=args.language,
                       nodes_json_file=args.nodes_json_file)
     else:
         report_writing(args.filename, args.output_filename,
                        args.start, args.end, args.done_flag_file, args.model, args.engine_backend,
+                       language=args.language,
                        nodes_json_file=args.nodes_json_file)

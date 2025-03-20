@@ -35,6 +35,7 @@ export const pingAPI = async () => {
  * @param {Object} params - Generation parameters
  * @param {string} params.prompt - The story prompt
  * @param {string} params.model - The model to use (e.g., 'gpt-4o', 'claude-3-5-sonnet-20241022')
+ * @param {string} params.language - The output language (e.g., 'en', 'zh')
  * @param {Object} params.apiKeys - API keys for different services
  * @param {string} params.apiKeys.openai - OpenAI API key
  * @param {string} params.apiKeys.claude - Claude API key
@@ -69,6 +70,7 @@ export const generateStory = async (params) => {
  * @param {Object} params - Generation parameters
  * @param {string} params.prompt - The report prompt
  * @param {string} params.model - The model to use
+ * @param {string} params.language - The output language (e.g., 'en', 'zh')
  * @param {boolean} params.enableSearch - Whether to enable search
  * @param {string} params.searchEngine - Search engine to use ('google' or 'bing')
  * @param {Object} params.apiKeys - API keys for different services

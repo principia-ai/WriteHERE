@@ -52,6 +52,11 @@ def get_llm_output(node, agent, memory, agent_type, overwrite_cache=False, *args
         
     to_run_check_str = kwargs.get("to_run_check_str", None)
     
+    # Debug information
+    from loguru import logger
+    logger.info(f"Prompt version being requested: {prompt_version}")
+    logger.info(f"Available prompt versions: {list(prompt_register.module_dict.keys())}")
+    
     system_message = prompt_register.module_dict[prompt_version]().construct_system_message(
         to_run_check_str = to_run_check_str
     )

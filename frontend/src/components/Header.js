@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   AppBar, 
   Toolbar, 
@@ -13,28 +13,50 @@ import {
   useMediaQuery, 
   useTheme,
   Container,
-  Divider 
+  Divider,
+  Menu,
+  MenuItem,
+  Tooltip
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import CreateIcon from '@mui/icons-material/Create';
 import EditNoteIcon from '@mui/icons-material/EditNote';
+import LanguageIcon from '@mui/icons-material/Language';
+import { useTranslation } from 'react-i18next';
+import i18n from '../utils/i18n';
 
 const Header = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [anchorElLang, setAnchorElLang] = useState(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { t } = useTranslation();
 
   const toggleDrawer = () => {
     setDrawerOpen(!drawerOpen);
   };
 
+  const handleLanguageMenuOpen = (event) => {
+    setAnchorElLang(event.currentTarget);
+  };
+
+  const handleLanguageMenuClose = () => {
+    setAnchorElLang(null);
+  };
+
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
+    localStorage.setItem('language', lng);
+    handleLanguageMenuClose();
+  };
+
   const menuItems = [
-    { text: 'Home', path: '/' },
-    { text: 'Story Generation', path: '/story-generation' },
-    { text: 'Report Generation', path: '/report-generation' },
-    { text: 'About', path: '/about' }
+    { text: t('header.home'), path: '/' },
+    { text: t('header.storyGeneration'), path: '/story-generation' },
+    { text: t('header.reportGeneration'), path: '/report-generation' },
+    { text: t('header.about'), path: '/about' }
   ];
 
   const drawer = (
@@ -185,19 +207,30 @@ const Header = () => {
           </Box>
           
           {isMobile ? (
-            <IconButton 
-              edge="end" 
-              aria-label="menu" 
-              onClick={toggleDrawer}
-              sx={{ 
-                color: 'text.primary',
-                '&:hover': {
-                  backgroundColor: 'grey.50',
-                },
-              }}
-            >
-              <MenuIcon />
-            </IconButton>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Tooltip title={t('common.selectLanguage')}>
+                <IconButton
+                  color="inherit"
+                  onClick={handleLanguageMenuOpen}
+                  sx={{ mr: 1 }}
+                >
+                  <LanguageIcon />
+                </IconButton>
+              </Tooltip>
+              <IconButton 
+                edge="end" 
+                aria-label="menu" 
+                onClick={toggleDrawer}
+                sx={{ 
+                  color: 'text.primary',
+                  '&:hover': {
+                    backgroundColor: 'grey.50',
+                  },
+                }}
+              >
+                <MenuIcon />
+              </IconButton>
+            </Box>
           ) : (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               {menuItems.map((item) => (
@@ -221,6 +254,15 @@ const Header = () => {
                   {item.text}
                 </Button>
               ))}
+              <Tooltip title={t('common.selectLanguage')}>
+                <IconButton
+                  color="inherit"
+                  onClick={handleLanguageMenuOpen}
+                  sx={{ ml: 1 }}
+                >
+                  <LanguageIcon />
+                </IconButton>
+              </Tooltip>
             </Box>
           )}
           
@@ -237,6 +279,21 @@ const Header = () => {
           >
             {drawer}
           </Drawer>
+
+          {/* Language Menu */}
+          <Menu
+            anchorEl={anchorElLang}
+            open={Boolean(anchorElLang)}
+            onClose={handleLanguageMenuClose}
+            sx={{ mt: 1 }}
+          >
+            <MenuItem onClick={() => changeLanguage('en')}>
+              <Typography variant="body2">{t('common.english')}</Typography>
+            </MenuItem>
+            <MenuItem onClick={() => changeLanguage('zh')}>
+              <Typography variant="body2">{t('common.chinese')}</Typography>
+            </MenuItem>
+          </Menu>
         </Toolbar>
       </Container>
     </AppBar>

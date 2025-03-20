@@ -35,6 +35,7 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import InfoIcon from '@mui/icons-material/Info';
 import { generateReport, pingAPI } from '../utils/api';
 import HistoryPanel from '../components/HistoryPanel';
+import { useTranslation } from 'react-i18next';
 
 // Recommended model options
 const commonModels = [
@@ -53,6 +54,7 @@ const examplePrompts = [
 const ReportGenerationPage = () => {
   const [prompt, setPrompt] = useState('');
   const [model, setModel] = useState('claude-3-5-sonnet-20241022');
+  const [outputLanguage, setOutputLanguage] = useState(localStorage.getItem('outputLanguage') || 'en');
   const [searchEngine, setSearchEngine] = useState('bing');
   const [enableSearch, setEnableSearch] = useState(true);
   const [apiKeys, setApiKeys] = useState({
@@ -69,6 +71,7 @@ const ReportGenerationPage = () => {
   const [statusMessage, setStatusMessage] = useState('');
   const [showStatus, setShowStatus] = useState(false);
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
   // Save API keys to localStorage when they change
   useEffect(() => {
@@ -76,6 +79,10 @@ const ReportGenerationPage = () => {
     if (apiKeys.claude) localStorage.setItem('claude_api_key', apiKeys.claude);
     if (apiKeys.serpapi) localStorage.setItem('serpapi_api_key', apiKeys.serpapi);
   }, [apiKeys]);
+  
+  useEffect(() => {
+    localStorage.setItem('outputLanguage', outputLanguage);
+  }, [outputLanguage]);
   
   const handleApiKeyChange = (provider, value) => {
     setApiKeys(prev => ({
@@ -146,6 +153,7 @@ const ReportGenerationPage = () => {
       const response = await generateReport({
         prompt,
         model,
+        language: outputLanguage,
         enableSearch,
         searchEngine,
         apiKeys: {
@@ -163,6 +171,7 @@ const ReportGenerationPage = () => {
             taskId: response.taskId,
             prompt,
             model,
+            language: outputLanguage,
             searchEngine: enableSearch ? searchEngine : 'none',
             type: 'report',
             status: 'generating'
@@ -187,12 +196,10 @@ const ReportGenerationPage = () => {
     <Container maxWidth="lg">
       <Box sx={{ mt: 4, mb: 6 }}>
         <Typography variant="h3" component="h1" gutterBottom>
-          Technical Report Generation
+          {t('reportPage.title')}
         </Typography>
         <Typography variant="body1" paragraph>
-          Generate comprehensive technical reports using our Heterogeneous Recursive Planning framework.
-          The system integrates information retrieval, logical reasoning, and content composition to 
-          create well-structured and informative reports.
+          {t('reportPage.description')}
         </Typography>
       </Box>
 
@@ -216,19 +223,19 @@ const ReportGenerationPage = () => {
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <TextField
-                label="Report Topic"
+                label={t('reportPage.form.promptLabel')}
                 multiline
                 rows={6}
                 fullWidth
                 required
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Describe the technical report you want to generate..."
+                placeholder={t('reportPage.form.promptPlaceholder')}
                 variant="outlined"
               />
             </Grid>
 
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={3}>
               <Autocomplete
                 freeSolo
                 options={commonModels}
@@ -256,11 +263,11 @@ const ReportGenerationPage = () => {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="Model"
+                    label={t('reportPage.form.modelLabel')}
                     variant="outlined"
                     fullWidth
-                    placeholder="Enter or select a model"
-                    helperText="Enter any model name or select from suggestions"
+                    placeholder={t('reportPage.form.modelPlaceholder')}
+                    helperText={t('reportPage.form.modelHelperText')}
                   />
                 )}
                 renderOption={(props, option) => (
@@ -285,7 +292,23 @@ const ReportGenerationPage = () => {
               />
             </Grid>
 
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={3}>
+              <FormControl fullWidth variant="outlined">
+                <InputLabel id="output-language-label">{t('reportPage.form.languageLabel')}</InputLabel>
+                <Select
+                  labelId="output-language-label"
+                  id="output-language-select"
+                  value={outputLanguage}
+                  onChange={(e) => setOutputLanguage(e.target.value)}
+                  label={t('reportPage.form.languageLabel')}
+                >
+                  <MenuItem value="en">{t('common.english')}</MenuItem>
+                  <MenuItem value="zh">{t('common.chinese')}</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} md={3}>
               <FormControlLabel
                 control={
                   <Switch 
@@ -293,16 +316,16 @@ const ReportGenerationPage = () => {
                     onChange={(e) => setEnableSearch(e.target.checked)} 
                   />
                 }
-                label="Enable Search"
+                label={t('reportPage.form.searchLabel')}
               />
               
               <FormControl fullWidth sx={{ mt: 1 }} disabled={!enableSearch}>
-                <InputLabel id="search-engine-label">Search Engine</InputLabel>
+                <InputLabel id="search-engine-label">{t('reportPage.form.searchEngineLabel')}</InputLabel>
                 <Select
                   labelId="search-engine-label"
                   id="search-engine-select"
                   value={searchEngine}
-                  label="Search Engine"
+                  label={t('reportPage.form.searchEngineLabel')}
                   onChange={(e) => setSearchEngine(e.target.value)}
                 >
                   {/* <MenuItem value="google">Google</MenuItem> */}
@@ -320,7 +343,7 @@ const ReportGenerationPage = () => {
                 fullWidth
                 disabled={loading || !prompt}
               >
-                {loading ? <CircularProgress size={24} color="inherit" /> : 'Generate Report'}
+                {loading ? <CircularProgress size={24} color="inherit" /> : t('reportPage.form.generateButton')}
               </Button>
             </Grid>
             
@@ -347,8 +370,8 @@ const ReportGenerationPage = () => {
                   sx={{ borderRadius: 2 }}
                 >
                   <Typography variant="subtitle1" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center' }}>
-                    API Settings
-                    <Tooltip title="Your API keys are stored locally in your browser and are never sent to our servers">
+                    {t('reportPage.form.apiSettings')}
+                    <Tooltip title={t('reportPage.form.apiKeysNote')}>
                       <IconButton size="small" sx={{ ml: 1 }}>
                         <InfoIcon fontSize="small" color="action" />
                       </IconButton>
@@ -359,7 +382,7 @@ const ReportGenerationPage = () => {
                   <Grid container spacing={3}>
                     <Grid item xs={12} md={4}>
                       <TextField
-                        label="OpenAI API Key"
+                        label={t('reportPage.form.openaiLabel')}
                         fullWidth
                         variant="outlined"
                         value={apiKeys.openai}
@@ -384,7 +407,7 @@ const ReportGenerationPage = () => {
                     </Grid>
                     <Grid item xs={12} md={4}>
                       <TextField
-                        label="Anthropic API Key"
+                        label={t('reportPage.form.claudeLabel')}
                         fullWidth
                         variant="outlined"
                         value={apiKeys.claude}
@@ -409,7 +432,7 @@ const ReportGenerationPage = () => {
                     </Grid>
                     <Grid item xs={12} md={4}>
                       <TextField
-                        label="SerpAPI Key"
+                        label={t('reportPage.form.serpapiLabel')}
                         fullWidth
                         variant="outlined"
                         value={apiKeys.serpapi}
@@ -434,8 +457,7 @@ const ReportGenerationPage = () => {
                     </Grid>
                     <Grid item xs={12}>
                       <Typography variant="caption" color="text.secondary">
-                        Your API keys are stored securely in your browser's local storage and are never sent to our servers.
-                        They are only used to make direct API calls to the respective services from your browser.
+                        {t('reportPage.form.apiKeysNote')}
                       </Typography>
                     </Grid>
                   </Grid>
@@ -448,10 +470,10 @@ const ReportGenerationPage = () => {
 
       <Box sx={{ mb: 6 }}>
         <Typography variant="h5" gutterBottom>
-          Example Topics
+          {t('reportPage.examples.title')}
         </Typography>
         <Typography variant="body2" paragraph>
-          Click on any example to use it as your prompt:
+          {t('reportPage.examples.description')}
         </Typography>
         
         <Grid container spacing={3}>
@@ -482,35 +504,32 @@ const ReportGenerationPage = () => {
 
       <Paper elevation={3} sx={{ p: 4, mb: 6 }}>
         <Typography variant="h5" gutterBottom>
-          Tips for Effective Report Prompts
+          {t('reportPage.tips.title')}
         </Typography>
         <Divider sx={{ mb: 2 }} />
         <Grid container spacing={2}>
           <Grid item xs={12} md={4}>
             <Typography variant="subtitle1" fontWeight="bold">
-              Define Scope
+              {t('reportPage.tips.scope.title')}
             </Typography>
             <Typography variant="body2">
-              Clearly specify the scope and focus of your report to ensure the content
-              addresses your specific needs.
+              {t('reportPage.tips.scope.description')}
             </Typography>
           </Grid>
           <Grid item xs={12} md={4}>
             <Typography variant="subtitle1" fontWeight="bold">
-              Indicate Structure
+              {t('reportPage.tips.structure.title')}
             </Typography>
             <Typography variant="body2">
-              If you have specific requirements for the structure or sections of the report,
-              mention them in your prompt.
+              {t('reportPage.tips.structure.description')}
             </Typography>
           </Grid>
           <Grid item xs={12} md={4}>
             <Typography variant="subtitle1" fontWeight="bold">
-              Specify Depth
+              {t('reportPage.tips.depth.title')}
             </Typography>
             <Typography variant="body2">
-              Indicate whether you need a general overview or an in-depth analysis with
-              detailed technical information and citations.
+              {t('reportPage.tips.depth.description')}
             </Typography>
           </Grid>
         </Grid>

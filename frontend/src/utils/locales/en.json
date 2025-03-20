@@ -1,0 +1,153 @@
+{
+  "header": {
+    "home": "Home",
+    "storyGeneration": "Story Generation",
+    "reportGeneration": "Report Generation",
+    "about": "About"
+  },
+  "footer": {
+    "copyright": "© 2025 WriteHERE. All rights reserved.",
+    "about": "About",
+    "github": "GitHub"
+  },
+  "homePage": {
+    "title": "Welcome to WriteHERE",
+    "subtitle": "AI-Powered Story & Report Generation",
+    "description": "Our advanced Heterogeneous Recursive Planning system breaks complex creative tasks into manageable pieces, combining reasoning, information retrieval, and writing to deliver high-quality content.",
+    "storyCard": {
+      "title": "Story Generation",
+      "description": "Create engaging stories with rich characters, compelling plots, and vivid descriptions.",
+      "button": "Generate Story"
+    },
+    "reportCard": {
+      "title": "Report Generation",
+      "description": "Create comprehensive reports with factual information, logical organization, and professional tone.",
+      "button": "Generate Report"
+    }
+  },
+  "storyPage": {
+    "title": "Creative Story Generation",
+    "description": "Generate creative stories using our Heterogeneous Recursive Planning framework. Provide a prompt describing the story you want to create, and our system will recursively plan and generate a cohesive narrative.",
+    "form": {
+      "promptLabel": "Story Prompt",
+      "promptPlaceholder": "Describe the story you want to generate...",
+      "modelLabel": "Model",
+      "modelPlaceholder": "Enter or select a model",
+      "modelHelperText": "Enter any model name or select from suggestions",
+      "languageLabel": "Output Language",
+      "generateButton": "Generate Story",
+      "apiSettings": "API Settings",
+      "openaiLabel": "OpenAI API Key",
+      "claudeLabel": "Anthropic API Key",
+      "serpapiLabel": "SerpAPI Key",
+      "apiKeysNote": "Your API keys are stored securely in your browser's local storage and are never sent to our servers. They are only used to make direct API calls to the respective services from your browser."
+    },
+    "examples": {
+      "title": "Example Prompts",
+      "description": "Click on any example to use it as your prompt:"
+    },
+    "tips": {
+      "title": "Tips for Effective Story Prompts",
+      "specific": {
+        "title": "Be Specific",
+        "description": "Provide specific details about the characters, setting, and plot elements you want in your story."
+      },
+      "parameters": {
+        "title": "Define Parameters",
+        "description": "Specify the perspective (first-person, third-person), tone (humorous, serious), and length of the story you want."
+      },
+      "creativity": {
+        "title": "Allow Creativity",
+        "description": "While providing guidance, leave room for the system to develop creative elements that enhance your story."
+      }
+    }
+  },
+  "reportPage": {
+    "title": "Technical Report Generation",
+    "description": "Generate comprehensive technical reports using our Heterogeneous Recursive Planning framework. The system integrates information retrieval, logical reasoning, and content composition to create well-structured and informative reports.",
+    "form": {
+      "promptLabel": "Report Topic",
+      "promptPlaceholder": "Describe the technical report you want to generate...",
+      "modelLabel": "Model",
+      "modelPlaceholder": "Enter or select a model",
+      "modelHelperText": "Enter any model name or select from suggestions",
+      "languageLabel": "Output Language",
+      "searchLabel": "Enable Search",
+      "searchEngineLabel": "Search Engine",
+      "generateButton": "Generate Report",
+      "apiSettings": "API Settings",
+      "openaiLabel": "OpenAI API Key",
+      "claudeLabel": "Anthropic API Key",
+      "serpapiLabel": "SerpAPI Key",
+      "apiKeysNote": "Your API keys are stored securely in your browser's local storage and are never sent to our servers. They are only used to make direct API calls to the respective services from your browser."
+    },
+    "examples": {
+      "title": "Example Topics",
+      "description": "Click on any example to use it as your prompt:"
+    },
+    "tips": {
+      "title": "Tips for Effective Report Prompts",
+      "scope": {
+        "title": "Define Scope",
+        "description": "Clearly specify the scope and focus of your report to ensure the content addresses your specific needs."
+      },
+      "structure": {
+        "title": "Indicate Structure",
+        "description": "If you have specific requirements for the structure or sections of the report, mention them in your prompt."
+      },
+      "depth": {
+        "title": "Specify Depth",
+        "description": "Indicate whether you need a general overview or an in-depth analysis with detailed technical information and citations."
+      }
+    }
+  },
+  "resultsPage": {
+    "title": "Generated Content",
+    "status": {
+      "generating": "Generating content... Please wait.",
+      "completed": "Generation completed.",
+      "error": "An error occurred during generation.",
+      "stopped": "Generation was stopped."
+    },
+    "taskDetails": "Task Details",
+    "taskType": "Task Type",
+    "model": "Model",
+    "searchEngine": "Search Engine",
+    "prompt": "Prompt",
+    "viewTaskGraph": "View Task Graph",
+    "copyToClipboard": "Copy to Clipboard",
+    "copied": "Copied!",
+    "stopGeneration": "Stop Generation",
+    "deleteResult": "Delete Result",
+    "backToGeneration": "Back to Generation",
+    "confirmDelete": "Are you sure you want to delete this result? This action cannot be undone."
+  },
+  "aboutPage": {
+    "title": "About WriteHERE",
+    "description": "WriteHERE is an advanced AI-powered content generation platform that utilizes Heterogeneous Recursive Planning to create high-quality stories and reports.",
+    "teamTitle": "Our Team",
+    "howItWorksTitle": "How It Works",
+    "heterogeneousTitle": "Heterogeneous Planning",
+    "heterogeneousDescription": "Our system integrates multiple AI capabilities - writing, reasoning, and searching - to handle different aspects of the content creation process.",
+    "recursiveTitle": "Recursive Planning",
+    "recursiveDescription": "Complex tasks are broken down into subtasks that can be further decomposed if needed, creating a hierarchical planning structure.",
+    "modelsTitle": "Supported Models",
+    "apiTitle": "API Integration",
+    "apiDescription": "WriteHERE connects to various AI models through their APIs. Your API keys are stored locally in your browser for security."
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "save": "Save",
+    "language": "Language",
+    "english": "English",
+    "chinese": "中文",
+    "languageChanged": "Language changed to {{language}}",
+    "selectLanguage": "Select Language"
+  }
+}
