@@ -6,4 +6,4 @@ mkdir -p ${output_folder}
 task_output_file=${output_folder}/result.jsonl
 done_file=${output_folder}/done.txt
 
-python engine.py --filename $task_input_file --output-filename $task_output_file --done-flag-file $done_file --model ${MODEL} --mode story
+python engine.py --filename $task_input_file --output-filename $task_output_file --done-flag-file $done_file --model ${MODEL} --mode story --language 'en'
