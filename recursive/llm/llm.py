@@ -13,7 +13,15 @@ from loguru import logger
 from recursive.memory import caches
 from dotenv import load_dotenv
 
+# Load environment variables from api_key.env if it exists
 load_dotenv(dotenv_path='api_key.env')
+
+# Also check for temporary environment files passed from the frontend
+import os
+current_dir = os.path.dirname(os.path.abspath(__file__))
+task_env_file = os.environ.get('TASK_ENV_FILE')
+if task_env_file and os.path.exists(task_env_file):
+    load_dotenv(dotenv_path=task_env_file, override=True)
 
 class OpenAIApiException(Exception):
     def __init__(self, msg, error_code):

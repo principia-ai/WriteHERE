@@ -131,6 +131,7 @@ def run_story_generation(task_id, prompt, model, api_keys):
         f.write(f"""#!/bin/bash
         cd {os.path.abspath(os.path.join(os.path.dirname(__file__), '../recursive'))}
         source {env_file}
+        export TASK_ENV_FILE={env_file}
         python engine.py --filename {input_file} --output-filename {output_file} --done-flag-file {done_file} --model {model} --mode story --nodes-json-file {nodes_file}
         """)
     
@@ -223,6 +224,7 @@ def run_report_generation(task_id, prompt, model, enable_search, search_engine, 
         f.write(f"""#!/bin/bash
         cd {os.path.abspath(os.path.join(os.path.dirname(__file__), '../recursive'))}
         source {env_file}
+        export TASK_ENV_FILE={env_file}
         python engine.py --filename {input_file} --output-filename {output_file} --done-flag-file {done_file} --model {model} --engine-backend {engine_backend} --mode report --nodes-json-file {nodes_file}
         """)
     
