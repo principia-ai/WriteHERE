@@ -6,7 +6,7 @@ from datetime import datetime
 now = datetime.now()
 
 @prompt_register.register_module()
-class StoryWrtingNLReasonerEN(PromptTemplate):
+class StoryWritingNLReasonerEN(PromptTemplate):
     def __init__(self) -> None:
         system_message = ""
 
