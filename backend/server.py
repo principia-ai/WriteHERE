@@ -29,8 +29,6 @@ socketio = SocketIO(app,
                     async_mode='threading',
                     logger=False, # disable logger
                     engineio_logger=False)
-                    logger=False, # disable logger
-                    engineio_logger=False)
 
 # Storage for task status and results
 task_storage = {}
@@ -409,7 +407,6 @@ def api_get_result(task_id):
         else:
             return jsonify({"error": "Task not found"}), 404
     
-    result_md_dir = os.path.join(RESULTS_DIR, 'records', task_id, 'report.md')
     result_md_dir = os.path.join(RESULTS_DIR, 'records', task_id, 'report.md')
     task = task_storage[task_id]
     
