@@ -633,7 +633,7 @@ def api_get_task_graph(task_id):
                 {
                     "id": "0",
                     "goal": "Task graph data not available",
-                    "task_type": "think",""
+                    "task_type": "think",
                     "status": "FINISH",
                     "sub_tasks": []
                 }
