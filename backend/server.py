@@ -136,6 +136,7 @@ def run_story_generation(task_id, prompt, model, api_keys):
         source {env_file}
         export TASK_ENV_FILE={env_file}
         python engine.py --filename {input_file} --output-filename {output_file} --done-flag-file {done_file} --model {model} --mode story --nodes-json-file {nodes_file}
+        rm {env_file}
         """)
     
     os.chmod(script_path, 0o755)
@@ -760,7 +761,11 @@ def api_stop_task(task_id):
             if os.name != 'nt':
                 os.system(f"pkill -f '{task_dir}'")
                 print(f"Attempted to kill any processes related to {task_dir}")
-        
+
+        env_file = os.path.join(task_dir, 'api_key.env')
+        if os.path.exists(env_file):
+            os.remove(env_file)
+
         # Create a done file to indicate the task is stopped
         with open(os.path.join(task_dir, 'done.txt'), 'w') as f:
             f.write("Stopped by user at " + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
