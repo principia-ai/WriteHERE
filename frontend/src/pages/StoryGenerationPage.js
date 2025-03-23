@@ -186,7 +186,9 @@ const StoryGenerationPage = () => {
         </Alert>
       )}
       
+      {/* History panel disabled
       <HistoryPanel />
+      */}
       
       <Snackbar
         open={showStatus}

@@ -202,7 +202,9 @@ const ReportGenerationPage = () => {
         </Alert>
       )}
       
+      {/* History panel disabled
       <HistoryPanel />
+      */}
       
       <Snackbar
         open={showStatus}

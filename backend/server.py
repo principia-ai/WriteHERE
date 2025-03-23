@@ -15,6 +15,9 @@ import argparse
 from pathlib import Path
 from datetime import datetime
 
+# Flag to enable/disable history functionality
+ENABLE_HISTORY = False
+
 # Parse command-line arguments
 parser = argparse.ArgumentParser(description='Backend server for WriteHERE application')
 parser.add_argument('--port', type=int, default=5001, help='Port to run the server on')
@@ -832,6 +835,12 @@ def api_delete_task(task_id):
 @app.route('/api/history', methods=['GET'])
 def api_get_history():
     """Get a list of previously generated tasks with their basic info"""
+    # Return empty history if ENABLE_HISTORY is False
+    if not ENABLE_HISTORY:
+        return jsonify({
+            "history": []
+        })
+    
     # Make sure task_storage is up to date
     reload_task_storage()
     
