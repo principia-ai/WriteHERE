@@ -46,7 +46,7 @@ const commonModels = [
 const examplePrompts = [
   "Write a story about a day where the sun doesn't rise. Tell the story from the third person perspective. Include a story about a girl who is playing outside when the sun vanishes.",
   "Write a science fiction story about the first human colony on Mars facing an unexpected discovery beneath the planet's surface.",
-  "Write a mystery story set in a small coastal town where strange phenomena occur every full moon. The protagonist is a skeptical journalist investigating the events."
+  "Write a mystery story set in a small coastal town where strange phenomena occur every full moon. The protagonist is a skeptical journalist investigating the events. 2000 words."
 ];
 
 const StoryGenerationPage = () => {
@@ -171,7 +171,7 @@ const StoryGenerationPage = () => {
     <Container maxWidth="lg">
       <Box sx={{ mt: 4, mb: 6 }}>
         <Typography variant="h3" component="h1" gutterBottom>
-          Creative Story Generation
+          Story Generation
         </Typography>
         <Typography variant="body1" paragraph>
           Generate creative stories using our Heterogeneous Recursive Planning framework. 

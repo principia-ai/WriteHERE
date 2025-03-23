@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import CreateIcon from '@mui/icons-material/Create';
-import DescriptionIcon from '@mui/icons-material/Description';
+import FindInPageIcon from '@mui/icons-material/FindInPage';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import SearchIcon from '@mui/icons-material/Search';
 import PsychologyIcon from '@mui/icons-material/Psychology';
@@ -326,7 +326,7 @@ const HomePage = () => {
                 />
                 <CreateIcon sx={{ fontSize: 60, color: 'white', mb: 2 }} />
                 <Typography variant="h4" component="div" sx={{ color: 'white', fontWeight: 700, mb: 1 }}>
-                  Creative Story Generation
+                  Creative Writing
                 </Typography>
                 <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
                   Craft engaging narratives and fiction
@@ -399,9 +399,9 @@ const HomePage = () => {
                     background: 'radial-gradient(circle at 70% 30%, white, transparent 70%)',
                   }}
                 />
-                <DescriptionIcon sx={{ fontSize: 60, color: 'white', mb: 2 }} />
+                <FindInPageIcon sx={{ fontSize: 60, color: 'white', mb: 2 }} />
                 <Typography variant="h4" component="div" sx={{ color: 'white', fontWeight: 700, mb: 1 }}>
-                  Technical Report Generation
+                  Deep Research
                 </Typography>
                 <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
                   Create comprehensive, fact-based documents
@@ -410,14 +410,14 @@ const HomePage = () => {
               
               <CardContent sx={{ flexGrow: 1, p: 4 }}>
                 <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-                  Create comprehensive technical reports and documentation with accurate information 
-                  retrieval and logical reasoning. Ideal for business, academic, and technical documentation.
+                  Create comprehensive reports and documentation with accurate information 
+                  retrieval and logical reasoning. Ideal for business, news, and technical documentation.
                 </Typography>
                 
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 3 }}>
-                  <Chip size="small" label="Research" />
-                  <Chip size="small" label="Analysis" />
-                  <Chip size="small" label="Documentation" />
+                  <Chip size="small" label="Deep Research" />
+                  <Chip size="small" label="Summarization" />
+                  <Chip size="small" label="Investigation" />
                 </Box>
                 
                 <Button 

@@ -9,6 +9,7 @@ import {
   List, 
   ListItem, 
   ListItemText, 
+  ListItemIcon,
   Box, 
   useMediaQuery, 
   useTheme,
@@ -20,6 +21,15 @@ import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import CreateIcon from '@mui/icons-material/Create';
 import EditNoteIcon from '@mui/icons-material/EditNote';
+import AutoStoriesIcon from '@mui/icons-material/AutoStories';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import HomeIcon from '@mui/icons-material/Home';
+import InfoIcon from '@mui/icons-material/Info';
+import SearchIcon from '@mui/icons-material/Search';
+import FindInPageIcon from '@mui/icons-material/FindInPage';
+import FactCheckIcon from '@mui/icons-material/FactCheck';
+import ManageSearchIcon from '@mui/icons-material/ManageSearch';
+import DocumentScannerIcon from '@mui/icons-material/DocumentScanner';
 
 const Header = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -31,10 +41,10 @@ const Header = () => {
   };
 
   const menuItems = [
-    { text: 'Home', path: '/' },
-    { text: 'Story Generation', path: '/story-generation' },
-    { text: 'Report Generation', path: '/report-generation' },
-    { text: 'About', path: '/about' }
+    { text: 'Home', path: '/', icon: <HomeIcon /> },
+    { text: 'Story Generation', path: '/story-generation', icon: <AutoStoriesIcon /> },
+    { text: 'Report Generation', path: '/report-generation', icon: <FindInPageIcon/> },
+    { text: 'About', path: '/about', icon: <InfoIcon /> }
   ];
 
   const drawer = (
@@ -102,6 +112,9 @@ const Header = () => {
               },
             }}
           >
+            <ListItemIcon sx={{ minWidth: 40, color: 'primary.main' }}>
+              {item.icon}
+            </ListItemIcon>
             <ListItemText 
               primary={item.text} 
               primaryTypographyProps={{ 
@@ -207,6 +220,7 @@ const Header = () => {
                   to={item.path}
                   variant="text"
                   color="inherit"
+                  startIcon={item.icon}
                   sx={{ 
                     fontWeight: 500,
                     px: 2,

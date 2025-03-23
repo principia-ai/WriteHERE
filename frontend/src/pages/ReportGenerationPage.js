@@ -187,10 +187,10 @@ const ReportGenerationPage = () => {
     <Container maxWidth="lg">
       <Box sx={{ mt: 4, mb: 6 }}>
         <Typography variant="h3" component="h1" gutterBottom>
-          Technical Report Generation
+          Report Generation
         </Typography>
         <Typography variant="body1" paragraph>
-          Generate comprehensive technical reports using our Heterogeneous Recursive Planning framework.
+          Generate comprehensive reports using our Heterogeneous Recursive Planning framework.
           The system integrates information retrieval, logical reasoning, and content composition to 
           create well-structured and informative reports.
         </Typography>
