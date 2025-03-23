@@ -285,6 +285,8 @@ class SearchAgent(BaseAgent):
         results = []
         for turn_idx, current_turn_info in enumerate(return_info[:-1]):
             turn_result = current_turn_info["tool_result"]
+            if turn_result is None:
+                continue
             result = {
                 "turn": current_turn_info["turn"],
                 "web_pages": turn_result["web_pages"], # = web_pages (selected)
