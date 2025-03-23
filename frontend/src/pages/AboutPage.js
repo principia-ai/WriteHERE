@@ -163,28 +163,33 @@ const AboutPage = () => {
           Project Team
         </Typography>
         <Divider sx={{ mb: 3 }} />
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={3}>
-            <Typography variant="body1">
-              <strong>Ruibin Xiong</strong>
-            </Typography>
-          </Grid>
-          <Grid item xs={12} md={3}>
-            <Typography variant="body1">
-              <strong>Yimeng Chen</strong>
-            </Typography>
-          </Grid>
-          <Grid item xs={12} md={3}>
-            <Typography variant="body1">
-              <strong>Dmitrii Khizbullin</strong>
-            </Typography>
-          </Grid>
-          <Grid item xs={12} md={3}>
-            <Typography variant="body1">
-              <strong>Jürgen Schmidhuber</strong>
-            </Typography>
-          </Grid>
-        </Grid>
+        <Box sx={{ 
+          display: 'flex', 
+          flexWrap: 'wrap', 
+          gap: 2, 
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <Typography variant="body1" sx={{ fontWeight: 500 }}>
+            Ruibin Xiong
+          </Typography>
+          <Typography variant="body1" sx={{ color: 'text.secondary' }}>•</Typography>
+          <Typography variant="body1" sx={{ fontWeight: 500 }}>
+            Yimeng Chen
+          </Typography>
+          <Typography variant="body1" sx={{ color: 'text.secondary' }}>•</Typography>
+          <Typography variant="body1" sx={{ fontWeight: 500 }}>
+            Dmitrii Khizbullin
+          </Typography>
+          <Typography variant="body1" sx={{ color: 'text.secondary' }}>•</Typography>
+          <Typography variant="body1" sx={{ fontWeight: 500 }}>
+            Mingchen Zhuge
+          </Typography>
+          <Typography variant="body1" sx={{ color: 'text.secondary' }}>•</Typography>
+          <Typography variant="body1" sx={{ fontWeight: 500 }}>
+            Jürgen Schmidhuber
+          </Typography>
+        </Box>
       </Paper>
     </Container>
   );

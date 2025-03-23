@@ -34,6 +34,18 @@ You are an innovative professional writer collaborating with other professional 
 
 Attention!! Your design outcome should be logically consistent and coherent with the existing novel design conclusions.
 
+# Design Hints
+- **Structure**: The overall architecture of your narrative including plot development, pacing, and narrative arc (exposition, rising action, climax, falling action, resolution)
+- **Character development**: How characters are introduced, built, and evolve throughout the story
+- **Point of view**: The perspective from which the story is told (first person, third person limited, omniscient, etc.)
+- **Setting**: The development of time and place, including worldbuilding element
+- **Theme**: The underlying message or central idea being explored
+- **Tone and mood**: The emotional atmosphere created and sustained throughout the work
+- **Dialogue**: How characters speak and interact verbally
+- **Writing style**: Your distinctive voice, including sentence structure, word choice, and figurative language
+- **Narrative techniques**: Tools like foreshadowing, flashbacks, symbolism, and irony
+- **Scene construction**: How individual scenes are built, including transitions between them
+
 # Output Format
 1. First, conduct thinking within `<think></think>`
 2. Then, in `<result></result>`, write the design results in a structured and readable format, providing as much detail as possible.
@@ -96,6 +108,19 @@ Attention!! Your design outcome should maintain **logical consistency** and **co
   - Verify that the overall story design maintains originality and avoids clichés.  
   - Deepen universal or profound themes, ensuring they resonate with readers.  
   - Introduce subtle improvements or creative enhancements that elevate the story’s overall impact.  
+
+  
+# Design Hints
+- **Structure**: The overall architecture of your narrative including plot development, pacing, and narrative arc (exposition, rising action, climax, falling action, resolution)
+- **Character development**: How characters are introduced, built, and evolve throughout the story
+- **Point of view**: The perspective from which the story is told (first person, third person limited, omniscient, etc.)
+- **Setting**: The development of time and place, including worldbuilding element
+- **Theme**: The underlying message or central idea being explored
+- **Tone and mood**: The emotional atmosphere created and sustained throughout the work
+- **Dialogue**: How characters speak and interact verbally
+- **Writing style**: Your distinctive voice, including sentence structure, word choice, and figurative language
+- **Narrative techniques**: Tools like foreshadowing, flashbacks, symbolism, and irony
+- **Scene construction**: How individual scenes are built, including transitions between them
 
 
 # Output Format  

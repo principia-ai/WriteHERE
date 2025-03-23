@@ -625,6 +625,7 @@ const LiveTaskList = ({ taskId, onTaskClick }) => {
                           )}
                           
                           {/* Show current action if available */}
+                          {/* Disable for now
                           {task.latest_action && (
                             <Box 
                               sx={{ 
@@ -674,12 +675,14 @@ const LiveTaskList = ({ taskId, onTaskClick }) => {
                               </Typography>
                             </Box>
                           )}
+                          */}
                         </Box>
                       }
                       sx={{ pr: 1 }}
                     />
                     
                     {/* Expand/Collapse Button if the task has detailed information */}
+                    {/* Disable for now
                     {(task.latest_action || task.actions || task.agent_response || task.content) && (
                       <IconButton 
                         size="small" 
@@ -689,14 +692,16 @@ const LiveTaskList = ({ taskId, onTaskClick }) => {
                         {expandedTasks[task.id] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                       </IconButton>
                     )}
+                    */}
                   </Box>
                   
                   {/* Expanded content */}
+                  {/* Disable for now
                   {(task.latest_action || task.actions || task.agent_response || task.content) && (
                     <Collapse in={expandedTasks[task.id]} timeout="auto" unmountOnExit sx={{ width: '100%', pl: 7 }}>
                       <Card variant="outlined" sx={{ mt: 1, mb: 1 }}>
                         <CardContent sx={{ py: 1, '&:last-child': { pb: 1 } }}>
-                          {/* Task Input */}
+
                           {task.input && (
                             <Box sx={{ mb: 2 }}>
                               <Typography variant="subtitle2" color="text.secondary">Input:</Typography>
@@ -716,7 +721,7 @@ const LiveTaskList = ({ taskId, onTaskClick }) => {
                             </Box>
                           )}
                           
-                          {/* Latest Action */}
+
                           {task.latest_action && (
                             <Box sx={{ mt: 2 }}>
                               <Box sx={{ 
@@ -765,7 +770,7 @@ const LiveTaskList = ({ taskId, onTaskClick }) => {
                             </Box>
                           )}
                           
-                          {/* All Actions */}
+
                           {task.actions && task.actions.length > 0 && (
                             <Box sx={{ mt: 3 }}>
                               <Box sx={{ 
@@ -863,7 +868,7 @@ const LiveTaskList = ({ taskId, onTaskClick }) => {
                             </Box>
                           )}
                           
-                          {/* Agent Response */}
+
                           {(task.agent_response || task.content) && (
                             <Box sx={{ mt: 2 }}>
                               <Typography variant="subtitle2" color="text.secondary">Agent Response:</Typography>
@@ -890,6 +895,7 @@ const LiveTaskList = ({ taskId, onTaskClick }) => {
                       </Card>
                     </Collapse>
                   )}
+                  */}
                 </ListItem>
                 {index < tasks.length - 1 && <Divider variant="inset" component="li" />}
               </React.Fragment>

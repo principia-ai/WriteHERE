@@ -19,6 +19,8 @@ Unlike traditional approaches that rely on predetermined workflows and rigid thi
 2. **Facilitates heterogeneous task decomposition** by integrating different task types
 3. **Adapts dynamically** during the writing process, similar to human writing behavior
 
+Our evaluations on both fiction writing and technical report generation demonstrate that this method consistently outperforms state-of-the-art approaches across all evaluation metrics.
+
 ## 🌐 Open Source Philosophy
 
 WriteHERE is developed with these core principles:

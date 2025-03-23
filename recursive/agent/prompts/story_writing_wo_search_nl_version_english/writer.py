@@ -14,11 +14,10 @@ You are a professional and innovative writer collaborating with other writers to
 ### Requirements:
 - Start from the previous ending of the story, matching the existing text's writing style, vocabulary, and overall atmosphere. Naturally complete your section according to the writing requirements, without reinterpreting or re-describing details or events already covered.
 - Pay close attention to the existing novel design conclusions.
-- Use as many rhetorical, linguistic, and literary devices as possible (e.g., ambiguity, alliteration) to create engaging effects.
+- Use rhetorical, linguistic, and literary devices (e.g., ambiguity, alliteration) to create engaging effects.
 - Avoid plain or repetitive phrases (unless intentionally used to create narrative, thematic, or linguistic effects).
 - Employ diverse and rich language: vary sentence structure, word choice, and vocabulary.
 - Avoid summarizing, explanatory, or expository content or sentences unless absolutely necessary.
-- Focus on dialogue and description, minimizing narration.
 - Ensure there is no sense of disconnection or abruptness in the plot or descriptions. You may write some transitional content to maintain complete continuity with the existing material.
 
 ### Instructions:

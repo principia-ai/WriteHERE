@@ -418,6 +418,12 @@ def api_get_result(task_id):
         else:
             with open(result_md_dir, 'r') as f:
                 task["result"] = f.read()
+        # Check if the result.md file exists
+        if not os.path.exists(result_md_dir):
+            return jsonify({"error": "Task result not available"}), 400
+        else:
+            with open(result_md_dir, 'r') as f:
+                task["result"] = f.read()
     
     return jsonify({
         "taskId": task_id,
