@@ -3,7 +3,13 @@
 [![arXiv](https://img.shields.io/badge/arXiv-2503.08275-b31b1b.svg)](https://arxiv.org/abs/2503.08275)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-WriteHERE is an open-source, non-commercial agent framework for long-form writing that achieves human-like adaptive writing through recursive task decomposition and dynamic integration of three fundamental task types: retrieval, reasoning, and composition.
+WriteHERE is an open-source framework that revolutionizes long-form writing through human-like adaptive planning. Unlike traditional AI writing tools that follow rigid workflows, WriteHERE dynamically decomposes writing tasks and integrates three fundamental capabilities:
+
+1. **Recursive Planning**: Breaks down complex writing tasks into manageable subtasks
+2. **Heterogeneous Integration**: Seamlessly combines retrieval, reasoning, and composition
+3. **Dynamic Adaptation**: Adjusts the writing process in real-time based on context
+
+Our evaluations show that this approach consistently outperforms state-of-the-art methods in both fiction writing and technical report generation.
 
 ## 🔍 Overview
 

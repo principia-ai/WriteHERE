@@ -29,6 +29,8 @@ socketio = SocketIO(app,
                     async_mode='threading',
                     logger=False, # disable logger
                     engineio_logger=False)
+                    logger=False, # disable logger
+                    engineio_logger=False)
 
 # Storage for task status and results
 task_storage = {}
@@ -408,10 +410,17 @@ def api_get_result(task_id):
             return jsonify({"error": "Task not found"}), 404
     
     result_md_dir = os.path.join(RESULTS_DIR, 'records', task_id, 'report.md')
+    result_md_dir = os.path.join(RESULTS_DIR, 'records', task_id, 'report.md')
     task = task_storage[task_id]
     
     # We'll allow getting results even if status is not completed as long as we have the result data
     if "result" not in task:
+        # Check if the result.md file exists
+        if not os.path.exists(result_md_dir):
+            return jsonify({"error": "Task result not available"}), 400
+        else:
+            with open(result_md_dir, 'r') as f:
+                task["result"] = f.read()
         # Check if the result.md file exists
         if not os.path.exists(result_md_dir):
             return jsonify({"error": "Task result not available"}), 400
@@ -426,105 +435,14 @@ def api_get_result(task_id):
         "searchEngine": task.get("search_engine")
     })
 
-def extract_from_log(task_id):
-    """
-    Extract information from the engine.log file for a specific task
-    Returns a dictionary mapping task IDs to their content
-    """
-    task_dir = os.path.join(RESULTS_DIR, task_id)
-    log_paths = [
-        os.path.join(task_dir, 'engine.log'),
-    ]
-    
-    # Also check for subdirectories that might contain logs
-    records_dir = os.path.join(task_dir, 'records')
-    if os.path.isdir(records_dir):
-        for subdir in os.listdir(records_dir):
-            subdir_path = os.path.join(records_dir, subdir)
-            if os.path.isdir(subdir_path):
-                log_file = os.path.join(subdir_path, 'engine.log')
-                if os.path.exists(log_file):
-                    log_paths.append(log_file)
-    
-    reasoning_dict = {}
-    current_node_id = None
-    
-    for log_path in log_paths:
-        if not os.path.exists(log_path):
-            continue
-            
-        try:
-            with open(log_path, 'r', encoding='utf-8', errors='replace') as f:
-                for line in f:
-                    # Check if this is a line selecting a node
-                    if "select node:" in line:
-                        node_match = re.search(r'select node: (\d+(?:\.\d+)*)', line)
-                        if node_match:
-                            current_node_id = node_match.group(1)
-                            # Initialize the dictionary for this node if it doesn't exist
-                            if current_node_id not in reasoning_dict:
-                                reasoning_dict[current_node_id] = {"think": "", "result": ""}
-                    
-                    # Check if this is a valid log with timestamp format
-                    elif "Get REASONING:" in line and current_node_id:
-                        # Read the next lines until we get a complete think tag content
-                        in_think_tag = False
-                        in_result_tag = False
-                        think_content = []
-                        result_content = []
-                        
-                        # Continue reading lines to find <think> tag content
-                        for next_line in f:
-                            # Handle think tag
-                            if "<think>" in next_line:
-                                in_think_tag = True
-                                continue  # Skip the line with <think> tag
 
-                            if in_think_tag:
-                                think_content.append(next_line)
-                                continue
-                                
-                            if "</think>" in next_line and in_think_tag:
-                                # Only keep the content before </think>
-                                in_think_tag = False
-                                continue
-                            
-
-                            # Handle result tag (both <result> and <r> formats)
-                            if "<result>" in next_line:
-                                in_result_tag = True
-                                continue  # Skip the line with result tag
-                            
-                            if in_result_tag:
-                                result_content.append(next_line)
-                                continue
-
-                            if "</result>" in next_line and in_result_tag:
-                                # Only keep the content before </result>
-                                in_result_tag = False
-                                break
-                        
-                        if think_content and current_node_id in reasoning_dict:
-                            reasoning_dict[current_node_id]["think"] = "".join(think_content)
-
-                        if result_content and current_node_id in reasoning_dict:
-                            reasoning_dict[current_node_id]["result"] = "".join(result_content)
-                
-        except Exception as e:
-            print(f"Error reading log file {log_path}: {str(e)}")
-    
-    return reasoning_dict
-
-def transform_node_to_graph(node, seen_nodes=None, root=False, think_result_dict=None):
+def transform_node_to_graph(node, seen_nodes=None, root=False):
     """
     Transform a node from the internal format to the format expected by the frontend
     Based on the display logic in display.py
     """
     if seen_nodes is None:
         seen_nodes = set()
-    
-    if think_result_dict is None:
-        think_result_dict = {}
         
     # Get the base node data
     task_info = node.get("task_info", {})
@@ -556,11 +474,38 @@ def transform_node_to_graph(node, seen_nodes=None, root=False, think_result_dict
         "is_execute_node": is_execute_node,
     }
     
-    # Add reasoning content from log if available for this node
-    if node_id in think_result_dict:
-        transformed["think"] = think_result_dict[node_id]["think"]
-        transformed["result"] = think_result_dict[node_id]["result"]
-
+    # Add action information if available
+    if "result" in node:
+        # The node.result dictionary contains actions as keys
+        # Include both the latest action and all actions
+        actions = []
+        latest_action_name = None
+        latest_action_result = None
+        
+        for action_name, action_data in node.get("result", {}).items():
+            raw_result = action_data.get("result", {})
+            action_result = raw_result.get("result", "") if isinstance(raw_result, dict) else raw_result
+            action_time = action_data.get("time", "")
+            
+            actions.append({
+                "name": action_name,
+                "result": action_result,
+                "time": action_time
+            })
+            
+            # Track the latest action by time
+            if not latest_action_name or action_time > node.get("result", {}).get(latest_action_name, {}).get("time", ""):
+                latest_action_name = action_name
+                latest_action_result = action_result
+                
+        if actions:
+            transformed["actions"] = actions
+        
+        if latest_action_name:
+            transformed["latest_action"] = {
+                "name": latest_action_name,
+                "result": latest_action_result
+            }
     
     # For task graph visualization, we need to collect and flatten all subtasks
     # from the node hierarchy
@@ -607,10 +552,37 @@ def transform_node_to_graph(node, seen_nodes=None, root=False, think_result_dict
                 "is_execute_node": is_execute
             }
             
-            # Add reasoning content from log if available for this sub-task
-            if task_id in think_result_dict:
-                sub_task["think"] = think_result_dict[task_id]["think"]
-                sub_task["result"] = think_result_dict[task_id]["result"]
+            # Add action information if available
+            if "result" in task:
+                # The task.result dictionary contains actions as keys
+                # Include both the latest action and all actions
+                actions = []
+                latest_action_name = None
+                latest_action_result = None
+                
+                for action_name, action_data in task.get("result", {}).items():
+                    raw_result = action_data.get("result", {})
+                    action_result = raw_result.get("result", "") if isinstance(raw_result, dict) else raw_result
+                    
+                    actions.append({
+                        "name": action_name,
+                        "result": action_result,
+                        "time": action_time
+                    })
+                    
+                    # Track the latest action by time
+                    if not latest_action_name or action_time > task.get("result", {}).get(latest_action_name, {}).get("time", ""):
+                        latest_action_name = action_name
+                        latest_action_result = action_result
+                        
+                if actions:
+                    sub_task["actions"] = actions
+                
+                if latest_action_name:
+                    sub_task["latest_action"] = {
+                        "name": latest_action_name,
+                        "result": latest_action_result
+                    }
             
             # Add to parent's subtasks
             parent_transformed["sub_tasks"].append(sub_task)
@@ -670,7 +642,7 @@ def api_get_task_graph(task_id):
                 {
                     "id": "0",
                     "goal": "Task graph data not available",
-                    "task_type": "think",
+                    "task_type": "think",""
                     "status": "FINISH",
                     "sub_tasks": []
                 }
@@ -686,11 +658,8 @@ def api_get_task_graph(task_id):
         with open(nodes_file, 'r') as f:
             nodes_data = json.load(f)
         
-        # Extract task input and output information from logs
-        think_result_dict = extract_from_log(task_id)
-        
         # Transform the data to the format expected by the frontend
-        transformed_graph = transform_node_to_graph(nodes_data, root=True, think_result_dict=think_result_dict)
+        transformed_graph = transform_node_to_graph(nodes_data, root=True)
         
         return jsonify({
             "taskId": task_id,
@@ -988,15 +957,23 @@ def monitor_task_progress(task_id, nodes_dir):
                     try:
                         with open(nodes_file, 'r') as f:
                             nodes_data = json.load(f)
-                            
-                        # Extract reasoning information from logs
-                        think_result_dict = extract_from_log(task_id)
                         
                         # Transform the data for frontend
-                        transformed_graph = transform_node_to_graph(nodes_data, root=True, think_result_dict=think_result_dict)
+                        transformed_graph = transform_node_to_graph(nodes_data, root=True)
                         
                         # Send update via WebSocket
                         print(f"Sending task_update with {len(transformed_graph.get('sub_tasks', []))} sub-tasks")
+                        
+                        # Debug output - check if we have action information
+                        if 'latest_action' in transformed_graph:
+                            print(f"Root node has latest action: {transformed_graph['latest_action']['name']}")
+                        
+                        # Debug the first subtask if available
+                        if transformed_graph.get('sub_tasks') and len(transformed_graph.get('sub_tasks', [])) > 0:
+                            first_task = transformed_graph['sub_tasks'][0]
+                            if 'latest_action' in first_task:
+                                print(f"First subtask has latest action: {first_task['latest_action']['name']}")
+                        
                         socketio.emit('task_update', {
                             'taskId': task_id, 
                             'taskGraph': transformed_graph
@@ -1016,11 +993,8 @@ def monitor_task_progress(task_id, nodes_dir):
                 print(f"Reading final state from nodes.json")
                 with open(nodes_file, 'r') as f:
                     nodes_data = json.load(f)
-                
-                # Extract reasoning information from logs
-                think_result_dict = extract_from_log(task_id)
                     
-                transformed_graph = transform_node_to_graph(nodes_data, root=True, think_result_dict=think_result_dict)
+                transformed_graph = transform_node_to_graph(nodes_data, root=True)
                 print(f"Sending final task_update with status {task_storage.get(task_id, {}).get('status')}")
                 socketio.emit('task_update', {
                     'taskId': task_id, 

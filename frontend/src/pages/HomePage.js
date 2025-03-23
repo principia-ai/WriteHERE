@@ -453,26 +453,25 @@ const HomePage = () => {
           borderColor: 'grey.100'
         }}
       >
-        <Grid container spacing={4} alignItems="center">
-          <Grid item xs={12} md={6}>
-            <Typography 
-              variant="h3" 
-              gutterBottom 
-              sx={{ 
-                fontSize: { xs: '1.5rem', md: '2rem' },
-                fontWeight: 700,
-                mb: 2
-              }}
-            >
-              Visualize the Writing Process
-            </Typography>
-            <Typography variant="body1" color="text.secondary" paragraph>
-              Our framework makes the writing process transparent by providing a detailed task list
-              showing how complex writing tasks are broken down into manageable sub-tasks that integrate
-              retrieval, reasoning, and composition.
-            </Typography>
-            <Divider sx={{ my: 3 }} />
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <Box sx={{ maxWidth: 800, mx: 'auto' }}>
+          <Typography 
+            variant="h3" 
+            gutterBottom 
+            sx={{ 
+              fontSize: { xs: '1.5rem', md: '2rem' },
+              fontWeight: 700,
+              mb: 3,
+              textAlign: 'center'
+            }}
+          >
+            Visualize the Writing Process
+          </Typography>
+          <Typography variant="body1" color="text.secondary" paragraph sx={{ mb: 4, textAlign: 'center' }}>
+            Our framework makes the writing process transparent by showing how complex writing tasks are broken down into manageable sub-tasks that integrate retrieval, reasoning, and composition.
+          </Typography>
+          
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Box sx={{ 
                   width: 40, 
@@ -483,14 +482,18 @@ const HomePage = () => {
                   alignItems: 'center', 
                   justifyContent: 'center',
                   color: 'white',
-                  fontWeight: 'bold'
+                  fontWeight: 'bold',
+                  flexShrink: 0
                 }}>
                   1
                 </Box>
-                <Typography variant="body1" fontWeight={500}>
-                  Initial decomposition of the main writing task
+                <Typography variant="body1">
+                  <strong>Initial decomposition</strong> of writing task
                 </Typography>
               </Box>
+            </Grid>
+            
+            <Grid item xs={12} md={6}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Box sx={{ 
                   width: 40, 
@@ -501,14 +504,18 @@ const HomePage = () => {
                   alignItems: 'center', 
                   justifyContent: 'center',
                   color: 'white',
-                  fontWeight: 'bold'
+                  fontWeight: 'bold',
+                  flexShrink: 0
                 }}>
                   2
                 </Box>
-                <Typography variant="body1" fontWeight={500}>
-                  Recursive planning and subtask generation
+                <Typography variant="body1">
+                  <strong>Recursive planning</strong> of subtasks
                 </Typography>
               </Box>
+            </Grid>
+            
+            <Grid item xs={12} md={6}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Box sx={{ 
                   width: 40, 
@@ -519,14 +526,18 @@ const HomePage = () => {
                   alignItems: 'center', 
                   justifyContent: 'center',
                   color: 'white',
-                  fontWeight: 'bold'
+                  fontWeight: 'bold',
+                  flexShrink: 0
                 }}>
                   3
                 </Box>
-                <Typography variant="body1" fontWeight={500}>
-                  Dynamic integration of retrieval, reasoning, and composition
+                <Typography variant="body1">
+                  <strong>Dynamic integration</strong> of components
                 </Typography>
               </Box>
+            </Grid>
+            
+            <Grid item xs={12} md={6}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Box sx={{ 
                   width: 40, 
@@ -537,29 +548,18 @@ const HomePage = () => {
                   alignItems: 'center', 
                   justifyContent: 'center',
                   color: 'white',
-                  fontWeight: 'bold'
+                  fontWeight: 'bold',
+                  flexShrink: 0
                 }}>
                   4
                 </Box>
-                <Typography variant="body1" fontWeight={500}>
-                  Content generation with coherent, high-quality output
+                <Typography variant="body1">
+                  <strong>Content generation</strong> with quality
                 </Typography>
               </Box>
-            </Box>
+            </Grid>
           </Grid>
-          <Grid item xs={12} md={6}>
-            <Box 
-              component="img"
-              src="https://via.placeholder.com/600x400?text=Task+List+Visualization"
-              alt="Task List Visualization"
-              sx={{ 
-                width: '100%',
-                borderRadius: 3,
-                boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
-              }}
-            />
-          </Grid>
-        </Grid>
+        </Box>
       </Paper>
       
       {/* CTA Section */}

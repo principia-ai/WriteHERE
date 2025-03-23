@@ -620,13 +620,67 @@ const LiveTaskList = ({ taskId, onTaskClick }) => {
                               {task.description.length > 100 ? task.description.substring(0, 100) + '...' : task.description}
                             </Typography>
                           )}
+                          
+                          {/* Show current action if available */}
+                          {/* Disable for now
+                          {task.latest_action && (
+                            <Box 
+                              sx={{ 
+                                mt: 1,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 1,
+                                bgcolor: 'rgba(0, 0, 0, 0.03)',
+                                borderLeft: '2px solid rgba(0, 0, 0, 0.2)',
+                                borderRadius: '3px',
+                                p: 0.7,
+                                pl: 1,
+                                maxWidth: '100%',
+                                overflow: 'hidden'
+                              }}
+                            >
+                              <CodeIcon fontSize="small" sx={{ color: 'rgba(0, 0, 0, 0.5)', opacity: 0.8, fontSize: '1rem' }} />
+                              <Typography
+                                sx={{
+                                  fontSize: '0.75rem',
+                                  fontWeight: 'bold',
+                                  color: 'rgba(0, 0, 0, 0.6)',
+                                  textTransform: 'uppercase',
+                                  letterSpacing: '0.2px',
+                                  whiteSpace: 'nowrap'
+                                }}
+                              >
+                                {task.latest_action.name}:
+                              </Typography>
+                              <Typography 
+                                sx={{ 
+                                  color: 'rgba(0, 0, 0, 0.5)', 
+                                  fontSize: '0.75rem',
+                                  whiteSpace: 'nowrap',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  flexGrow: 1,
+                                  fontStyle: 'italic'
+                                }}
+                              >
+                                {typeof task.latest_action.result === 'string' 
+                                  ? (task.latest_action.result.length > 60 
+                                     ? task.latest_action.result.substring(0, 60) + '...' 
+                                     : task.latest_action.result)
+                                  : JSON.stringify(task.latest_action.result).substring(0, 60) + '...'
+                                }
+                              </Typography>
+                            </Box>
+                          )}
+                          */}
                         </Box>
                       }
                       sx={{ pr: 1 }}
                     />
                     
                     {/* Expand/Collapse Button if the task has detailed information */}
-                    {(task.think || task.result) && (
+                    {/* Disable for now
+                    {(task.latest_action || task.actions || task.agent_response || task.content) && (
                       <IconButton 
                         size="small" 
                         onClick={(e) => toggleTaskExpansion(task.id, e)}
@@ -635,14 +689,16 @@ const LiveTaskList = ({ taskId, onTaskClick }) => {
                         {expandedTasks[task.id] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                       </IconButton>
                     )}
+                    */}
                   </Box>
                   
                   {/* Expanded content */}
-                  {(task.think || task.result) && (
+                  {/* Disable for now
+                  {(task.latest_action || task.actions || task.agent_response || task.content) && (
                     <Collapse in={expandedTasks[task.id]} timeout="auto" unmountOnExit sx={{ width: '100%', pl: 7 }}>
                       <Card variant="outlined" sx={{ mt: 1, mb: 1 }}>
                         <CardContent sx={{ py: 1, '&:last-child': { pb: 1 } }}>
-                          {/* Task Input */}
+
                           {task.input && (
                             <Box sx={{ mb: 2 }}>
                               <Typography variant="subtitle2" color="text.secondary">Input:</Typography>
@@ -662,59 +718,154 @@ const LiveTaskList = ({ taskId, onTaskClick }) => {
                             </Box>
                           )}
                           
-                          {/* Task Thinking Process - check multiple possible field names */}
-                          {(task.think) && (
-                            <Box sx={{ mb: 2 }}>
-                              <Typography variant="subtitle2" color="text.secondary">Thinking:</Typography>
+
+                          {task.latest_action && (
+                            <Box sx={{ mt: 2 }}>
+                              <Box sx={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                mb: 1, 
+                                bgcolor: 'rgba(0, 0, 0, 0.02)', 
+                                p: 1,
+                                borderRadius: '4px',
+                                borderLeft: '3px solid #2196f3'
+                              }}>
+                                <CodeIcon sx={{ mr: 1, color: '#2196f3', fontSize: '1.2rem' }} />
+                                <Typography 
+                                  variant="subtitle2" 
+                                  sx={{ 
+                                    fontWeight: 'bold', 
+                                    color: '#2196f3',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.5px',
+                                    fontSize: '0.8rem'
+                                  }}
+                                >
+                                  Action: {task.latest_action.name}
+                                </Typography>
+                              </Box>
                               <Typography variant="body2" component="pre" 
                                 sx={{ 
                                   bgcolor: 'rgba(0, 0, 0, 0.04)', 
                                   p: 1, 
                                   borderRadius: 1,
-                                  maxHeight: '300px',
+                                  maxHeight: '100px',
                                   overflow: 'auto',
                                   fontSize: '0.8rem',
                                   whiteSpace: 'pre-wrap'
                                 }}
                               >
                                 {(() => {
-                                  // Use the think field from the server
-                                  const thinkingContent = task.think || '';
-                                  return thinkingContent.length > 1000 ? thinkingContent.substring(0, 1000) + '...' : thinkingContent;
-                                })()}
-                              </Typography>
-                            </Box>
-                          )}
-                          
-                          {/* Task Result/Output - check multiple possible field names */}
-                          {(task.result) && (
-                            <Box>
-                              <Typography variant="subtitle2" color="text.secondary">Result:</Typography>
-                              <Typography variant="body2" component="pre" 
-                                sx={{ 
-                                  bgcolor: 'rgba(0, 0, 0, 0.04)', 
-                                  p: 1, 
-                                  borderRadius: 1,
-                                  maxHeight: '150px',
-                                  overflow: 'auto',
-                                  fontSize: '0.8rem',
-                                  whiteSpace: 'pre-wrap'
-                                }}
-                              >
-                                {(() => {
-                                  // Use the result field from the server
-                                  const resultContent = task.result || '';
-                                  if (typeof resultContent === 'string') {
-                                    return resultContent.length > 500 ? resultContent.substring(0, 500) + '...' : resultContent;
+                                  const actionResult = task.latest_action.result || '';
+                                  if (typeof actionResult === 'string') {
+                                    return actionResult.length > 300 ? actionResult.substring(0, 300) + '...' : actionResult;
                                   } else {
-                                    return JSON.stringify(resultContent, null, 2);
+                                    return JSON.stringify(actionResult, null, 2);
                                   }
                                 })()}
                               </Typography>
                             </Box>
                           )}
                           
-                          {/* Agent Response */}
+
+                          {task.actions && task.actions.length > 0 && (
+                            <Box sx={{ mt: 3 }}>
+                              <Box sx={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                mb: 1.5, 
+                                borderBottom: '1px solid rgba(0, 0, 0, 0.06)',
+                                pb: 0.5
+                              }}>
+                                <CodeIcon sx={{ mr: 1, color: 'text.secondary', fontSize: '1rem' }} />
+                                <Typography 
+                                  variant="subtitle2" 
+                                  sx={{ 
+                                    fontWeight: 'bold', 
+                                    color: 'text.secondary',
+                                    fontSize: '0.85rem'
+                                  }}
+                                >
+                                  Action History
+                                </Typography>
+                                <Chip 
+                                  label={`${task.actions.length} actions`} 
+                                  size="small" 
+                                  color="default" 
+                                  variant="outlined" 
+                                  sx={{ ml: 1, height: '18px', '& .MuiChip-label': { fontSize: '0.65rem', py: 0 } }}
+                                />
+                              </Box>
+                              <Box sx={{ 
+                                bgcolor: 'rgba(0, 0, 0, 0.02)', 
+                                borderRadius: 1,
+                                maxHeight: '220px',
+                                overflow: 'auto',
+                                border: '1px solid rgba(0, 0, 0, 0.04)'
+                              }}>
+                                {task.actions.map((action, idx) => (
+                                  <Box key={idx} sx={{ 
+                                    p: 1,
+                                    mb: idx < task.actions.length - 1 ? 0 : 0,
+                                    borderBottom: idx < task.actions.length - 1 ? '1px solid rgba(0, 0, 0, 0.04)' : 'none',
+                                    position: 'relative',
+                                    '&:hover': {
+                                      backgroundColor: 'rgba(0, 0, 0, 0.01)'
+                                    }
+                                  }}>
+                                    <Box sx={{
+                                      display: 'flex',
+                                      justifyContent: 'space-between',
+                                      alignItems: 'center'
+                                    }}>
+                                      <Typography variant="body2" sx={{ 
+                                        fontWeight: 'bold', 
+                                        fontSize: '0.75rem', 
+                                        color: 'primary.main',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.3px'
+                                      }}>
+                                        {action.name}
+                                      </Typography>
+                                      {action.time && (
+                                        <Typography variant="caption" sx={{ 
+                                          fontSize: '0.65rem', 
+                                          color: 'text.secondary',
+                                          fontStyle: 'italic'
+                                        }}>
+                                          {action.time}
+                                        </Typography>
+                                      )}
+                                    </Box>
+                                    {action.result && (
+                                      <Box sx={{
+                                        mt: 0.5,
+                                        p: 0.8,
+                                        borderRadius: '3px',
+                                        bgcolor: 'rgba(0, 0, 0, 0.02)',
+                                        border: '1px solid rgba(0, 0, 0, 0.03)'
+                                      }}>
+                                        <Typography variant="body2" component="pre" 
+                                          sx={{ 
+                                            fontSize: '0.7rem',
+                                            whiteSpace: 'pre-wrap',
+                                            m: 0
+                                          }}
+                                        >
+                                          {typeof action.result === 'string' 
+                                            ? (action.result.length > 100 ? action.result.substring(0, 100) + '...' : action.result)
+                                            : JSON.stringify(action.result, null, 2)
+                                          }
+                                        </Typography>
+                                      </Box>
+                                    )}
+                                  </Box>
+                                ))}
+                              </Box>
+                            </Box>
+                          )}
+                          
+
                           {(task.agent_response || task.content) && (
                             <Box sx={{ mt: 2 }}>
                               <Typography variant="subtitle2" color="text.secondary">Agent Response:</Typography>
@@ -741,6 +892,7 @@ const LiveTaskList = ({ taskId, onTaskClick }) => {
                       </Card>
                     </Collapse>
                   )}
+                  */}
                 </ListItem>
                 {index < tasks.length - 1 && <Divider variant="inset" component="li" />}
               </React.Fragment>
