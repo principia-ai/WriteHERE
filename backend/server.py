@@ -29,8 +29,6 @@ socketio = SocketIO(app,
                     async_mode='threading',
                     logger=False, # disable logger
                     engineio_logger=False)
-                    logger=False, # disable logger
-                    engineio_logger=False)
 
 # Storage for task status and results
 task_storage = {}
