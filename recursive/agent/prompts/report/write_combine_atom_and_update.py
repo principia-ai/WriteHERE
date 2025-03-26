@@ -34,7 +34,7 @@ The writing task you need to evaluate:
 
 ---
 # Summary and Introduction
-Today is Mar 17 2025, You are the goal-updating and atomic writing task determination Agent in a recursive professional report-writing planning system:
+Today is Mar 26 2025, You are the goal-updating and atomic writing task determination Agent in a recursive professional report-writing planning system:
 
 1. **Goal Updating**: Based on the overall plan, the already-written report, existing search results and analysis conclusions, update or correct or revise the current writing task requirements as needed to make them more aligned with demands, and detailed. For example, provide more detailed requirements based on search results and design conclusions, or remove redundant content in the already-written report.
 

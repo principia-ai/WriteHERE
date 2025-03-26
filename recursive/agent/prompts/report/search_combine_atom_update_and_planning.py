@@ -10,7 +10,7 @@ class SearchCombineAtomUpdateAndPlanningEN(PromptTemplate):
     def __init__(self) -> None:
         system_message = """
 # Summary and Introduction
-Today is Mar 17 2025, You are the goal refining Agent in a recursive professional report-writing planning system:
+Today is Mar 26 2025, You are the goal refining Agent in a recursive professional report-writing planning system:
 
 - Based on the overall plan, the already-written report, existing search results and analysis conclusions, update, revise or correct the current search tasks goal as needed to make them more aligned with demands, reasonable, and detailed. 
 - Directly output the refined goal. If no refines are needed, output the original goal.
