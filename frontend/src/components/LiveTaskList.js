@@ -35,7 +35,11 @@ import { getWorkspace } from '../utils/api';
 
 // Get the backend port from environment variable or use default
 const BACKEND_PORT = process.env.REACT_APP_BACKEND_PORT || '5001';
-const API_BASE_URL = `http://localhost:${BACKEND_PORT}/api`;
+const SOCKET_URL =
+  window.location.hostname === "localhost"
+    ? `http://localhost:${BACKEND_PORT}` // For local development
+    : `http://${window.location.hostname}:${BACKEND_PORT}`; // For EC2
+const API_BASE_URL = `${SOCKET_URL}/api`;
 
 // Create a singleton socket instance for the entire application
 let socket;
@@ -45,10 +49,9 @@ const getSocket = () => {
   if (!socket) {
     // Initialize socket connection - make sure this matches your backend URL
     // Using a dynamic approach that works with both development and production
-    const socketUrl = `http://localhost:${BACKEND_PORT}`;
-    console.log('Creating new WebSocket connection to:', socketUrl);
+    console.log('Creating new WebSocket connection to:', SOCKET_URL);
     
-    socket = io(socketUrl, {
+    socket = io(SOCKET_URL, {
       transports: ['polling', 'websocket'], // Try polling first, then WebSocket (more reliable initial connection)
       reconnectionAttempts: 10,
       reconnectionDelay: 500,

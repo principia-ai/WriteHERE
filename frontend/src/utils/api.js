@@ -1,10 +1,13 @@
 import axios from 'axios';
 
-// Base URL for API requests - adjust as needed for production/development
 const BACKEND_PORT = process.env.REACT_APP_BACKEND_PORT || '5001';
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? '/api' 
-  : `http://localhost:${BACKEND_PORT}/api`;
+const API_BASE_URL =
+  window.location.hostname === "localhost"
+    ? `http://localhost:${BACKEND_PORT}/api` // For local development
+    : `http://${window.location.hostname}:${BACKEND_PORT}/api`; // For EC2
+
+console.log("BACKEND_PORT=", BACKEND_PORT)
+console.log("API_BASE_URL=", API_BASE_URL)
 
 // Create an axios instance with CORS headers
 const apiClient = axios.create({

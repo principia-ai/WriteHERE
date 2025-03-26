@@ -265,6 +265,10 @@ class OpenAIApiProxy():
             if not no_cache:
                 llm_cache.save_cache(cache_name, call_args_dict, data)
             return data
+
+        if 'choices' not in data:
+            raise RuntimeError(f"No 'choices' in response: {data}. Possibly, the API key is invalid.")
+
         if not no_cache:
             llm_cache.save_cache(cache_name, call_args_dict, data['choices'])
         return data['choices']
