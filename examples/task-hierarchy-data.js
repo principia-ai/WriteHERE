@@ -239,7 +239,7 @@ const storyTaskData = {
 
 const reportTaskData = {
   id: 'report-example',
-  goal: 'Write a report on the commercial value of long-article writing AI agents, including market overview, applications, ROI considerations, and future potential. About 5000 words.',
+  goal: 'Write a comprehensive commercial report on the value of long-article writing AI agents, including market analysis, applications, ROI considerations, and future potential. Around 5000 words.',
   task_type: 'write',
   status: 'FINISH',
   start_time: '2025-03-15T14:20:00.000Z',
@@ -251,7 +251,7 @@ const reportTaskData = {
   sub_tasks: [
     {
       id: '1',
-      goal: 'Gather comprehensive information about the current market for AI writing agents, including market size, growth rates, key players, investment trends, and market segmentation',
+      goal: 'Gather current market data on long-article writing AI agents, including market size, growth rates, major players, pricing models, and recent developments',
       task_type: 'search',
       status: 'FINISH',
       start_time: '2025-03-15T14:21:00.000Z',
@@ -264,7 +264,7 @@ const reportTaskData = {
     },
     {
       id: '2',
-      goal: 'Collect information on various applications and use cases of long-article writing AI agents across different industries and sectors',
+      goal: 'Collect information on applications of long-article writing AI agents across different industries, including use cases, success stories, and implementation challenges',
       task_type: 'search',
       status: 'FINISH',
       start_time: '2025-03-15T14:24:05.000Z',
@@ -277,7 +277,7 @@ const reportTaskData = {
     },
     {
       id: '3',
-      goal: 'Gather data and case studies on ROI considerations for implementing long-article writing AI agents, including cost structures, efficiency gains, and financial metrics',
+      goal: 'Gather data on ROI metrics, cost structures, and economic benefits of implementing long-article writing AI agents in business contexts',
       task_type: 'search',
       status: 'FINISH',
       start_time: '2025-03-15T14:27:05.000Z',
@@ -290,7 +290,7 @@ const reportTaskData = {
     },
     {
       id: '4',
-      goal: 'Research future trends, technological developments, and potential growth areas for long-article writing AI agents',
+      goal: 'Research future trends, technological advancements, and potential developments in long-article writing AI agents',
       task_type: 'search',
       status: 'FINISH',
       start_time: '2025-03-15T14:30:05.000Z',
@@ -303,279 +303,166 @@ const reportTaskData = {
     },
     {
       id: '5',
-      goal: 'Analyze all gathered information and design a comprehensive report structure with key sections, arguments, and data points to include',
+      goal: 'Analyze the market data and identify key trends, competitive landscape, and market dynamics for long-article writing AI agents',
       task_type: 'think',
+      depends_on: [1],
       status: 'FINISH',
       start_time: '2025-03-15T14:33:05.000Z',
-      end_time: '2025-03-15T14:36:00.000Z',
+      end_time: '2025-03-15T14:35:00.000Z',
       token_usage: {
-        input_tokens: 1180,
-        output_tokens: 1420
+        input_tokens: 780,
+        output_tokens: 920
       },
       sub_tasks: []
     },
     {
       id: '6',
-      goal: 'Write the executive summary (300 words) and introduction section (400 words) of the report, totaling 700 words',
-      task_type: 'write',
+      goal: 'Evaluate applications and use cases across industries, identifying patterns, best practices, and industry-specific considerations',
+      task_type: 'think',
+      depends_on: [2, 5],
       status: 'FINISH',
-      start_time: '2025-03-15T14:36:05.000Z',
-      end_time: '2025-03-15T14:38:00.000Z',
+      start_time: '2025-03-15T14:35:05.000Z',
+      end_time: '2025-03-15T14:37:00.000Z',
       token_usage: {
-        input_tokens: 640,
-        output_tokens: 750
+        input_tokens: 840,
+        output_tokens: 980
       },
       sub_tasks: []
     },
     {
       id: '7',
-      goal: 'Write the market overview section (800-1000 words) of the report on long-article writing AI agents',
-      task_type: 'write',
+      goal: 'Develop ROI frameworks, calculation methodologies, and economic analysis for long-article writing AI implementation',
+      task_type: 'think',
+      depends_on: [3, 5, 6],
       status: 'FINISH',
-      start_time: '2025-03-15T14:38:05.000Z',
-      end_time: '2025-03-15T14:44:00.000Z',
+      start_time: '2025-03-15T14:37:05.000Z',
+      end_time: '2025-03-15T14:39:00.000Z',
       token_usage: {
-        input_tokens: 780,
-        output_tokens: 1080
+        input_tokens: 860,
+        output_tokens: 1020
       },
-      sub_tasks: [
-        {
-          id: '7.1',
-          goal: 'Analyze market data to identify key trends, growth patterns, and competitive landscape in the AI writing agent market',
-          task_type: 'think',
-          status: 'FINISH',
-          start_time: '2025-03-15T14:38:10.000Z',
-          end_time: '2025-03-15T14:39:30.000Z',
-          token_usage: {
-            input_tokens: 580,
-            output_tokens: 840
-          },
-          sub_tasks: []
-        },
-        {
-          id: '7.2',
-          goal: 'Write the Current Market Landscape subsection (300-350 words), covering market size projections, broader AI agents market growth, investment trends, and key players analysis',
-          task_type: 'write',
-          status: 'FINISH',
-          start_time: '2025-03-15T14:39:35.000Z',
-          end_time: '2025-03-15T14:41:00.000Z',
-          token_usage: {
-            input_tokens: 420,
-            output_tokens: 380
-          },
-          sub_tasks: []
-        },
-        {
-          id: '7.3',
-          goal: 'Write the Market Segmentation subsection (300-350 words), covering segmentation by application, industry adoption patterns, geographical distribution, and target customer segments',
-          task_type: 'write',
-          status: 'FINISH',
-          start_time: '2025-03-15T14:41:05.000Z',
-          end_time: '2025-03-15T14:42:30.000Z',
-          token_usage: {
-            input_tokens: 430,
-            output_tokens: 370
-          },
-          sub_tasks: []
-        },
-        {
-          id: '7.4',
-          goal: 'Write the Pricing Structures and Business Models subsection (300-350 words), analyzing freemium models, subscription tier comparisons, enterprise pricing strategies, and emerging monetization approaches',
-          task_type: 'write',
-          status: 'FINISH',
-          start_time: '2025-03-15T14:42:35.000Z',
-          end_time: '2025-03-15T14:44:00.000Z',
-          token_usage: {
-            input_tokens: 440,
-            output_tokens: 385
-          },
-          sub_tasks: []
-        }
-      ]
+      sub_tasks: []
     },
     {
       id: '8',
-      goal: 'Write the applications section (1200 words) of the report, detailing various use cases of long-article writing AI agents across four key industries',
-      task_type: 'write',
+      goal: 'Assess future potential, predict market evolution, and identify emerging opportunities and challenges in the long-article writing AI space',
+      task_type: 'think',
+      depends_on: [4, 5, 6, 7],
       status: 'FINISH',
-      start_time: '2025-03-15T14:44:05.000Z',
-      end_time: '2025-03-15T14:48:00.000Z',
+      start_time: '2025-03-15T14:39:05.000Z',
+      end_time: '2025-03-15T14:41:00.000Z',
       token_usage: {
         input_tokens: 880,
-        output_tokens: 1240
+        output_tokens: 1040
       },
-      sub_tasks: [
-        {
-          id: '8.1',
-          goal: 'Analyze information from dependencies to organize key applications, examples, metrics, and case studies for each industry subsection',
-          task_type: 'think',
-          status: 'FINISH',
-          start_time: '2025-03-15T14:44:10.000Z',
-          end_time: '2025-03-15T14:45:00.000Z',
-          token_usage: {
-            input_tokens: 520,
-            output_tokens: 780
-          },
-          sub_tasks: []
-        },
-        {
-          id: '8.2',
-          goal: 'Write the Publishing and Media Industry Applications subsection (300 words), covering automated journalism with Washington Post\'s Heliograf example, book creation processes, and editing workflows',
-          task_type: 'write',
-          status: 'FINISH',
-          start_time: '2025-03-15T14:45:05.000Z',
-          end_time: '2025-03-15T14:46:00.000Z',
-          token_usage: {
-            input_tokens: 340,
-            output_tokens: 320
-          },
-          sub_tasks: []
-        },
-        {
-          id: '8.3',
-          goal: 'Write the Marketing and Content Creation Applications subsection (300 words), detailing content marketing optimization, SEO enhancement capabilities, and personalization features',
-          task_type: 'write',
-          status: 'FINISH',
-          start_time: '2025-03-15T14:46:05.000Z',
-          end_time: '2025-03-15T14:47:00.000Z',
-          token_usage: {
-            input_tokens: 350,
-            output_tokens: 330
-          },
-          sub_tasks: []
-        },
-        {
-          id: '8.4',
-          goal: 'Write the Education and Healthcare Applications subsection (300 words), highlighting educational content development use cases and healthcare communications applications',
-          task_type: 'write',
-          status: 'FINISH',
-          start_time: '2025-03-15T14:47:05.000Z',
-          end_time: '2025-03-15T14:48:00.000Z',
-          token_usage: {
-            input_tokens: 360,
-            output_tokens: 340
-          },
-          sub_tasks: []
-        },
-        {
-          id: '8.5',
-          goal: 'Write the Enterprise and Business Applications subsection (300 words), focusing on corporate communications, workflow integration strategies, and strategic marketing support',
-          task_type: 'write',
-          status: 'FINISH',
-          start_time: '2025-03-15T14:48:05.000Z',
-          end_time: '2025-03-15T14:49:00.000Z',
-          token_usage: {
-            input_tokens: 370,
-            output_tokens: 330
-          },
-          sub_tasks: []
-        }
-      ]
+      sub_tasks: []
     },
     {
       id: '9',
-      goal: 'Write the ROI considerations section (1100 words) of the report, analyzing financial and operational benefits of implementing long-article writing AI agents',
-      task_type: 'write',
+      goal: 'Design the overall structure, key arguments, and flow of the commercial report',
+      task_type: 'think',
+      depends_on: [5, 6, 7, 8],
       status: 'FINISH',
-      start_time: '2025-03-15T14:49:05.000Z',
-      end_time: '2025-03-15T14:53:00.000Z',
+      start_time: '2025-03-15T14:41:05.000Z',
+      end_time: '2025-03-15T14:42:30.000Z',
       token_usage: {
-        input_tokens: 820,
-        output_tokens: 1160
+        input_tokens: 750,
+        output_tokens: 900
+      },
+      sub_tasks: []
+    },
+    {
+      id: '10',
+      goal: 'Write the comprehensive commercial report on long-article writing AI agents following the structure outlined in Task 9: Executive Summary (500 words), Introduction (750 words), Market Analysis (1000 words), Applications and Use Cases (1000 words), ROI and Economic Analysis (750 words), Implementation Considerations (500 words), Future Outlook (500 words), Conclusion (250 words), and Appendices (750 words). Incorporate key arguments on productivity benefits, quality and strategic value, implementation success factors, and future evolution. Total length: 5000 words.',
+      task_type: 'write',
+      depends_on: [5, 6, 7, 8, 9],
+      status: 'FINISH',
+      start_time: '2025-03-15T14:42:35.000Z',
+      end_time: '2025-03-15T14:55:30.000Z',
+      token_usage: {
+        input_tokens: 3100,
+        output_tokens: 5200
       },
       sub_tasks: [
         {
-          id: '9.1',
-          goal: 'Analyze and synthesize ROI-related information from other sections of the report, organizing data on implementation costs, efficiency metrics, revenue impacts, and potential ROI calculation approaches',
-          task_type: 'think',
+          id: '10.1',
+          goal: 'Write the executive summary and introduction, providing an overview of the report\'s purpose, scope, and key findings',
+          task_type: 'write',
           status: 'FINISH',
-          start_time: '2025-03-15T14:49:10.000Z',
-          end_time: '2025-03-15T14:50:00.000Z',
+          start_time: '2025-03-15T14:42:40.000Z',
+          end_time: '2025-03-15T14:44:30.000Z',
           token_usage: {
-            input_tokens: 540,
-            output_tokens: 760
+            input_tokens: 580,
+            output_tokens: 1250
           },
           sub_tasks: []
         },
         {
-          id: '9.2',
-          goal: 'Write the implementation costs and initial investment subsection (300 words), covering software subscription/licensing models across different tiers',
+          id: '10.2',
+          goal: 'Write the market analysis section (1000 words) detailing the current state, size, growth, and competitive landscape of long-article writing AI agents. Include: (1) market size and growth trajectory ($2.09-3.28B in 2023-2024, projected to reach $4.84-8.45B by 2025-2032); (2) competitive landscape analysis covering specialized AI writing platforms (Jasper, Copy.ai, Rytr, etc.), major technology companies (OpenAI, Google, Microsoft, etc.), and emerging niche players; (3) market segmentation by content format, deployment model, customer segment, and technology; (4) pricing models and monetization strategies; (5) technological trends and innovation; (6) regional market distribution; and (7) adoption patterns and market challenges. Incorporate data from the market analysis in Task 5 and ensure alignment with the executive summary and introduction.',
           task_type: 'write',
           status: 'FINISH',
-          start_time: '2025-03-15T14:50:05.000Z',
-          end_time: '2025-03-15T14:51:00.000Z',
+          start_time: '2025-03-15T14:44:35.000Z',
+          end_time: '2025-03-15T14:46:30.000Z',
           token_usage: {
-            input_tokens: 320,
-            output_tokens: 310
+            input_tokens: 620,
+            output_tokens: 1000
           },
           sub_tasks: []
         },
         {
-          id: '9.3',
-          goal: 'Write the efficiency and productivity gains subsection (300 words), analyzing documented metrics from the applications section',
+          id: '10.3',
+          goal: 'Write the applications and use cases section (1000 words) detailing how long-article writing AI agents are implemented across industries. Include: (1) cross-industry implementation patterns (productivity enhancement, human-AI collaboration, staged implementation approach); (2) industry-specific applications with notable implementations for Content Marketing/Digital Media, Finance/Banking, Healthcare, Retail/E-commerce, Technology/Software, and Automotive sectors; (3) success stories with measurable benefits (e.g., Warner Bros. Discovery\'s 80% time reduction, American Addiction Centers\' onboarding improvements); and (4) implementation best practices and challenges. Ensure alignment with the market analysis section and incorporate data from the applications analysis in Task 6.',
           task_type: 'write',
           status: 'FINISH',
-          start_time: '2025-03-15T14:51:05.000Z',
-          end_time: '2025-03-15T14:52:00.000Z',
+          start_time: '2025-03-15T14:46:35.000Z',
+          end_time: '2025-03-15T14:48:30.000Z',
           token_usage: {
-            input_tokens: 330,
-            output_tokens: 320
+            input_tokens: 630,
+            output_tokens: 1000
           },
           sub_tasks: []
         },
         {
-          id: '9.4',
-          goal: 'Write the revenue impact and quality considerations subsection (250 words), examining how AI-generated content affects SEO performance, customer engagement, and conversion rates',
+          id: '10.4',
+          goal: 'Write the ROI and Economic Analysis section (750 words) examining the financial impact of long-article writing AI implementation. Include: (1) a multi-dimensional ROI assessment framework covering productivity, quality, financial, and strategic dimensions; (2) calculation methodologies for different ROI types including time efficiency, output volume, direct cost comparison, and quality impact formulas; (3) total cost of ownership analysis with typical investment ranges for different implementation scales; (4) cost-benefit analysis by content type (standardized, technical, marketing, compliance); (5) industry-specific economic considerations; and (6) strategic economic value beyond tactical ROI. Incorporate data showing 25-74% time savings, 30% operational cost reduction, and 63% of enterprises experiencing revenue increases of at least 10% after AI adoption. Ensure alignment with the applications section and incorporate frameworks from the ROI analysis in Task 7.',
           task_type: 'write',
           status: 'FINISH',
-          start_time: '2025-03-15T14:52:05.000Z',
+          start_time: '2025-03-15T14:48:35.000Z',
+          end_time: '2025-03-15T14:50:30.000Z',
+          token_usage: {
+            input_tokens: 640,
+            output_tokens: 750
+          },
+          sub_tasks: []
+        },
+        {
+          id: '10.5',
+          goal: 'Write the Implementation Considerations (500 words) and Future Outlook (500 words) sections of the commercial report. For Implementation Considerations, cover: (1) technical integration requirements for enterprise systems; (2) quality control and oversight processes for AI-generated content; (3) organizational change management strategies; (4) legal and ethical considerations including copyright issues and transparency requirements; and (5) risk mitigation approaches. For Future Outlook, address: (1) technological evolution path from assistive tools to autonomous agents; (2) market trajectory and growth forecast through 2030; (3) emerging opportunities in industry-specific solutions, enterprise integration, multi-modal content, and human-AI collaboration tools; (4) challenges including regulatory hurdles, quality differentiation, implementation barriers, and ethical considerations; and (5) strategic implications and recommendations for organizations. Incorporate data from search tasks and analysis conclusions, ensuring alignment with previous sections of the report.',
+          task_type: 'write',
+          status: 'FINISH',
+          start_time: '2025-03-15T14:50:35.000Z',
           end_time: '2025-03-15T14:52:30.000Z',
           token_usage: {
-            input_tokens: 280,
-            output_tokens: 260
+            input_tokens: 650,
+            output_tokens: 1000
           },
           sub_tasks: []
         },
         {
-          id: '9.5',
-          goal: 'Write the ROI calculation framework subsection (250 words), providing a practical methodology for organizations to assess potential returns',
+          id: '10.6',
+          goal: 'Write the conclusion (250 words) and appendices (750 words), summarizing key findings from the market analysis, applications, ROI considerations, and future outlook sections. For the conclusion, synthesize the value proposition of long-article writing AI agents and provide strategic recommendations for implementation. For the appendices, include: (1) a detailed methodology section explaining the research approach, (2) a glossary of key terms related to AI writing technologies, (3) additional case studies that complement the main report, and (4) a comprehensive reference list organized by topic area.',
           task_type: 'write',
           status: 'FINISH',
           start_time: '2025-03-15T14:52:35.000Z',
-          end_time: '2025-03-15T14:53:00.000Z',
+          end_time: '2025-03-15T14:55:30.000Z',
           token_usage: {
-            input_tokens: 290,
-            output_tokens: 270
+            input_tokens: 580,
+            output_tokens: 1000
           },
           sub_tasks: []
         }
       ]
-    },
-    {
-      id: '10',
-      goal: 'Write the future potential section (800 words) of the report, exploring emerging trends and growth opportunities for long-article writing AI agents',
-      task_type: 'write',
-      status: 'FINISH',
-      start_time: '2025-03-15T14:53:05.000Z',
-      end_time: '2025-03-15T14:54:30.000Z',
-      token_usage: {
-        input_tokens: 720,
-        output_tokens: 840
-      },
-      sub_tasks: []
-    },
-    {
-      id: '11',
-      goal: 'Write the conclusion section (300 words) of the report on long-article writing AI agents, summarizing key findings from each major section and providing actionable recommendations',
-      task_type: 'write',
-      status: 'FINISH',
-      start_time: '2025-03-15T14:54:35.000Z',
-      end_time: '2025-03-15T14:55:30.000Z',
-      token_usage: {
-        input_tokens: 380,
-        output_tokens: 330
-      },
-      sub_tasks: []
     }
   ]
 };
