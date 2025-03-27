@@ -326,7 +326,7 @@ const HomePage = () => {
                 />
                 <CreateIcon sx={{ fontSize: 60, color: 'white', mb: 2 }} />
                 <Typography variant="h4" component="div" sx={{ color: 'white', fontWeight: 700, mb: 1 }}>
-                  Creative Story Generation
+                  Story Generation
                 </Typography>
                 <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
                   Craft engaging narratives and fiction
@@ -401,7 +401,7 @@ const HomePage = () => {
                 />
                 <DescriptionIcon sx={{ fontSize: 60, color: 'white', mb: 2 }} />
                 <Typography variant="h4" component="div" sx={{ color: 'white', fontWeight: 700, mb: 1 }}>
-                  Technical Report Generation
+                  Report Generation
                 </Typography>
                 <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
                   Create comprehensive, fact-based documents
@@ -410,8 +410,7 @@ const HomePage = () => {
               
               <CardContent sx={{ flexGrow: 1, p: 4 }}>
                 <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-                  Create comprehensive technical reports and documentation with accurate information 
-                  retrieval and logical reasoning. Ideal for business, academic, and technical documentation.
+                Create comprehensive technical reports and documentation with accurate information retrieval and logical reasoning. Ideal for news, technical, and business documentation.
                 </Typography>
                 
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 3 }}>

@@ -255,9 +255,9 @@ By contributing to WriteHERE, you agree that your contributions will be licensed
 If you use this code in your research, please cite our paper:
 
 ```bibtex
-@misc{xiong2025beyondoutlining,
+@misc{xiong2025heterogeneousrecursiveplanning,
       title={Beyond Outlining: Heterogeneous Recursive Planning for Adaptive Long-form Writing with Language Models}, 
-      author={Ruibin Xiong and Yimeng Chen and Dmitrii Khizbullin and Jürgen Schmidhuber},
+      author={Ruibin Xiong and Yimeng Chen and Dmitrii Khizbullin and Mingchen Zhuge and Jürgen Schmidhuber},
       year={2025},
       eprint={2503.08275},
       archivePrefix={arXiv},
@@ -270,4 +270,4 @@ If you use this code in your research, please cite our paper:
 
 [MIT License](LICENSE)
 
-This project is open-source and non-commercial. You are free to use, modify, and distribute the code for research, educational, and personal purposes.
+This project is open-source. You are free to use, modify, and distribute the code for research, educational, and personal purposes.

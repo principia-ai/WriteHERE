@@ -53,7 +53,7 @@ const examplePrompts = [
 const ReportGenerationPage = () => {
   const [prompt, setPrompt] = useState('');
   const [model, setModel] = useState('claude-3-5-sonnet-20241022');
-  const [searchEngine, setSearchEngine] = useState('bing');
+  const [searchEngine, setSearchEngine] = useState('google');
   const [enableSearch, setEnableSearch] = useState(true);
   const [apiKeys, setApiKeys] = useState({
     openai: localStorage.getItem('openai_api_key') || '',
@@ -305,7 +305,7 @@ const ReportGenerationPage = () => {
                   label="Search Engine"
                   onChange={(e) => setSearchEngine(e.target.value)}
                 >
-                  {/* <MenuItem value="google">Google</MenuItem> */}
+                  <MenuItem value="google">Google</MenuItem>
                   <MenuItem value="bing">Bing</MenuItem>
                 </Select>
               </FormControl>

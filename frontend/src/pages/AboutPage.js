@@ -130,11 +130,11 @@ const AboutPage = () => {
         
         <Box sx={{ p: 3, backgroundColor: '#f5f5f5', borderRadius: 2, mb: 3 }}>
           <Typography variant="body1" fontFamily="monospace">
-            @misc&#123;xiong2025beyondoutlining,
+            @misc&#123;xiong2025heterogeneousrecursiveplanning,
             <br />
             &nbsp;&nbsp;title=&#123;Beyond Outlining: Heterogeneous Recursive Planning for Adaptive Long-form Writing with Language Models&#125;, 
             <br />
-            &nbsp;&nbsp;author=&#123;Ruibin Xiong and Yimeng Chen and Dmitrii Khizbullin and Jürgen Schmidhuber&#125;,
+            &nbsp;&nbsp;author=&#123;Ruibin Xiong* and Yimeng Chen* and Dmitrii Khizbullin and Mingchen Zhuge and Jürgen Schmidhuber&#125;,
             <br />
             &nbsp;&nbsp;year=&#123;2025&#125;,
             <br />
