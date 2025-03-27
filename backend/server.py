@@ -408,7 +408,6 @@ def api_get_result(task_id):
             return jsonify({"error": "Task not found"}), 404
     
     result_md_dir = os.path.join(RESULTS_DIR, 'records', task_id, 'report.md')
-    result_md_dir = os.path.join(RESULTS_DIR, 'records', task_id, 'report.md')
     task = task_storage[task_id]
     
     # We'll allow getting results even if status is not completed as long as we have the result data
@@ -640,7 +639,7 @@ def api_get_task_graph(task_id):
                 {
                     "id": "0",
                     "goal": "Task graph data not available",
-                    "task_type": "think",""
+                    "task_type": "think",
                     "status": "FINISH",
                     "sub_tasks": []
                 }
