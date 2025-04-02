@@ -16,6 +16,7 @@ import traceback
 from recursive.memory import caches
 from recursive.cache import Cache
 from recursive.utils.get_index import get_report_with_ref
+from datetime import datetime
 
     
     
@@ -357,12 +358,17 @@ def report_writing(input_filename,
                    done_flag_file,
                    global_use_model,
                    engine_backend,
-                   nodes_json_file=None):
+                   nodes_json_file=None,
+                   today_date=None):
+    # Use current date if not provided
+    if today_date is None:
+        today_date = datetime.now().strftime("%b %d, %Y")
     config = {
         "language": "en", 
         # Agent is Defined in recursive.agent.agents.regular
         # update, prior_reflect, planning_post_reflect and execute_post_reflect is skipped, by using Dummy Agent
         # prompt is Defined in recursive.agent.prompts
+        "today_date": today_date,  # Add the today_date parameter to config
         "action_mapping": {
             "plan": ["UpdateAtomPlanningAgent", {}],
             "update": ["DummyRandomUpdateAgent", {}],
@@ -585,6 +591,8 @@ def define_args():
     parser.add_argument("--length", type=int)
     parser.add_argument("--engine-backend", type=str)
     parser.add_argument("--nodes-json-file", type=str, help="Path to save nodes.json for real-time visualization")
+    current_date = datetime.now().strftime("%b %d, %Y")  # Format: "Apr 1, 2025"
+    parser.add_argument("--today-date", type=str, default=current_date, help="Today's date to use in prompts (default: current date)")
     
     parser.add_argument("--start", type=int, default=None)
     parser.add_argument("--end", type=int, default=None)
@@ -604,4 +612,4 @@ if __name__ == "__main__":
     else:
         report_writing(args.filename, args.output_filename,
                        args.start, args.end, args.done_flag_file, args.model, args.engine_backend,
-                       nodes_json_file=args.nodes_json_file)
+                       nodes_json_file=args.nodes_json_file, today_date=args.today_date)

@@ -105,7 +105,8 @@ class SearchAgent(BaseAgent):
                to_run_target_write_tasks: str,
                to_run_root_question: str,
                to_run_outer_write_task: str,
-               force_stop: bool = False,):
+               today_date: str,
+               force_stop: bool = False):
         """Generate the ReAct format prompt.
 
         Args:
@@ -175,7 +176,8 @@ class SearchAgent(BaseAgent):
             to_run_action_history = action_memory,
             to_run_tool_result = tool_result,
             to_run_turn = turn,
-            to_run_target_write_tasks = to_run_target_write_tasks
+            to_run_target_write_tasks = to_run_target_write_tasks,
+            today_date = today_date
         )
         formatted.append(dict(role="user", content=final_message))
         
@@ -187,6 +189,7 @@ class SearchAgent(BaseAgent):
     def chat(self, message: Union[str, dict, List[dict]],
              global_start_index, to_run_target_write_tasks, 
              to_run_root_question, to_run_outer_write_task,
+             today_date,
              **kwargs) -> AgentReturn:
         # assert isinstance(message, str)       
         if isinstance(message, str):
@@ -214,6 +217,7 @@ class SearchAgent(BaseAgent):
                 to_run_target_write_tasks = to_run_target_write_tasks,
                 to_run_root_question = to_run_root_question,
                 to_run_outer_write_task = to_run_outer_write_task,
+                today_date = today_date,
                 turn = turn)
 
             for key in list(prompt.keys()):

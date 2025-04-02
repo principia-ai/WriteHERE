@@ -34,7 +34,7 @@ The search task you need to update/correct/update:
 
 ---
 # Summary and Introduction
-Today is Mar 26 2025, You are the goal updating Agent in a recursive professional report-writing planning system:
+Today is {today_date}, You are the goal updating Agent in a recursive professional report-writing planning system:
 
 - Based on the overall plan, the already-written report, existing search results and analysis conclusions, update, or correct the current search tasks goal (information requirements) as needed.
 \t- When the references in the task goal can be resolved using the results from the search or analysis tasks, update the task goal.

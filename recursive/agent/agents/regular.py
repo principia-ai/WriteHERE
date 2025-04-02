@@ -95,19 +95,23 @@ def get_llm_output(node, agent, memory, agent_type, overwrite_cache=False, *args
             ) if (depend_write_task is not None and len(depend_write_task) > 0) else "Not Provided"
         
     
-    prompt = prompt_register.module_dict[prompt_version]().construct_prompt(
-        to_run_root_question = memory.root_node.task_info["goal"],
-        to_run_article = memory.article,
-        to_run_full_plan = node.get_all_layer_plan(),
-        to_run_outer_graph_dependent = to_run_outer_graph_dependent,
-        to_run_same_graph_dependent = to_run_same_graph_dependent,
-        to_run_task = to_run_task,
-        to_run_candidate_plan = node.task_info.get("candidate_plan", "Missing"),
-        to_run_candidate_think = node.task_info.get("candidate_think", "Missing"),
-        to_run_final_aggregate = kwargs.get("to_run_final_aggregate", ""),
-        to_run_target_write_tasks = to_run_target_write_tasks,
-        to_run_global_writing_task = node.get_all_previous_writing_plan()
-    )
+    # Prepare prompt arguments
+    prompt_args = {
+        'to_run_root_question': memory.root_node.task_info["goal"],
+        'to_run_article': memory.article,
+        'to_run_full_plan': node.get_all_layer_plan(),
+        'to_run_outer_graph_dependent': to_run_outer_graph_dependent,
+        'to_run_same_graph_dependent': to_run_same_graph_dependent,
+        'to_run_task': to_run_task,
+        'to_run_candidate_plan': node.task_info.get("candidate_plan", "Missing"),
+        'to_run_candidate_think': node.task_info.get("candidate_think", "Missing"),
+        'to_run_final_aggregate': kwargs.get("to_run_final_aggregate", ""),
+        'to_run_target_write_tasks': to_run_target_write_tasks,
+        'to_run_global_writing_task': node.get_all_previous_writing_plan(),
+        'today_date': node.config.get('today_date', 'Mar 26, 2025')  # Add today_date from config
+    }
+    
+    prompt = prompt_register.module_dict[prompt_version]().construct_prompt(**prompt_args)
     llm_result = agent.call_llm(
         system_message = system_message,
         prompt = prompt,
@@ -332,6 +336,7 @@ class SimpleExcutor(Agent):
                                                   to_run_target_write_tasks = to_run_target_write_tasks,
                                                   to_run_root_question = to_run_root_question,
                                                   to_run_outer_write_task = to_run_outer_write_task,
+                                                  today_date = node.config.get('today_date', 'Mar 26, 2025'),
                                                   temperature=inner_kwargs.get("temperature", None))
             
             execute_result = []
@@ -411,13 +416,17 @@ class SimpleExcutor(Agent):
             to_run_target_write_tasks = "\n".join(
                 "Write Task{}, word count requirements：{}".format(idx, node.task_info["length"]) for idx, node in enumerate(depend_write_task, start=1)
             ) if (depend_write_task is not None and len(depend_write_task) > 0) else "Not Provided"
-        prompt = prompt_register.module_dict[prompt_version]().construct_prompt(
-            to_run_search_task = to_run_search_task,
-            to_run_search_results = to_run_search_results,
-            to_run_target_write_tasks = to_run_target_write_tasks,
-            to_run_outer_write_task = to_run_outer_write_task,
-            to_run_root_question = to_run_root_question,
-        )
+        # Prepare prompt arguments
+        prompt_args = {
+            'to_run_search_task': to_run_search_task,
+            'to_run_search_results': to_run_search_results,
+            'to_run_target_write_tasks': to_run_target_write_tasks,
+            'to_run_outer_write_task': to_run_outer_write_task,
+            'to_run_root_question': to_run_root_question,
+            'today_date': node.config.get('today_date', 'Mar 26, 2025')  # Add today_date from config
+        }
+        
+        prompt = prompt_register.module_dict[prompt_version]().construct_prompt(**prompt_args)
         
         succ = False 
         retry_cnt = 0

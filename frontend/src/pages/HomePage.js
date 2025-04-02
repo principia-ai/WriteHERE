@@ -71,7 +71,7 @@ const HomePage = () => {
               mb: 2,
             }}
           >
-            Open Framework for Human-like Long-form Writing
+            WriteHERE: An Open Framework for Human-like Long-form Writing
           </Typography>
           <Typography 
             variant="h5" 
@@ -85,7 +85,7 @@ const HomePage = () => {
               lineHeight: 1.5
             }}
           >
-            A general agent framework for long-form writing that achieves adaptive content generation
+            A general planning-based framework for long-form writing that achieves adaptive content generation
             through recursive task decomposition and dynamic integration of heterogeneous tasks/tools.
           </Typography>
           

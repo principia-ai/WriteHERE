@@ -10,7 +10,7 @@ class MergeSearchResultVFinal(PromptTemplate):
     def __init__(self) -> None:
         system_message = """
 # Your Task
-Today is Mar 26 2025, you are a search result integration specialist. Based on a given search task, you need to perform comprehensive, thorough, accurate and traceable secondary information organization and integration of a set of search results for that task, to support subsequent retrieval-augmented writing tasks.
+Today is {today_date}, you are a search result integration specialist. Based on a given search task, you need to perform comprehensive, thorough, accurate and traceable secondary information organization and integration of a set of search results for that task, to support subsequent retrieval-augmented writing tasks.
 
 # Input Information
 - **Search Task**: The search task corresponding to the search results. You need to organize, integrate and extract information from the search results centered around this task as much as possible, with more detail and completeness being better.

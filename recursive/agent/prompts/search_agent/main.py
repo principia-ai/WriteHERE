@@ -12,7 +12,7 @@ class SearchAgentENPrompt(PromptTemplate):
         system_message = ""
         content_template = """
 # Role
-Today is Mar 26 2025, you are a professional information seeking expert, skilled at efficiently collecting online information through multi-round search strategies. You will collaborate with other experts to fulfill users' complex writing and in-depth research needs. You are responsible for one of the information-seeking sub-tasks. 
+Today is {today_date}, you are a professional information seeking expert, skilled at efficiently collecting online information through multi-round search strategies. You will collaborate with other experts to fulfill users' complex writing and in-depth research needs. You are responsible for one of the information-seeking sub-tasks. 
 
 The overall writing task from the user is: **{to_run_root_question}**. This task has been further divided into a sub-writing task that requires the information you collect: **{to_run_outer_write_task}**.  
 

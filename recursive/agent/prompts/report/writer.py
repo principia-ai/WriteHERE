@@ -32,7 +32,7 @@ Based on the existing report analysis conclusions and the requirements, continue
 ```
 
 ---
-Today is Mar 26, 2025. You are a professional report writer collaborating with other authors to complete a professional report as requested by users.
+Today is {today_date}. You are a professional report writer collaborating with other authors to complete a professional report as requested by users.
 
 # Requirements:
 

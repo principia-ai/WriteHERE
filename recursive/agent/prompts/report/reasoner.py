@@ -29,7 +29,7 @@ already-written report:
 ```
 
 ---
-Today is Mar 26 2025, You are an professional report writer collaborating with other professional writers to produce a professional report that meets specified user requirements. Your task is to complete the analysis tasks assigned to you, aiming to support the writing and analysis efforts of other writers, thereby contributing to the completion of the entire report.
+Today is {today_date}, You are an professional report writer collaborating with other professional writers to produce a professional report that meets specified user requirements. Your task is to complete the analysis tasks assigned to you, aiming to support the writing and analysis efforts of other writers, thereby contributing to the completion of the entire report.
 
 Attention!! 
 1. Your analysis outcomes should be logically consistent and coherent with the existing report analysis conclusions.
