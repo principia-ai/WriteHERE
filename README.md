@@ -271,3 +271,7 @@ If you use this code in your research, please cite our paper:
 [MIT License](LICENSE)
 
 This project is open-source. You are free to use, modify, and distribute the code for research, educational, and personal purposes.
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=principia-ai/WriteHERE&type=Date)](https://www.star-history.com/#principia-ai/WriteHERE&Date)
