@@ -41,6 +41,8 @@ const commonModels = [
   { label: 'Claude 3.7 Sonnet (Recommended)', value: 'claude-3-7-sonnet-20250219' },
   { label: 'Claude 3.5 Sonnet', value: 'claude-3-5-sonnet-20241022' },
   { label: 'GPT-4o', value: 'gpt-4o' },
+  { label: 'Gemini 1.5 Pro', value: 'gemini-1.5-pro' },
+  { label: 'Gemini 1.5 Flash', value: 'gemini-1.5-flash' },
 ];
 
 // Example prompts for report generation
@@ -58,11 +60,13 @@ const ReportGenerationPage = () => {
   const [apiKeys, setApiKeys] = useState({
     openai: localStorage.getItem('openai_api_key') || '',
     claude: localStorage.getItem('claude_api_key') || '',
+    gemini: localStorage.getItem('gemini_api_key') || '',
     serpapi: localStorage.getItem('serpapi_api_key') || '',
   });
   const [showApiSection, setShowApiSection] = useState(false);
   const [showOpenAIKey, setShowOpenAIKey] = useState(false);
   const [showClaudeKey, setShowClaudeKey] = useState(false);
+  const [showGeminiKey, setShowGeminiKey] = useState(false);
   const [showSerpApiKey, setShowSerpApiKey] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -74,6 +78,7 @@ const ReportGenerationPage = () => {
   useEffect(() => {
     if (apiKeys.openai) localStorage.setItem('openai_api_key', apiKeys.openai);
     if (apiKeys.claude) localStorage.setItem('claude_api_key', apiKeys.claude);
+    if (apiKeys.gemini) localStorage.setItem('gemini_api_key', apiKeys.gemini);
     if (apiKeys.serpapi) localStorage.setItem('serpapi_api_key', apiKeys.serpapi);
   }, [apiKeys]);
   
@@ -109,6 +114,7 @@ const ReportGenerationPage = () => {
     // Check if the appropriate API keys are provided
     const isOpenAIModel = model.toLowerCase().includes('gpt');
     const isClaudeModel = model.toLowerCase().includes('claude');
+    const isGeminiModel = model.toLowerCase().includes('gemini');
     
     if (isOpenAIModel && !apiKeys.openai) {
       setError('Please provide your OpenAI API key in the settings section.');
@@ -118,6 +124,12 @@ const ReportGenerationPage = () => {
     
     if (isClaudeModel && !apiKeys.claude) {
       setError('Please provide your Anthropic Claude API key in the settings section.');
+      setShowApiSection(true);
+      return;
+    }
+    
+    if (isGeminiModel && !apiKeys.gemini) {
+      setError('Please provide your Google Gemini API key in the settings section.');
       setShowApiSection(true);
       return;
     }
@@ -151,6 +163,7 @@ const ReportGenerationPage = () => {
         apiKeys: {
           openai: apiKeys.openai,
           claude: apiKeys.claude,
+          gemini: apiKeys.gemini,
           serpapi: apiKeys.serpapi
         }
       });
@@ -357,80 +370,113 @@ const ReportGenerationPage = () => {
                 </AccordionSummary>
                 <AccordionDetails>
                   <Grid container spacing={3}>
-                    <Grid item xs={12} md={4}>
-                      <TextField
-                        label="OpenAI API Key"
-                        fullWidth
-                        variant="outlined"
-                        value={apiKeys.openai}
-                        onChange={(e) => handleApiKeyChange('openai', e.target.value)}
-                        type={showOpenAIKey ? 'text' : 'password'}
-                        placeholder="sk-..."
-                        helperText="Required for GPT models"
-                        InputProps={{
-                          endAdornment: (
-                            <InputAdornment position="end">
-                              <IconButton
-                                aria-label="toggle password visibility"
-                                onClick={() => setShowOpenAIKey(!showOpenAIKey)}
-                                edge="end"
-                              >
-                                {showOpenAIKey ? <VisibilityOff /> : <Visibility />}
-                              </IconButton>
-                            </InputAdornment>
-                          ),
-                        }}
-                      />
+                    <Grid item xs={12} md={6}>
+                      <Grid container spacing={3}>
+                        <Grid item xs={12}>
+                          <TextField
+                            label="OpenAI API Key"
+                            fullWidth
+                            variant="outlined"
+                            value={apiKeys.openai}
+                            onChange={(e) => handleApiKeyChange('openai', e.target.value)}
+                            type={showOpenAIKey ? 'text' : 'password'}
+                            placeholder="sk-..."
+                            helperText="Required for GPT models"
+                            InputProps={{
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  <IconButton
+                                    aria-label="toggle password visibility"
+                                    onClick={() => setShowOpenAIKey(!showOpenAIKey)}
+                                    edge="end"
+                                  >
+                                    {showOpenAIKey ? <VisibilityOff /> : <Visibility />}
+                                  </IconButton>
+                                </InputAdornment>
+                              ),
+                            }}
+                          />
+                        </Grid>
+                        <Grid item xs={12}>
+                          <TextField
+                            label="Anthropic API Key"
+                            fullWidth
+                            variant="outlined"
+                            value={apiKeys.claude}
+                            onChange={(e) => handleApiKeyChange('claude', e.target.value)}
+                            type={showClaudeKey ? 'text' : 'password'}
+                            placeholder="sk-ant-..."
+                            helperText="Required for Claude models"
+                            InputProps={{
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  <IconButton
+                                    aria-label="toggle password visibility"
+                                    onClick={() => setShowClaudeKey(!showClaudeKey)}
+                                    edge="end"
+                                  >
+                                    {showClaudeKey ? <VisibilityOff /> : <Visibility />}
+                                  </IconButton>
+                                </InputAdornment>
+                              ),
+                            }}
+                          />
+                        </Grid>
+                      </Grid>
                     </Grid>
-                    <Grid item xs={12} md={4}>
-                      <TextField
-                        label="Anthropic API Key"
-                        fullWidth
-                        variant="outlined"
-                        value={apiKeys.claude}
-                        onChange={(e) => handleApiKeyChange('claude', e.target.value)}
-                        type={showClaudeKey ? 'text' : 'password'}
-                        placeholder="sk-ant-..."
-                        helperText="Required for Claude models"
-                        InputProps={{
-                          endAdornment: (
-                            <InputAdornment position="end">
-                              <IconButton
-                                aria-label="toggle password visibility"
-                                onClick={() => setShowClaudeKey(!showClaudeKey)}
-                                edge="end"
-                              >
-                                {showClaudeKey ? <VisibilityOff /> : <Visibility />}
-                              </IconButton>
-                            </InputAdornment>
-                          ),
-                        }}
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={4}>
-                      <TextField
-                        label="SerpAPI Key"
-                        fullWidth
-                        variant="outlined"
-                        value={apiKeys.serpapi}
-                        onChange={(e) => handleApiKeyChange('serpapi', e.target.value)}
-                        type={showSerpApiKey ? 'text' : 'password'}
-                        placeholder="..."
-                        helperText="Required for search functionality"
-                        InputProps={{
-                          endAdornment: (
-                            <InputAdornment position="end">
-                              <IconButton
-                                aria-label="toggle password visibility"
-                                onClick={() => setShowSerpApiKey(!showSerpApiKey)}
-                                edge="end"
-                              >
-                                {showSerpApiKey ? <VisibilityOff /> : <Visibility />}
-                              </IconButton>
-                            </InputAdornment>
-                          ),
-                        }}
-                      />
+                    <Grid item xs={12} md={6}>
+                      <Grid container spacing={3}>
+                        <Grid item xs={12}>
+                          <TextField
+                            label="Google Gemini API Key"
+                            fullWidth
+                            variant="outlined"
+                            value={apiKeys.gemini}
+                            onChange={(e) => handleApiKeyChange('gemini', e.target.value)}
+                            type={showGeminiKey ? 'text' : 'password'}
+                            placeholder="your-api-key-..."
+                            helperText="Required for Gemini models"
+                            InputProps={{
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  <IconButton
+                                    aria-label="toggle password visibility"
+                                    onClick={() => setShowGeminiKey(!showGeminiKey)}
+                                    edge="end"
+                                  >
+                                    {showGeminiKey ? <VisibilityOff /> : <Visibility />}
+                                  </IconButton>
+                                </InputAdornment>
+                              ),
+                            }}
+                          />
+                        </Grid>
+                        <Grid item xs={12}>
+                          <TextField
+                            label="SerpAPI Key"
+                            fullWidth
+                            variant="outlined"
+                            value={apiKeys.serpapi}
+                            onChange={(e) => handleApiKeyChange('serpapi', e.target.value)}
+                            type={showSerpApiKey ? 'text' : 'password'}
+                            placeholder="..."
+                            helperText="Required for search functionality"
+                            InputProps={{
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  <IconButton
+                                    aria-label="toggle password visibility"
+                                    onClick={() => setShowSerpApiKey(!showSerpApiKey)}
+                                    edge="end"
+                                  >
+                                    {showSerpApiKey ? <VisibilityOff /> : <Visibility />}
+                                  </IconButton>
+                                </InputAdornment>
+                              ),
+                            }}
+                          />
+                        </Grid>
+                      </Grid>
                     </Grid>
                     <Grid item xs={12}>
                       <Typography variant="caption" color="text.secondary">

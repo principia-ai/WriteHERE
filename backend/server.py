@@ -122,6 +122,8 @@ def run_story_generation(task_id, prompt, model, api_keys):
             f.write(f"OPENAI={api_keys['openai']}\n")
         if 'claude' in api_keys and api_keys['claude']:
             f.write(f"CLAUDE={api_keys['claude']}\n")
+        if 'gemini' in api_keys and api_keys['gemini']:
+            f.write(f"GEMINI={api_keys['gemini']}\n")
         if 'serpapi' in api_keys and api_keys['serpapi']:
             f.write(f"SERPAPI={api_keys['serpapi']}\n")
     
@@ -213,6 +215,8 @@ def run_report_generation(task_id, prompt, model, enable_search, search_engine, 
             f.write(f"OPENAI={api_keys['openai']}\n")
         if 'claude' in api_keys and api_keys['claude']:
             f.write(f"CLAUDE={api_keys['claude']}\n")
+        if 'gemini' in api_keys and api_keys['gemini']:
+            f.write(f"GEMINI={api_keys['gemini']}\n")
         if 'serpapi' in api_keys and api_keys['serpapi']:
             f.write(f"SERPAPI={api_keys['serpapi']}\n")
     

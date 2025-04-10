@@ -40,6 +40,8 @@ const commonModels = [
   { label: 'Claude 3.5 Sonnet', value: 'claude-3-5-sonnet-20241022' },
   { label: 'GPT-4o', value: 'gpt-4o' },
   { label: 'GPT-4o-mini', value: 'gpt-4o-mini' },
+  { label: 'Gemini 1.5 Pro', value: 'gemini-1.5-pro' },
+  { label: 'Gemini 1.5 Flash', value: 'gemini-1.5-flash' },
 ];
 
 // Example prompts for story generation
@@ -55,10 +57,12 @@ const StoryGenerationPage = () => {
   const [apiKeys, setApiKeys] = useState({
     openai: localStorage.getItem('openai_api_key') || '',
     claude: localStorage.getItem('claude_api_key') || '',
+    gemini: localStorage.getItem('gemini_api_key') || '',
   });
   const [showApiSection, setShowApiSection] = useState(false);
   const [showOpenAIKey, setShowOpenAIKey] = useState(false);
   const [showClaudeKey, setShowClaudeKey] = useState(false);
+  const [showGeminiKey, setShowGeminiKey] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [statusMessage, setStatusMessage] = useState('');
@@ -69,6 +73,7 @@ const StoryGenerationPage = () => {
   useEffect(() => {
     if (apiKeys.openai) localStorage.setItem('openai_api_key', apiKeys.openai);
     if (apiKeys.claude) localStorage.setItem('claude_api_key', apiKeys.claude);
+    if (apiKeys.gemini) localStorage.setItem('gemini_api_key', apiKeys.gemini);
   }, [apiKeys]);
 
   // Check if API is available on component mount
@@ -96,6 +101,7 @@ const StoryGenerationPage = () => {
     // Check if the appropriate API key is provided
     const isOpenAIModel = model.toLowerCase().includes('gpt');
     const isClaudeModel = model.toLowerCase().includes('claude');
+    const isGeminiModel = model.toLowerCase().includes('gemini');
     
     if (isOpenAIModel && !apiKeys.openai) {
       setError('Please provide your OpenAI API key in the settings section.');
@@ -105,6 +111,12 @@ const StoryGenerationPage = () => {
     
     if (isClaudeModel && !apiKeys.claude) {
       setError('Please provide your Anthropic Claude API key in the settings section.');
+      setShowApiSection(true);
+      return;
+    }
+    
+    if (isGeminiModel && !apiKeys.gemini) {
+      setError('Please provide your Google Gemini API key in the settings section.');
       setShowApiSection(true);
       return;
     }
@@ -129,7 +141,8 @@ const StoryGenerationPage = () => {
         model,
         apiKeys: {
           openai: apiKeys.openai,
-          claude: apiKeys.claude
+          claude: apiKeys.claude,
+          gemini: apiKeys.gemini
         }
       });
       
@@ -315,7 +328,7 @@ const StoryGenerationPage = () => {
                 </AccordionSummary>
                 <AccordionDetails>
                   <Grid container spacing={3}>
-                    <Grid item xs={12} md={6}>
+                    <Grid item xs={12} md={4}>
                       <TextField
                         label="OpenAI API Key"
                         fullWidth
@@ -340,7 +353,7 @@ const StoryGenerationPage = () => {
                         }}
                       />
                     </Grid>
-                    <Grid item xs={12} md={6}>
+                    <Grid item xs={12} md={4}>
                       <TextField
                         label="Anthropic API Key"
                         fullWidth
@@ -359,6 +372,31 @@ const StoryGenerationPage = () => {
                                 edge="end"
                               >
                                 {showClaudeKey ? <VisibilityOff /> : <Visibility />}
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={4}>
+                      <TextField
+                        label="Google Gemini API Key"
+                        fullWidth
+                        variant="outlined"
+                        value={apiKeys.gemini}
+                        onChange={(e) => handleApiKeyChange('gemini', e.target.value)}
+                        type={showGeminiKey ? 'text' : 'password'}
+                        placeholder="your-api-key-..."
+                        helperText="Required for Gemini models"
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton
+                                aria-label="toggle password visibility"
+                                onClick={() => setShowGeminiKey(!showGeminiKey)}
+                                edge="end"
+                              >
+                                {showGeminiKey ? <VisibilityOff /> : <Visibility />}
                               </IconButton>
                             </InputAdornment>
                           ),

@@ -461,8 +461,10 @@ def report_writing(input_filename,
                 "select_quota": 20, # search agent select quota
                 "selector_max_workers": 8, # selector parallel
                 "summarizier_max_workers": 8, # summarizer parallel
-                "selector_model": "gpt-4o-mini",
-                "summarizer_model": "gpt-4o-mini",
+                # "selector_model": "gpt-4o-mini",
+                "selector_model": "gemini-2.0-flash",
+                # "summarizer_model": "gpt-4o-mini",
+                "summarizer_model": "gemini-2.0-flash",
             },
             "search_merge": {
                 "prompt_version": "MergeSearchResultVFinal", # search merge prompt

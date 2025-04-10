@@ -12,6 +12,7 @@ import time
 from loguru import logger
 from recursive.memory import caches
 from dotenv import load_dotenv
+import google.generativeai as genai
 
 # Load environment variables from api_key.env if it exists
 load_dotenv(dotenv_path='api_key.env')
@@ -22,6 +23,8 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 task_env_file = os.environ.get('TASK_ENV_FILE')
 if task_env_file and os.path.exists(task_env_file):
     load_dotenv(dotenv_path=task_env_file, override=True)
+
+# We'll configure Gemini API when it's used to ensure the key is available
 
 class OpenAIApiException(Exception):
     def __init__(self, msg, error_code):
@@ -128,7 +131,7 @@ class OpenAIApiProxy():
         use_official = None
         messages = copy.deepcopy(messages)
 
-        is_gpt = True if "gpt" or "o1" in model else False
+        is_gpt = True if "gpt" in model or "o1" in model else False
     
         params_gpt = {
             "model": model,
@@ -158,9 +161,11 @@ class OpenAIApiProxy():
         elif "deepseek" in model:
             url = ''
             api_key = ''
-        else: # gemini
-            url = ''
-            api_key = ''
+        elif "gemini" in model:
+            # For Gemini, we'll use the Google API directly, not REST API
+            api_key = str(os.getenv('GEMINI'))
+            genai.configure(api_key=api_key)
+            url = None  # Not used for Gemini
 
         if "o1" in model:
             if "temperature" in params_gpt:
@@ -192,6 +197,70 @@ class OpenAIApiProxy():
             }
             if messages[0]['role'] == 'system':
                 params_gpt['system'] = messages.pop(0)['content']
+        
+        # Handle Gemini API
+        if "gemini" in model:
+            try:
+                # Process messages for Gemini format
+                gemini_messages = []
+                system_prompt = None
+                
+                for msg in messages:
+                    role = msg['role']
+                    content = msg['content']
+                    
+                    if role == 'system':
+                        system_prompt = content
+                    elif role == 'user':
+                        gemini_messages.append({"role": "user", "parts": [{"text": content}]})
+                    elif role == 'assistant':
+                        gemini_messages.append({"role": "model", "parts": [{"text": content}]})
+                
+                # Set up Gemini model
+                generation_config = {}
+                if temperature is not None:
+                    generation_config["temperature"] = temperature
+                
+                # Create the model with system instruction if available
+                if system_prompt:
+                    gemini_model = genai.GenerativeModel(
+                        model_name=model,
+                        system_instruction=system_prompt,
+                        generation_config=generation_config
+                    )
+                else:
+                    gemini_model = genai.GenerativeModel(
+                        model_name=model,
+                        generation_config=generation_config
+                    )
+                
+                # Start chat and get response
+                chat = gemini_model.start_chat(history=gemini_messages[:-1] if gemini_messages else [])
+                last_message = gemini_messages[-1]["parts"][0]["text"] if gemini_messages else ""
+                response = chat.send_message(last_message)
+                
+                # Get token usage estimates for Gemini
+                # Gemini doesn't provide token counts directly, so we use a rough estimate
+                # This is a simplified approach - for production, consider using a proper tokenizer
+                input_tokens = sum(len(msg.get("parts", [{}])[0].get("text", "").split()) * 1.3 for msg in gemini_messages)
+                output_tokens = len(response.text.split()) * 1.3
+                
+                # Format response to match what call_llm expects - simple message with content
+                result = [{
+                    "message": {
+                        "content": response.text
+                    }
+                }]
+                
+                # Cache if needed
+                if not no_cache:
+                    llm_cache.save_cache(cache_name, call_args_dict, result)
+                
+                return result
+                
+            except Exception as e:
+                logger.error(f"Error with Gemini API: {e}")
+                raise
 
         for attempt in range(self.MAX_RETRIES):
             current_headers = headers.copy()
@@ -249,6 +318,9 @@ class OpenAIApiProxy():
             elif "r1" in model:
                 ip = 0.55
                 op = 2.19
+            elif "gemini" in model:
+                ip = 0.25  # Gemini Pro prices (per million tokens)
+                op = 0.75
             else:
                 ip = 0.0
                 op = 0.0
