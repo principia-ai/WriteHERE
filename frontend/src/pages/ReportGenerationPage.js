@@ -41,8 +41,8 @@ const commonModels = [
   { label: 'Claude 3.7 Sonnet (Recommended)', value: 'claude-3-7-sonnet-20250219' },
   { label: 'Claude 3.5 Sonnet', value: 'claude-3-5-sonnet-20241022' },
   { label: 'GPT-4o', value: 'gpt-4o' },
-  { label: 'Gemini 1.5 Pro', value: 'gemini-1.5-pro' },
-  { label: 'Gemini 1.5 Flash', value: 'gemini-1.5-flash' },
+  { label: 'Gemini 2.5 Pro Exp', value: 'gemini-2.5-pro-exp-03-25' },
+  { label: 'Gemini 2.5 Pro Preview', value: 'gemini-2.5-pro-preview-03-25' },
 ];
 
 // Example prompts for report generation

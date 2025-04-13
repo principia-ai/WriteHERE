@@ -37,7 +37,7 @@ export const pingAPI = async () => {
  * Generates a story using the heterogeneous recursive planning engine
  * @param {Object} params - Generation parameters
  * @param {string} params.prompt - The story prompt
- * @param {string} params.model - The model to use (e.g., 'gpt-4o', 'claude-3-5-sonnet-20241022', 'gemini-1.5-pro')
+ * @param {string} params.model - The model to use (e.g., 'gpt-4o', 'claude-3-5-sonnet-20241022')
  * @param {Object} params.apiKeys - API keys for different services
  * @param {string} params.apiKeys.openai - OpenAI API key
  * @param {string} params.apiKeys.claude - Claude API key
@@ -72,7 +72,7 @@ export const generateStory = async (params) => {
  * Generates a report using the heterogeneous recursive planning engine
  * @param {Object} params - Generation parameters
  * @param {string} params.prompt - The report prompt
- * @param {string} params.model - The model to use (e.g., 'gpt-4o', 'claude-3-5-sonnet-20241022', 'gemini-1.5-pro')
+ * @param {string} params.model - The model to use (e.g., 'gpt-4o', 'claude-3-5-sonnet-20241022')
  * @param {boolean} params.enableSearch - Whether to enable search
  * @param {string} params.searchEngine - Search engine to use ('google' or 'bing')
  * @param {Object} params.apiKeys - API keys for different services

@@ -80,7 +80,7 @@ def extract_and_renumber_citations(text: str, citation_urls):
 
 def process_citations(text, citation_to_url):
     # 步骤1: 找出文章中所有引用
-    citation_pattern = r'\[reference:(\d+)\]'
+    citation_pattern = r'\[(?:reference|ref):(\d+)\]'
     citations_in_text = re.findall(citation_pattern, text)
     used_ids = [int(cid) for cid in citations_in_text]
     old2id_2_pos = {idx: text.index("[reference:{}]".format(idx)) for idx in used_ids}
@@ -117,7 +117,7 @@ def process_citations(text, citation_to_url):
         if old_id in old_to_new_id:
             new_id = old_to_new_id[old_id]
             url = new_citation_to_url[new_id]["url"]
-            return f'[\[reference:{new_id}\]]({url})'
+            return f'[[reference:{new_id}]]({url})'
         return ""  # 如果找不到映射，删除这个引用
     
     updated_text = re.sub(citation_pattern, replace_citation, text)
