@@ -1,7 +1,7 @@
 # MODEL=claude-3-5-sonnet-20241022
 # MODEL=gpt-4o
 # MODEL=gemini-2.5-pro-exp-03-25
-MODEL=gemini-2.0-flash
+MODEL=google/gemini-2.5-pro-preview-03-25
 task_input_file=../test_data/qa_test.jsonl
 output_folder=project/qa/example_claude/$MODEL/gemini
 

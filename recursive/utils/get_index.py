@@ -149,7 +149,8 @@ if __name__ == "__main__":
     traverse(data, web_pages)
     # print(len(web_pages))
     # print(sorted(web_pages.keys()))
-    article = open("{}/report.md".format(folder)).read()
+    # article = open("{}/report.md".format(folder)).read()
+    article = open("{}/article.txt".format(folder)).read()
     
     article, web_pages = process_citations(article, web_pages)
     

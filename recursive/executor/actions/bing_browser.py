@@ -439,8 +439,8 @@ class BingBrowser(BaseAction):
                  language = "en",
                  selector_max_workers = 8,
                  summarizier_max_workers = 8,
-                 selector_model = "gemini-2.0-flash",
-                 summarizer_model = "gemini-2.0-flash",
+                 selector_model = "gpt-4o-mini",
+                 summarizer_model = "gpt-4o-mini",
                  **kwargs):
         
         self.searcher_type = searcher_type

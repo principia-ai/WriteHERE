@@ -13,6 +13,7 @@ from loguru import logger
 from recursive.memory import caches
 from dotenv import load_dotenv
 import google.generativeai as genai
+from openai import OpenAI
 
 # Load environment variables from api_key.env if it exists
 load_dotenv(dotenv_path='api_key.env')
@@ -24,7 +25,6 @@ task_env_file = os.environ.get('TASK_ENV_FILE')
 if task_env_file and os.path.exists(task_env_file):
     load_dotenv(dotenv_path=task_env_file, override=True)
 
-# We'll configure Gemini API when it's used to ensure the key is available
 
 class OpenAIApiException(Exception):
     def __init__(self, msg, error_code):
@@ -128,8 +128,11 @@ class OpenAIApiProxy():
 
     def call(self, model, messages, no_cache = False, overwrite_cache=False, tools=None, temperature=None, headers={}, use_official=None, **kwargs):
         assert tools is None
-        use_official = None
         messages = copy.deepcopy(messages)
+        
+        # Check if model name includes openrouter model identifier
+        if any(provider in model for provider in ["google/", "anthropic/", "meta/", "mistral/"]):
+            use_official = "openrouter"
 
         is_gpt = True if "gpt" in model or "o1" in model else False
     
@@ -161,6 +164,13 @@ class OpenAIApiProxy():
         elif "deepseek" in model:
             url = ''
             api_key = ''
+        elif use_official == "openrouter" or "openrouter" in model:
+            # Use OpenRouter API
+            url = "https://openrouter.ai/api/v1/chat/completions"
+            api_key = str(os.getenv('OPENROUTER'))
+            # Add HTTP-Referer and X-Title headers for OpenRouter
+            headers['HTTP-Referer'] = os.getenv('OPENROUTER_REFERER', '')
+            headers['X-Title'] = os.getenv('OPENROUTER_TITLE', '')
         elif "gemini" in model:
             # For Gemini, we'll use the Google API directly, not REST API
             api_key = str(os.getenv('GEMINI'))
@@ -198,6 +208,51 @@ class OpenAIApiProxy():
             if messages[0]['role'] == 'system':
                 params_gpt['system'] = messages.pop(0)['content']
         
+        # Handle OpenRouter API via official OpenAI client
+        if use_official == "openrouter":
+            try:
+                site_url = os.getenv('OPENROUTER_REFERER', '')
+                site_name = os.getenv('OPENROUTER_TITLE', '')
+                
+                # Initialize OpenAI client with OpenRouter base URL
+                client = OpenAI(
+                    base_url="https://openrouter.ai/api/v1",
+                    api_key=api_key,
+                )
+                
+                # Prepare extra headers
+                extra_headers = {}
+                if site_url:
+                    extra_headers["HTTP-Referer"] = site_url
+                if site_name:
+                    extra_headers["X-Title"] = site_name
+                
+                # Create completion
+                completion = client.chat.completions.create(
+                    extra_headers=extra_headers,
+                    model=model,  # e.g. "google/gemini-2.5-pro-preview"
+                    messages=messages,
+                    temperature=temperature if temperature is not None else 0.7,
+                    **kwargs
+                )
+                
+                # Format response to match expected output
+                result = [{
+                    "message": {
+                        "content": completion.choices[0].message.content
+                    }
+                }]
+                
+                # Cache if needed
+                if not no_cache:
+                    llm_cache.save_cache(cache_name, call_args_dict, result)
+                
+                return result
+                
+            except Exception as e:
+                logger.error(f"Error with OpenRouter API: {e}")
+                raise
+                
         # Handle Gemini API
         if "gemini" in model:
             try:
@@ -330,7 +385,7 @@ class OpenAIApiProxy():
             # if self.verbose:
             logger.debug("{} input data {}, output_data {} LLM price: {}\n\n".format(model, input_tokens, output_tokens, price))
                 # ))
-        if use_official:
+        if use_official == "anthropic":
             result = data["content"][0]["text"]
             # make the format consistent
             data = [{"message": {"content": result}}]
