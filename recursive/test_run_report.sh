@@ -3,7 +3,7 @@
 # MODEL=gemini-2.5-pro-exp-03-25
 MODEL=google/gemini-2.5-pro-preview-03-25
 task_input_file=../test_data/qa_test.jsonl
-output_folder=project/qa/example_claude/$MODEL/gemini
+output_folder=project/report/example_gemini/$MODEL/gemini-2.5
 
 mkdir -p ${output_folder}
 task_output_file=${output_folder}/result.jsonl

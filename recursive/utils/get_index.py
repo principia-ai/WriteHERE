@@ -127,6 +127,9 @@ def process_citations(text, citation_to_url):
     pattern_consecutive = r'(\[reference:\d+\])(\1)+'
     while re.search(pattern_consecutive, updated_text):
         updated_text = re.sub(pattern_consecutive, r'\1', updated_text)
+
+    # Replace by [\d]
+    updated_text = re.sub(r'\[reference:(\d+)\]', r'[\1]', updated_text)
         
     return updated_text, new_citation_to_url
 
