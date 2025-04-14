@@ -458,7 +458,7 @@ def report_writing(input_filename,
                 "cc": "US", # search region
                 "topk": 20,
                 "pk_quota": 20, # search agent, pk quota, see __search
-                "select_quota": 20, # search agent select quota
+                "select_quota": 10, # search agent select quota
                 "selector_max_workers": 8, # selector parallel
                 "summarizier_max_workers": 8, # summarizer parallel
                 "selector_model": "gpt-4o-mini",
