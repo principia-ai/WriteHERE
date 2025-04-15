@@ -105,7 +105,7 @@ class OpenAIApiProxy():
                     break  # Successful response, exit the loop
                 else:
                     # print(f"Received status code {response.status_code} at attempt={attempt + 1}. Retrying... {current_headers['x-api-key']=}")
-                    print(f"Received status code {response.status_code} at attempt={attempt + 1}. Retrying..., the reponse is {response.text}", flush=True)
+                    print(f"Received status code {response.status_code} at attempt={attempt + 1}. Retrying..., the response is {response.text}", flush=True)
                     
                     
             except requests.exceptions.RequestException as e:
@@ -211,7 +211,7 @@ class OpenAIApiProxy():
                         # just return None
                         return None
     
-                    print(f"Received status code {response.status_code} at attempt={attempt + 1}. Retrying..., the reponse is {response.text}", flush=True)  
+                    print(f"Received status code {response.status_code} at attempt={attempt + 1}. Retrying..., the response is {response.text}", flush=True)  
                     
             except requests.exceptions.RequestException as e:
                 print(f"Error making request (attempt {attempt + 1}): {e}", flush=True)
