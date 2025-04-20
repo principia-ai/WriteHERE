@@ -83,7 +83,13 @@ def process_citations(text, citation_to_url):
     citation_pattern = r'\[(?:reference|ref):(\d+)\]'
     citations_in_text = re.findall(citation_pattern, text)
     used_ids = [int(cid) for cid in citations_in_text]
-    old2id_2_pos = {idx: text.index("[reference:{}]".format(idx)) for idx in used_ids}
+    # Find positions using regex to match both formats
+    old2id_2_pos = {}
+    for idx in used_ids:
+        matches = list(re.finditer(r'\[(?:reference|ref):{}]'.format(idx), text))
+        if matches:
+            old2id_2_pos[idx] = matches[0].start()
+    # old2id_2_pos = {idx: text.index("[reference:{}]".format(idx)) for idx in used_ids}
     url2page = {page["url"]: page  for page in citation_to_url.values()}
     
     # 步骤2: 创建URL到引用ID的映射，合并相同URL的引用
