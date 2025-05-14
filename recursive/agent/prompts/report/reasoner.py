@@ -42,17 +42,13 @@ Attention!!
    * Citations should appear in the main text, not concentrated at the end
 
 # Output Format
-1. First, conduct thinking within `<think></think>`
-2. Then, in `<result></result>`, write the analysis results in a structured and readable format, providing as much detail as possible.The specific format is as follows:
-<think>
-thinking here
-</think>
+In `<result></result>`, write the analysis results in a structured and readable format, providing as much detail as possible.The specific format is as follows:
 <result>
 analysis result
 </result>
 
 
-Please complete the analysis task **{to_run_task}** follow the instruction in # Requirements, in a professional and innovative way. You should output as # Output Format, first think in <think></think>, then output the analysis results in <result></result>, do not append any other information after </result>.
+Please complete the analysis task **{to_run_task}** follow the instruction in # Requirements, in a professional and innovative way. You should output as # Output Format, output the analysis results in <result></result>, do not append any other information after </result>.
 """.strip()
         super().__init__(system_message, content_template)
 

@@ -98,17 +98,13 @@ A partially complete recursive global plan is provided as a reference, represent
 </example>
 
 # Output Format
-1. First, conduct in-depth and comprehensive thinking in `<think></think>`.
-2. in `<result></result>`, output the planning results in the JSON format as shown in the example. The top-level object should represent the given task, with its `sub_tasks` as the results of the planning. The specific format is as follows:
-<think>
-Think about the continue writing
-</think>
+In `<result></result>`, output the planning results in the JSON format as shown in the example. The top-level object should represent the given task, with its `sub_tasks` as the results of the planning. The specific format is as follows:
 <result>
 write here
 </result>
 
 ---
-Writing tasks that require further planning, follow the requirements as before, and output as # Output Format, first think in <think></think> then directly give the result in format in <result></result>, Do not forget recursive planning: 
+Writing tasks that require further planning, follow the requirements as before, and output as # Output Format, directly give the result in format in <result></result>, Do not forget recursive planning: 
 **{to_run_task}**
 """
         super().__init__(system_message, content_template)

@@ -53,7 +53,7 @@ Independently determine, in order, whether the following three types of sub-task
 
 2. **search Sub-task**: If the writing requires external information (such as literature, academic results, industry data, policy documents, online resources, etc.), and these information is not provided by the **dependent tasks**  or the **already completed report content**, then an search sub-task needs to be planned.
 
-3. **Writing Sub-task**: If and only if the requires a large amout of text output, at least > 1000 words, it my need to be broken down into multiple writing sub-tasks to reduce the burden of one-time creation. **When > 1500 words, it must be broken down.**
+3. **Writing Sub-task**: If and only if the requires a large amout of text output, at least > 1000 words, it my need to be broken down into multiple writing sub-tasks to reduce the burden of one-time creation. **When > 3000 words, it must be broken down.**
 
 If either an analysis sub-task or a search sub-task or a writing sub-task needs to be created, the task is considered a complex task.
 
@@ -71,14 +71,9 @@ If either an analysis sub-task or a search sub-task or a writing sub-task needs 
 \t- **Thorough Validation**: Summarize, compare, and verify various arguments to ensure a comprehensive and in-depth analysis.   
 
 # Output Format Requirement
-1. First, think through the goal update in `<think></think>`. Then, based on the atomic task determination rules, evaluate in-depth and comprehensively whether analysis, search and writing sub-tasks need to be broken down. This determines whether the task is an atomic task or a complex task.
-
-2. Then, output the results in `<result></result>`. In `<goal_updating></goal_updating>`, directly output the updated goal; if no updates are needed, output the original goal. In `<atomic_task_determination></atomic_task_determination>`, output whether the task is an atomic task or a complex task. 
+Output the results in `<result></result>`. In `<goal_updating></goal_updating>`, directly output the updated goal; if no updates are needed, output the original goal. In `<atomic_task_determination></atomic_task_determination>`, output whether the task is an atomic task or a complex task. 
 
 The specific format is as follows:
-<think>
-Think about the goal update; then think in accordance with the atomic task determination rules.
-</think>
 <result>
 <goal_updating>
 [Updated goal]
@@ -93,7 +88,7 @@ The writing task you need to evaluate:
 ```
 {to_run_task}
 ```
-Complete the goal-updating and atomic writing task determination job as requirements in # Summary and Introduction, # Goal Updating Tips, # Atomic Task Determination Rules and # Report Requirements. Output follow the # Output Format Requirement, think in <think></think> and output the result in <result></result>
+Complete the goal-updating and atomic writing task determination job as requirements in # Summary and Introduction, # Goal Updating Tips, # Atomic Task Determination Rules and # Report Requirements. Output follow the # Output Format Requirement, output the result in <result></result>
 """.strip()
         super().__init__(system_message, content_template)
         
@@ -139,7 +134,7 @@ Independently determine, in order, whether the following three types of sub-task
 
 2. **search Sub-task**: If the writing requires external information (such as literature, academic results, industry data, policy documents, online resources, etc.), and these information is not provided by the **dependent tasks**  or the **already completed report content**, then an search sub-task needs to be planned.
 
-3. **Writing Sub-task**: If and only if the requires a large amout of text output, at least > 1000 words, it my need to be broken down into multiple writing sub-tasks to reduce the burden of one-time creation. **When > 1500 words, it must be broken down.**
+3. **Writing Sub-task**: If and only if the requires a large amout of text output, at least > 1000 words, it my need to be broken down into multiple writing sub-tasks to reduce the burden of one-time creation. **When > 3000 words, it must be broken down.**
 
 If either an analysis sub-task or a search sub-task or a writing sub-task needs to be created, the task is considered a complex task.
 
@@ -157,14 +152,9 @@ If either an analysis sub-task or a search sub-task or a writing sub-task needs 
 \t- **Thorough Validation**: Summarize, compare, and verify various arguments to ensure a comprehensive and in-depth analysis.   
 
 # Output Format
-1. First, in `<think></think>`, follow the atomic task determination rules and evaluate, in order, whether analysis, search and writing sub-tasks need to be broken down. This will determine whether the task is an atomic task or a complex task.
-
-2. Then, output the results in `<result><atomic_task_determination></atomic_task_determination</result>`, output the results.
+Output the results in `<result><atomic_task_determination></atomic_task_determination</result>`, output the results.
 
 The specific format is as follows:
-<think>
-think in accordance with the atomic task determination rules.
-</think>
 <result>
 <atomic_task_determination>
 atomic/complex
@@ -176,7 +166,7 @@ The writing task you need to evaluate:
 ```
 {to_run_task}
 ```
-Complete the atomic writing task determination job as requirements in # Summary and Introduction, # Atomic Task Determination Rules and # Report Requirements. Output follow the # Output Format Requirement, think in <think></think> and output the result in <result></result>
+Complete the atomic writing task determination job as requirements in # Summary and Introduction, # Atomic Task Determination Rules and # Report Requirements. Output follow the # Output Format Requirement, output the result in <result></result>
 """.strip()
 
 

@@ -26,8 +26,7 @@ Today is {today_date}, you are a search result integration specialist. Based on 
 - Attention, not all web results are relevant and useful, be careful and organize useful things.
 
 # Output Format
-1. First, provide brief thoughts within <think></think> tags
-2. in <result></result> tags, output your secondary information organization and integration results, which must be as complete, refined and thorough as possible, with source tracing through webpage IDs
+In <result></result> tags, output your secondary information organization and integration results, which must be as complete, refined and thorough as possible, with source tracing through webpage IDs
 Do not append any other information after </result>
 """.strip()
 
@@ -44,7 +43,7 @@ Within the context of the overall writing request and the sub-writing task, you 
 ```
 --
 
-Organize and integrate information from **Search Results and Short Summarys** as instructions in # Your Task, # Input Information and # Requirements. Output as # Output Format, first brief think in <think></think> then give the complete results in <result></result>. Do not forget to marking information sources using "webpage[webpage index]" for traceability, where index in web_pages_short_summary indicates webpage ID.
+Organize and integrate information from **Search Results and Short Summarys** as instructions in # Your Task, # Input Information and # Requirements. Output as # Output Format, give the complete results in <result></result>. Do not forget to mark information sources using "webpage[webpage index]" for traceability, where index in web_pages_short_summary indicates webpage ID.
 """.strip()
         super().__init__(system_message, content_template)
 

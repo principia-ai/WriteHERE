@@ -72,10 +72,7 @@ Today is {today_date}. You are a professional report writer collaborating with o
 \t* Maintain clarity and logic in section hierarchy
 
 # Output Format Instructions:
-First, think in `<think></think>`. Then, please continue writing within the <article></article> tags. Respond in the same language as the user's question. The specific format is as follows:
-<think>
-Think about the continue writing
-</think>
+Please continue writing within the <article></article> tags. Respond in the same language as the user's question. The specific format is as follows:
 <article>
 write here
 </article>
@@ -94,6 +91,6 @@ The Global Sections Plan and the writing task you should continue to write.
 {to_run_global_writing_task}
 ```
 
-Based on the requirements as in # Requirements, continue writing **{to_run_task}**. Focus on this writing task. as # Output Format Instructions, first think in <think></think>, then continue writing within the <article></article> tags. The tune should be human-like.
+Based on the requirements as in # Requirements, continue writing **{to_run_task}**. Focus on this writing task. as # Output Format Instructions, continue writing within the <article></article> tags. The tone should be human-like.
 """
         super().__init__(system_message, content_template)

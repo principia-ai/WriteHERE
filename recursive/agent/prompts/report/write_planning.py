@@ -100,8 +100,7 @@ You are a recursive professional report-writing and information seeking planning
 {}
 
 # Output Format
-1. First, conduct in-depth and comprehensive thinking in `<think></think>`.  
-2. Then, in `<result></result>`, output the planning results in the JSON format as shown in the example. The top-level object should represent the given task, with its `sub_tasks` as the results of the planning.   
+In `<result></result>`, output the planning results in the JSON format as shown in the example. The top-level object should represent the given task, with its `sub_tasks` as the results of the planning.   
 """.strip().format(require, fewshot)
 
         content_template = """
@@ -113,7 +112,7 @@ Writing tasks that require further planning:
 Reference thinking:
 {to_run_candidate_think}
 
-Plan the writing task according to the aforementioned requirements and examples, do not remember the output format. thinking in <think></think> and direct output the planning results in the JSON format as shown in the example in <result></result>: 
+Plan the writing task according to the aforementioned requirements and examples, do not remember the output format. Directly output the planning results in the JSON format as shown in the example in <result></result>: 
 **{to_run_task}**
 """.strip()
         super().__init__(system_message, content_template)
@@ -180,8 +179,7 @@ You are a recursive professional report-writing planning expert, specializing in
 {}
 
 # Output Format
-1. First, conduct in-depth and comprehensive thinking in `<think></think>`.  
-2. Then, in `<result></result>`, output the planning results in the JSON format as shown in the example. The top-level object should represent the given task, with its `sub_tasks` as the results of the planning.  
+In `<result></result>`, output the planning results in the JSON format as shown in the example. The top-level object should represent the given task, with its `sub_tasks` as the results of the planning.  
 """.strip().format(require, fewshot)
         
         content_template = """
@@ -220,7 +218,7 @@ Already-written report content:
 ---
 
 Continue to Plan the Given Writing tasks: **{to_run_task}**.
-Do to remember the aforementioned requirements and examples that I told you at the first, including # Overall Introduction, # Task Types, # Planning Tips, # Report Requirements, e.t.c. Think in <think></think> and direct output the planning results in <result></result>, as I told you before.
+Do to remember the aforementioned requirements and examples that I told you at the first, including # Overall Introduction, # Task Types, # Planning Tips, # Report Requirements, e.t.c. Directly output the planning results in <result></result>, as I told you before.
 """.strip()
         super().__init__(system_message, content_template)
     

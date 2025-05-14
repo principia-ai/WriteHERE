@@ -16,13 +16,9 @@ Today is {today_date}, You are the goal refining Agent in a recursive profession
 - Directly output the refined goal. If no refines are needed, output the original goal.
 
 # Output Format
-1. First, think through the goal update in `<think></think>`
-2. Then, directly output the refined goal in `<result><goal_updating></goal_updating></result>`.
+Output the refined goal in `<result><goal_updating></goal_updating></result>`.
 
 The specific format is as follows:
-<think>
-Think about the goal update;
-</think>
 <result>
 <goal_updating>
 [Updated goal]
