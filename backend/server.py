@@ -115,27 +115,26 @@ def run_story_generation(task_id, prompt, model, api_keys):
     done_file = os.path.join(task_dir, 'done.txt')
     nodes_file = os.path.join(records_dir, 'nodes.json')
     
-    # Create environment file with API keys
-    env_file = os.path.join(task_dir, 'api_key.env')
-    with open(env_file, 'w') as f:
-        if 'openai' in api_keys and api_keys['openai']:
-            f.write(f"OPENAI={api_keys['openai']}\n")
-        if 'claude' in api_keys and api_keys['claude']:
-            f.write(f"CLAUDE={api_keys['claude']}\n")
-        if 'gemini' in api_keys and api_keys['gemini']:
-            f.write(f"GEMINI={api_keys['gemini']}\n")
-        if 'serpapi' in api_keys and api_keys['serpapi']:
-            f.write(f"SERPAPI={api_keys['serpapi']}\n")
+    # Prepare environment variables for the subprocess without writing them to disk
+    env = os.environ.copy()
+    if 'openai' in api_keys and api_keys['openai']:
+        env['OPENAI'] = api_keys['openai']
+    if 'claude' in api_keys and api_keys['claude']:
+        env['CLAUDE'] = api_keys['claude']
+    if 'gemini' in api_keys and api_keys['gemini']:
+        env['GEMINI'] = api_keys['gemini']
+    if 'serpapi' in api_keys and api_keys['serpapi']:
+        env['SERPAPI'] = api_keys['serpapi']
     
-    # Create a script to run the engine with the appropriate environment
+    # Create a script to run the engine
     script_path = os.path.join(task_dir, 'run.sh')
     with open(script_path, 'w') as f:
-        f.write(f"""#!/bin/bash
-        cd {os.path.abspath(os.path.join(os.path.dirname(__file__), '../recursive'))}
-        source {env_file}
-        export TASK_ENV_FILE={env_file}
-        python engine.py --filename {input_file} --output-filename {output_file} --done-flag-file {done_file} --model {model} --mode story --nodes-json-file {nodes_file}
-        """)
+        f.write(
+            f"""#!/bin/bash
+cd {os.path.abspath(os.path.join(os.path.dirname(__file__), '../recursive'))}
+python engine.py --filename {input_file} --output-filename {output_file} --done-flag-file {done_file} --model {model} --mode story --nodes-json-file {nodes_file}
+"""
+        )
     
     os.chmod(script_path, 0o755)
     
@@ -155,10 +154,13 @@ def run_story_generation(task_id, prompt, model, api_keys):
     monitoring_thread.start()
     
     try:
-        # Run the script
-        process = subprocess.Popen(['/bin/bash', script_path], 
-                                   stdout=subprocess.PIPE, 
-                                   stderr=subprocess.PIPE)
+        # Run the script with the prepared environment
+        process = subprocess.Popen(
+            ['/bin/bash', script_path],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=env
+        )
         # Store the process object in task_storage for later termination
         task_storage[task_id]["process"] = process
         stdout, stderr = process.communicate()
@@ -208,29 +210,28 @@ def run_report_generation(task_id, prompt, model, enable_search, search_engine, 
     done_file = os.path.join(task_dir, 'done.txt')
     nodes_file = os.path.join(records_dir, 'nodes.json')
     
-    # Create environment file with API keys
-    env_file = os.path.join(task_dir, 'api_key.env')
-    with open(env_file, 'w') as f:
-        if 'openai' in api_keys and api_keys['openai']:
-            f.write(f"OPENAI={api_keys['openai']}\n")
-        if 'claude' in api_keys and api_keys['claude']:
-            f.write(f"CLAUDE={api_keys['claude']}\n")
-        if 'gemini' in api_keys and api_keys['gemini']:
-            f.write(f"GEMINI={api_keys['gemini']}\n")
-        if 'serpapi' in api_keys and api_keys['serpapi']:
-            f.write(f"SERPAPI={api_keys['serpapi']}\n")
+    # Prepare environment variables without persisting them to disk
+    env = os.environ.copy()
+    if 'openai' in api_keys and api_keys['openai']:
+        env['OPENAI'] = api_keys['openai']
+    if 'claude' in api_keys and api_keys['claude']:
+        env['CLAUDE'] = api_keys['claude']
+    if 'gemini' in api_keys and api_keys['gemini']:
+        env['GEMINI'] = api_keys['gemini']
+    if 'serpapi' in api_keys and api_keys['serpapi']:
+        env['SERPAPI'] = api_keys['serpapi']
     
-    # Create a script to run the engine with the appropriate environment
+    # Create a script to run the engine
     script_path = os.path.join(task_dir, 'run.sh')
     engine_backend = search_engine if enable_search else "none"
-    
+
     with open(script_path, 'w') as f:
-        f.write(f"""#!/bin/bash
-        cd {os.path.abspath(os.path.join(os.path.dirname(__file__), '../recursive'))}
-        source {env_file}
-        export TASK_ENV_FILE={env_file}
-        python engine.py --filename {input_file} --output-filename {output_file} --done-flag-file {done_file} --model {model} --engine-backend {engine_backend} --mode report --nodes-json-file {nodes_file}
-        """)
+        f.write(
+            f"""#!/bin/bash
+cd {os.path.abspath(os.path.join(os.path.dirname(__file__), '../recursive'))}
+python engine.py --filename {input_file} --output-filename {output_file} --done-flag-file {done_file} --model {model} --engine-backend {engine_backend} --mode report --nodes-json-file {nodes_file}
+"""
+        )
     
     os.chmod(script_path, 0o755)
     
@@ -251,10 +252,13 @@ def run_report_generation(task_id, prompt, model, enable_search, search_engine, 
     monitoring_thread.start()
     
     try:
-        # Run the script
-        process = subprocess.Popen(['/bin/bash', script_path], 
-                                   stdout=subprocess.PIPE, 
-                                   stderr=subprocess.PIPE)
+        # Run the script with the prepared environment
+        process = subprocess.Popen(
+            ['/bin/bash', script_path],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=env
+        )
         # Store the process object in task_storage for later termination
         task_storage[task_id]["process"] = process
         stdout, stderr = process.communicate()
