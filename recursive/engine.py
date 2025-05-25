@@ -21,13 +21,34 @@ from datetime import datetime
     
     
 class GraphRunEngine:
-    """
+    """Engine that drives execution of a nested task graph.
+
+    The root node and all of its descendants form a dependency graph of
+    planning and execution tasks. ``GraphRunEngine`` repeatedly selects nodes
+    that are ready to take the next action, invokes the corresponding agent
+    to perform that action and updates the shared :class:`Memory` object.
+    After each action the engine examines the graph to progress suspended
+    nodes whose dependencies have been satisfied. The process continues until
+    no activatable nodes remain.
     """
     def __init__(self, root_node, memory_format, config):
         self.root_node = root_node
         self.memory = Memory(root_node, format=memory_format, config=config)
         
     def find_need_next_step_nodes(self, single=False):
+        """Collect nodes that are ready for their next action.
+
+        The graph is traversed breadth‑first starting from ``root_node``. All
+        nodes whose status falls into the ``activate`` category are gathered.
+
+        Args:
+            single (bool): When ``True`` return only the first activatable node.
+
+        Returns:
+            list[AbstractNode] | AbstractNode | None: A list of ready nodes or
+            a single node when ``single`` is ``True``. ``None`` is returned when
+            no node can be executed.
+        """
         nodes = []
         queue = deque([self.root_node])
         # Root node, starts in READY state
@@ -83,6 +104,26 @@ class GraphRunEngine:
 
     def forward_one_step_not_parallel(self, full_step=False, select_node_hashkey=None, log_fn=None,
                                       nodes_json_file=None, *action_args, **action_kwargs):
+        """Run a single action step for one node without parallel execution.
+
+        This function locates a node that is ready to act, executes its next
+        action and then re-examines the graph to update node states.
+
+        Args:
+            full_step (bool): When ``True`` run ``next_full_action_step`` on the
+                node instead of ``next_action_step``.
+            select_node_hashkey (str, optional): If provided, only the node with
+                this hash key will be executed.
+            log_fn (str, optional): Path prefix for logs.
+            nodes_json_file (str, optional): File path to dump ``nodes.json``
+                after each step for real-time visualization.
+            *action_args: Extra arguments passed to the node action.
+            **action_kwargs: Extra keyword arguments passed to the node action.
+
+        Returns:
+            str | None: ``"done"`` when no node can be executed, otherwise
+            ``None``.
+        """
         # Find tasks that need to enter the next step
         if select_node_hashkey is not None:
             need_next_step_node = self.find_need_next_step_nodes(single=False)
@@ -133,12 +174,33 @@ class GraphRunEngine:
             display_plan(self.root_node.inner_graph)
         
         
-    def forward_one_step_untill_done(self, full_step=False, 
+    def forward_one_step_untill_done(self, full_step=False,
                                            parallel=False,
                                            save_folder=None,
                                            nl=False,
                                            nodes_json_file=None,
                                            *action_args, **action_kwargs):
+        """Iteratively run ``forward_one_step_not_parallel`` until completion.
+
+        The engine repeatedly selects an executable node and advances it one
+        step at a time. Intermediate state is saved to ``save_folder`` after
+        each step. Execution stops when no further nodes can be activated or
+        when the maximum step count (10,000) is reached.
+
+        Args:
+            full_step (bool): Whether to use ``next_full_action_step`` for each
+                node.
+            parallel (bool): Placeholder for future parallel support.
+            save_folder (str): Directory used to persist execution state.
+            nl (bool): Unused flag kept for backward compatibility.
+            nodes_json_file (str, optional): Path to store ``nodes.json`` on
+                each iteration.
+            *action_args: Extra arguments forwarded to the node action.
+            **action_kwargs: Extra keyword arguments for the node action.
+
+        Returns:
+            str: The final aggregated answer produced by the root node.
+        """
         self.root_node.status = TaskStatus.READY
         for step in range(10000):
             logger.info("Step {}".format(step))
