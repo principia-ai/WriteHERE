@@ -664,6 +664,9 @@ class SearXNG(BaseSearch):
         topk: int = 3,
         is_valid_source = None,
         backend_engine: str = None,
+        min_char_count: int = 150,
+        snippet_chunk_size: int = 1000,
+        webpage_helper_max_threads: int = 10,
         **kwargs
     ):
         super().__init__(topk=topk, black_list=[])
@@ -675,6 +678,11 @@ class SearXNG(BaseSearch):
         self.searxng_api_key = searxng_api_key
         self.usage = 0
         self.is_valid_source = is_valid_source or (lambda x: True)
+        self.webpage_helper = WebPageHelper(
+            min_char_count=min_char_count,
+            snippet_chunk_size=snippet_chunk_size,
+            max_thread_num=webpage_helper_max_threads,
+        )
 
     def get_usage_and_reset(self):
         u = self.usage
@@ -698,7 +706,8 @@ class SearXNG(BaseSearch):
                 timeout=10,
             )
             resp.raise_for_status()
-            hits = resp.json().get("results", [])
+            json_value = resp.json()
+            hits = json_value.get("results", [])
         except Exception as e:
             logger.error(f"SearXNG lookup failed for `{query}`: {e}")
             return {}
@@ -720,7 +729,24 @@ class SearXNG(BaseSearch):
                 break
         return {i: p for i, p in enumerate(pages)}
 
-
+    def fetch_content(
+        self, pages: List[dict]
+    ) -> List[dict]:
+        urls = [page["url"] for page in pages]
+        valid_url_to_snippets = self.webpage_helper.urls_to_snippets(urls)
+        fetched_pages = []
+        for page in pages:
+            url = page["url"]
+            if url not in valid_url_to_snippets:
+                continue
+            page["snippet"] = page["description"]
+            del page["description"]
+            long_res = "Snippet: {}\nContent: {}".format(
+                page["snippet"], valid_url_to_snippets[url]["text"]
+            )
+            page["content"] = long_res
+            fetched_pages.append(page)
+        return fetched_pages
 
 if __name__ == "__main__":
     from recursive.cache import Cache
