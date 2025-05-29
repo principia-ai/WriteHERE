@@ -289,13 +289,14 @@ class SearchAgent(BaseAgent):
         results = []
         for turn_idx, current_turn_info in enumerate(return_info[:-1]):
             turn_result = current_turn_info["tool_result"]
-            result = {
-                "turn": current_turn_info["turn"],
-                "web_pages": turn_result["web_pages"], # = web_pages (selected)
-                "xml_format_result": turn_result["result"], # = xml concat web pages
-                "observation": return_info[turn_idx+1]["observation"],
-            }
-            results.append(result)
+            if turn_result:
+                result = {
+                    "turn": current_turn_info["turn"],
+                    "web_pages": turn_result["web_pages"], # = web_pages (selected)
+                    "xml_format_result": turn_result["result"], # = xml concat web pages
+                    "observation": return_info[turn_idx+1]["observation"],
+                }
+                results.append(result)
         
         return {
             "ori": return_info,
