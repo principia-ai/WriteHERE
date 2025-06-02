@@ -448,8 +448,8 @@ class AbstractNode(ABC):
                     if "length" not in task:
                         task["length"] = self.task_info["length"]
 
-            task_info = {key:task[key] for key in self.config["require_keys"][self.config["tag2task_type"][task["task_type"]]]}
-            
+            task_info = {key: task.get(key) for key in self.config["require_keys"].get(self.config["tag2task_type"].get(task.get("task_type")), [])}
+
             if "sub_tasks" in task:
                 task_info["candidate_plan"] = task["sub_tasks"]
                 for st in task["sub_tasks"]:
