@@ -17,7 +17,7 @@ from recursive.memory import caches
 from recursive.cache import Cache
 from recursive.utils.get_index import get_report_with_ref
 from datetime import datetime
-
+import os
     
     
 class GraphRunEngine:
@@ -434,7 +434,7 @@ def report_writing(input_filename,
             "execute": {
                 "react_agent": True, # use Search Agent
                 "prompt_version": "SearchAgentENPrompt", # see recursive.agent.prompts.search_agent.main
-                "searcher_type": "SerpApiSearch", # see recursive.executor.actions.bing_browser
+                "searcher_type": "SearXNG" if str(engine_backend).lower() == 'searxng' else "SerpApiSearch", # see recursive.executor.actions.bing_browser
                 "llm_args": {
                     "model": global_use_model, # set the llm
                 },

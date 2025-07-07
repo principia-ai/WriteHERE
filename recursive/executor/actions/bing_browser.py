@@ -593,7 +593,7 @@ class BingBrowser(BaseAction):
         ori_urls = [res["url"] for res in pk_search_results]
         # fetch web page content
         # pk_search_results = self.__fetch(pk_search_results)
-        if self.searcher_type == "SerpApiSearch":
+        if self.searcher_type in ("SerpApiSearch", "SearXNG"):
             pk_search_results = self.__single_fetch(pk_search_results)
         else:
             raise Exception()
@@ -656,7 +656,97 @@ class BingBrowser(BaseAction):
     
         return search_result
 
+class SearXNG(BaseSearch):
+    def __init__(
+        self,
+        searxng_api_url: str = None,
+        searxng_api_key: str = None,
+        topk: int = 3,
+        is_valid_source = None,
+        backend_engine: str = None,
+        min_char_count: int = 150,
+        snippet_chunk_size: int = 1000,
+        webpage_helper_max_threads: int = 10,
+        **kwargs
+    ):
+        super().__init__(topk=topk, black_list=[])
+        self.searxng_api_url = searxng_api_url or os.environ.get("SearXNG", "http://127.0.0.1:8080/search")
+        try:
+            requests.get(self.searxng_api_url, timeout=5).raise_for_status()  # one-liner health check
+        except requests.RequestException as e:
+            logger.error(f"SearXNG API URL `{self.searxng_api_url}` is not reachable: {e} / set an env variable `SearXNG` or by pas searxng_api_url parameter. Don't forget to prefix with http:// or https://")
+        self.searxng_api_key = searxng_api_key
+        self.usage = 0
+        self.is_valid_source = is_valid_source or (lambda x: True)
+        self.webpage_helper = WebPageHelper(
+            min_char_count=min_char_count,
+            snippet_chunk_size=snippet_chunk_size,
+            max_thread_num=webpage_helper_max_threads,
+        )
 
+    def get_usage_and_reset(self):
+        u = self.usage
+        self.usage = 0
+        return {"SearXNG": u}
+
+    def search(
+        self, query: str, exclude_urls: List[str] = [], overwrite_cache: bool = False
+    ) -> dict:
+        self.usage += 1
+        headers = (
+            {"Authorization": f"Bearer {self.searxng_api_key}"}
+            if self.searxng_api_key
+            else {}
+        )
+        try:
+            resp = requests.get(
+                self.searxng_api_url,
+                headers=headers,
+                params={"q": query, "format": "json"},
+                timeout=10,
+            )
+            resp.raise_for_status()
+            json_value = resp.json()
+            hits = json_value.get("results", [])
+        except Exception as e:
+            logger.error(f"SearXNG lookup failed for `{query}`: {e}")
+            return {}
+
+        pages = []
+        idx = 1
+        for r in hits:
+            url = r.get("url")
+            if (
+                not url
+                or not self.is_valid_source(url)
+                or url.endswith(".pdf")
+                or url in exclude_urls
+            ):
+                continue
+            pages.append({"url": url, "title": r.get("title", ""), "description": r.get("content", ""), "position": idx, "publish_time": "Not Provided",})
+            idx += 1
+            if idx > self.topk:
+                break
+        return {i: p for i, p in enumerate(pages)}
+
+    def fetch_content(
+        self, pages: List[dict]
+    ) -> List[dict]:
+        urls = [page["url"] for page in pages]
+        valid_url_to_snippets = self.webpage_helper.urls_to_snippets(urls)
+        fetched_pages = []
+        for page in pages:
+            url = page["url"]
+            if url not in valid_url_to_snippets:
+                continue
+            page["snippet"] = page["description"]
+            del page["description"]
+            long_res = "Snippet: {}\nContent: {}".format(
+                page["snippet"], valid_url_to_snippets[url]["text"]
+            )
+            page["content"] = long_res
+            fetched_pages.append(page)
+        return fetched_pages
 
 if __name__ == "__main__":
     from recursive.cache import Cache
