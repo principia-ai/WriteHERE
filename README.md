@@ -19,6 +19,10 @@ Our evaluations show that this approach consistently outperforms state-of-the-ar
   <img src="overview.png" alt="WriteHERE Architecture Overview">
 </p>
 
+## 🎉 News
+
+- **[Sep 2025]** Our paper has been accepted as an oral presentation at EMNLP 2025. See you in Suzhou! 🎊
+
 ## 🔍 Overview
 
 Unlike traditional approaches that rely on predetermined workflows and rigid thinking patterns, this framework:
