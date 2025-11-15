@@ -3,7 +3,7 @@ import json
 import tqdm
 from concurrent.futures import ThreadPoolExecutor
 import threading
-from recursive.llm.llm import OpenAIApiProxy
+from recursive.llm import get_llm_client
 import time
 from recursive.utils.file_io import parse_hierarchy_tags_result
 from loguru import logger
@@ -26,8 +26,8 @@ class EvidenceSelectorAPIClientOpenAI:
         self.model = model
         self.language = language
         assert language in ("zh", "en")
-        # self.llm = OpenAIApiProxy(verbose=False)
-        self.llm = OpenAIApiProxy(verbose=VERBOSE)
+        # Use the factory function to get the appropriate LLM client
+        self.llm = get_llm_client(model, verbose=VERBOSE)
         self.max_parralel_requests = max_parralel_requests
         self.en_sys_pe = "You are an intelligent assistant specializing in information retrieval, equipped with powerful text analysis and logical reasoning abilities."
         
@@ -179,7 +179,8 @@ class Summarizier:
         """
         self.language = language
         assert language in ("zh", "en")
-        self.llm = OpenAIApiProxy(verbose=VERBOSE)
+        # Use the factory function to get the appropriate LLM client
+        self.llm = get_llm_client(model, verbose=VERBOSE)
         self.max_parralel_requests = max_parralel_requests
         self.model = model
         

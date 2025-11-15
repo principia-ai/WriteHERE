@@ -51,7 +51,9 @@ WriteHERE is developed with these core principles:
 - API keys for:
   - OpenAI (GPT models)
   - Anthropic (Claude models)
+  - Minimax (M2 models) - **NEW**
   - SerpAPI (for search functionality in report generation)
+  - Jina.ai (for search and content extraction) - **NEW**
 
 ### Quickstart
 
@@ -180,6 +182,46 @@ PORT=8000 npm start
 ### Troubleshooting
 
 If you encounter any issues, please check the [Troubleshooting Guide](TROUBLESHOOTING.md) for common problems and solutions.
+
+## 🆕 New Integrations
+
+### Minimax M2 Model Support
+
+WriteHERE now supports **Minimax M2** models for text generation and reasoning:
+
+- **Model Names**: `abab6.5s-chat`, `abab6.5g-chat`, and other Minimax models
+- **Usage**: Simply specify a Minimax model name when running the engine
+- **Configuration**: Set your `MINIMAX_API_KEY` in the `recursive/api_key.env` file
+
+**Example**:
+```bash
+python engine.py --filename ../test_data/meta_fiction.jsonl \
+  --output-filename ./project/story/output.jsonl \
+  --done-flag-file ./project/story/done.txt \
+  --model abab6.5s-chat \
+  --mode story
+```
+
+### Jina.ai Search Integration
+
+WriteHERE now includes **Jina.ai** as a search provider for enhanced web search and content extraction:
+
+- **Jina Search API**: Clean, structured web search results
+- **Jina Reader API**: Extract clean content from web pages without ads or clutter
+- **Usage**: Configure `SEARCH_PROVIDER=jina` in your `api_key.env` file
+- **API Key**: Set your `JINA_API_KEY` in the configuration
+
+**Benefits**:
+- Cleaner content extraction compared to traditional web scraping
+- Better handling of modern web pages
+- No need for complex HTML parsing
+
+**To enable Jina search**:
+1. Add your Jina.ai API key to `recursive/api_key.env`
+2. Set `SEARCH_PROVIDER=jina` in the same file
+3. Run your tasks normally - Jina will be used automatically
+
+For more details on migrating from SerpAPI to Jina.ai, see the [Migration Guide](MIGRATION_GUIDE.md).
 
 ## ✨ Features
 

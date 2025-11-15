@@ -7,7 +7,7 @@ from pprint import pprint
 import json
 import requests
 from recursive.executor.actions.register import executor_register
-from recursive.llm.llm import OpenAIApiProxy
+from recursive.llm import get_llm_client
 from loguru import logger
 from recursive.utils.file_io import parse_hierarchy_tags_result
 from recursive.agent.prompts.base import prompt_register
@@ -36,7 +36,7 @@ class SearchAgent(BaseAgent):
     def __init__(self,
                  prompt_version,
                  action_executor: ActionExecutor,
-                 llm = OpenAIApiProxy(),
+                 llm = None,
                  protocol = None,
                  model = "gpt-4o",
                  max_turn: int = 10,
@@ -47,6 +47,9 @@ class SearchAgent(BaseAgent):
         self.message_constructor = prompt_register.module_dict[prompt_version]()
         self.max_turn = max_turn
         self.model = model
+        # Use factory function to get the appropriate LLM client based on model
+        if llm is None:
+            llm = get_llm_client(model)
         self.force_step = '你需要基于历史消息返回一个最终结果'
         self.action_memory = action_memory
         self.remove_history = remove_history
