@@ -58,7 +58,7 @@ class MinimaxM2Client:
         self.verbose = verbose
 
         # Minimax API configuration
-        self.api_base = "https://api.minimax.chat/v1"
+        self.api_base = os.getenv('MINIMAX_API_BASE', 'https://api.minimax.chat/v1')
         self.api_key = str(os.getenv('MINIMAX_API_KEY', ''))
 
         if not self.api_key:
@@ -241,13 +241,22 @@ class MinimaxM2Client:
 
         # Log usage and cost
         if "usage" in data:
-            input_tokens = data["usage"].get("total_tokens", 0)
-            output_tokens = data["usage"].get("total_tokens", 0)  # Minimax may provide different fields
+            # Minimax API may use different field names than OpenAI
+            # Check for both formats to ensure compatibility
+            usage = data["usage"]
+            input_tokens = usage.get("input_tokens", usage.get("prompt_tokens", 0))
+            output_tokens = usage.get("output_tokens", usage.get("completion_tokens", 0))
 
-            # Minimax M2 pricing (example - adjust based on actual pricing)
-            # These are placeholder values - update with actual Minimax pricing
-            ip = 0.015  # per 1K tokens
-            op = 0.05   # per 1K tokens
+            # If neither format is available, fall back to total_tokens
+            if input_tokens == 0 and output_tokens == 0:
+                total = usage.get("total_tokens", 0)
+                input_tokens = total // 2  # Rough estimate
+                output_tokens = total // 2
+
+            # Minimax M2 pricing (placeholder values - update with actual pricing)
+            # TODO: Update these values based on official Minimax M2 pricing
+            ip = 0.015  # per 1K input tokens
+            op = 0.05   # per 1K output tokens
 
             price = (input_tokens / 1000) * ip + (output_tokens / 1000) * op
 
