@@ -21,13 +21,18 @@ parser.add_argument('--port', type=int, default=5001, help='Port to run the serv
 args = parser.parse_args()
 
 app = Flask(__name__)
-# Enable CORS with more specific options
-CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
-# Initialize Socket.IO with broader CORS settings for development
-socketio = SocketIO(app, 
-                    cors_allowed_origins="*", 
+
+# CORS configuration - read from environment variable or default to localhost for development
+ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:8000').split(',')
+
+# Enable CORS with specific origins
+CORS(app, resources={r"/*": {"origins": ALLOWED_ORIGINS}}, supports_credentials=True)
+
+# Initialize Socket.IO with specific CORS settings
+socketio = SocketIO(app,
+                    cors_allowed_origins=ALLOWED_ORIGINS,
                     async_mode='threading',
-                    logger=False, # disable logger
+                    logger=False,
                     engineio_logger=False)
 
 # Storage for task status and results
@@ -89,34 +94,8 @@ def reload_task_storage():
 # Load existing tasks on startup
 reload_task_storage()
 
-def run_story_generation(task_id, prompt, model, api_keys):
-    """
-    Run the story generation script as a subprocess
-    """
-    task_dir = os.path.join(RESULTS_DIR, task_id)
-    os.makedirs(task_dir, exist_ok=True)
-    
-    # Create a records directory for nodes.json
-    records_dir = os.path.join(task_dir, 'records')
-    os.makedirs(records_dir, exist_ok=True)
-    
-    # Create a temporary input file with the prompt
-    input_file = os.path.join(task_dir, 'input.jsonl')
-    with open(input_file, 'w') as f:
-        json.dump({
-            "id": task_id,
-            "field": "inputs",
-            "value": prompt,
-            "ori": {"example_id": task_id, "inputs": prompt, "subset": "user"}
-        }, f)
-        f.write('\n')
-    
-    output_file = os.path.join(task_dir, 'result.jsonl')
-    done_file = os.path.join(task_dir, 'done.txt')
-    nodes_file = os.path.join(records_dir, 'nodes.json')
-    
-    # Create environment file with API keys
-    env_file = os.path.join(task_dir, 'api_key.env')
+def create_api_keys_file(env_file, api_keys):
+    """Create an environment file with API keys"""
     with open(env_file, 'w') as f:
         if 'openai' in api_keys and api_keys['openai']:
             f.write(f"OPENAI={api_keys['openai']}\n")
@@ -126,43 +105,33 @@ def run_story_generation(task_id, prompt, model, api_keys):
             f.write(f"GEMINI={api_keys['gemini']}\n")
         if 'serpapi' in api_keys and api_keys['serpapi']:
             f.write(f"SERPAPI={api_keys['serpapi']}\n")
-    
-    # Create a script to run the engine with the appropriate environment
-    script_path = os.path.join(task_dir, 'run.sh')
-    with open(script_path, 'w') as f:
-        f.write(f"""#!/bin/bash
-        cd {os.path.abspath(os.path.join(os.path.dirname(__file__), '../recursive'))}
-        source {env_file}
-        export TASK_ENV_FILE={env_file}
-        python engine.py --filename {input_file} --output-filename {output_file} --done-flag-file {done_file} --model {model} --mode story --nodes-json-file {nodes_file}
-        """)
-    
-    os.chmod(script_path, 0o755)
-    
-    # Update task status to "running"
-    task_storage[task_id] = {
-        "status": "running", 
-        "start_time": time.time(),
-        "model": model
-    }
-    
-    # Start task progress monitoring in a background thread
-    monitoring_thread = threading.Thread(
-        target=monitor_task_progress,
-        args=(task_id, records_dir)
-    )
-    monitoring_thread.daemon = True
-    monitoring_thread.start()
-    
+    # Set restrictive permissions on the API key file
+    os.chmod(env_file, 0o600)
+
+def setup_task_environment(task_id, api_keys):
+    """Setup common task environment (directories, files, etc.)"""
+    task_dir = os.path.join(RESULTS_DIR, task_id)
+    os.makedirs(task_dir, exist_ok=True)
+
+    records_dir = os.path.join(task_dir, 'records')
+    os.makedirs(records_dir, exist_ok=True)
+
+    env_file = os.path.join(task_dir, 'api_key.env')
+    create_api_keys_file(env_file, api_keys)
+
+    return task_dir, records_dir, env_file
+
+def execute_task(task_id, script_path, output_file, records_dir):
+    """Execute a task and update its status"""
     try:
         # Run the script
-        process = subprocess.Popen(['/bin/bash', script_path], 
-                                   stdout=subprocess.PIPE, 
+        process = subprocess.Popen(['/bin/bash', script_path],
+                                   stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE)
         # Store the process object in task_storage for later termination
         task_storage[task_id]["process"] = process
         stdout, stderr = process.communicate()
-        
+
         # Check if the process completed successfully
         if process.returncode == 0:
             task_storage[task_id]["status"] = "completed"
@@ -181,18 +150,58 @@ def run_story_generation(task_id, prompt, model, api_keys):
         task_storage[task_id]["status"] = "error"
         task_storage[task_id]["error"] = str(e)
 
+def run_story_generation(task_id, prompt, model, api_keys):
+    """Run the story generation script as a subprocess"""
+    # Setup environment
+    task_dir, records_dir, env_file = setup_task_environment(task_id, api_keys)
+
+    # Create input file
+    input_file = os.path.join(task_dir, 'input.jsonl')
+    with open(input_file, 'w') as f:
+        json.dump({
+            "id": task_id,
+            "field": "inputs",
+            "value": prompt,
+            "ori": {"example_id": task_id, "inputs": prompt, "subset": "user"}
+        }, f)
+        f.write('\n')
+
+    output_file = os.path.join(task_dir, 'result.jsonl')
+    done_file = os.path.join(task_dir, 'done.txt')
+    nodes_file = os.path.join(records_dir, 'nodes.json')
+
+    # Create execution script
+    script_path = os.path.join(task_dir, 'run.sh')
+    with open(script_path, 'w') as f:
+        f.write(f"""#!/bin/bash
+        cd {os.path.abspath(os.path.join(os.path.dirname(__file__), '../recursive'))}
+        source {env_file}
+        export TASK_ENV_FILE={env_file}
+        python engine.py --filename {input_file} --output-filename {output_file} --done-flag-file {done_file} --model {model} --mode story --nodes-json-file {nodes_file}
+        """)
+    os.chmod(script_path, 0o755)
+
+    # Initialize task status
+    task_storage[task_id] = {
+        "status": "running",
+        "start_time": time.time(),
+        "model": model
+    }
+
+    # Start monitoring
+    monitoring_thread = threading.Thread(target=monitor_task_progress, args=(task_id, records_dir))
+    monitoring_thread.daemon = True
+    monitoring_thread.start()
+
+    # Execute task
+    execute_task(task_id, script_path, output_file, records_dir)
+
 def run_report_generation(task_id, prompt, model, enable_search, search_engine, api_keys):
-    """
-    Run the report generation script as a subprocess
-    """
-    task_dir = os.path.join(RESULTS_DIR, task_id)
-    os.makedirs(task_dir, exist_ok=True)
-    
-    # Create a records directory for nodes.json
-    records_dir = os.path.join(task_dir, 'records')
-    os.makedirs(records_dir, exist_ok=True)
-    
-    # Create a temporary input file with the prompt
+    """Run the report generation script as a subprocess"""
+    # Setup environment
+    task_dir, records_dir, env_file = setup_task_environment(task_id, api_keys)
+
+    # Create input file
     input_file = os.path.join(task_dir, 'input.jsonl')
     with open(input_file, 'w') as f:
         json.dump({
@@ -203,27 +212,15 @@ def run_report_generation(task_id, prompt, model, enable_search, search_engine, 
             "prompt": prompt
         }, f)
         f.write('\n')
-    
+
     output_file = os.path.join(task_dir, 'result.jsonl')
     done_file = os.path.join(task_dir, 'done.txt')
     nodes_file = os.path.join(records_dir, 'nodes.json')
-    
-    # Create environment file with API keys
-    env_file = os.path.join(task_dir, 'api_key.env')
-    with open(env_file, 'w') as f:
-        if 'openai' in api_keys and api_keys['openai']:
-            f.write(f"OPENAI={api_keys['openai']}\n")
-        if 'claude' in api_keys and api_keys['claude']:
-            f.write(f"CLAUDE={api_keys['claude']}\n")
-        if 'gemini' in api_keys and api_keys['gemini']:
-            f.write(f"GEMINI={api_keys['gemini']}\n")
-        if 'serpapi' in api_keys and api_keys['serpapi']:
-            f.write(f"SERPAPI={api_keys['serpapi']}\n")
-    
-    # Create a script to run the engine with the appropriate environment
+
+    # Create execution script
     script_path = os.path.join(task_dir, 'run.sh')
     engine_backend = search_engine if enable_search else "none"
-    
+
     with open(script_path, 'w') as f:
         f.write(f"""#!/bin/bash
         cd {os.path.abspath(os.path.join(os.path.dirname(__file__), '../recursive'))}
@@ -231,51 +228,23 @@ def run_report_generation(task_id, prompt, model, enable_search, search_engine, 
         export TASK_ENV_FILE={env_file}
         python engine.py --filename {input_file} --output-filename {output_file} --done-flag-file {done_file} --model {model} --engine-backend {engine_backend} --mode report --nodes-json-file {nodes_file}
         """)
-    
     os.chmod(script_path, 0o755)
-    
-    # Update task status to "running"
+
+    # Initialize task status
     task_storage[task_id] = {
-        "status": "running", 
+        "status": "running",
         "start_time": time.time(),
         "model": model,
         "search_engine": engine_backend if enable_search else None
     }
-    
-    # Start task progress monitoring in a background thread
-    monitoring_thread = threading.Thread(
-        target=monitor_task_progress,
-        args=(task_id, records_dir)
-    )
+
+    # Start monitoring
+    monitoring_thread = threading.Thread(target=monitor_task_progress, args=(task_id, records_dir))
     monitoring_thread.daemon = True
     monitoring_thread.start()
-    
-    try:
-        # Run the script
-        process = subprocess.Popen(['/bin/bash', script_path], 
-                                   stdout=subprocess.PIPE, 
-                                   stderr=subprocess.PIPE)
-        # Store the process object in task_storage for later termination
-        task_storage[task_id]["process"] = process
-        stdout, stderr = process.communicate()
-        
-        # Check if the process completed successfully
-        if process.returncode == 0:
-            task_storage[task_id]["status"] = "completed"
-            # Store the result if available
-            if os.path.exists(output_file):
-                with open(output_file, 'r') as f:
-                    result_data = json.load(f)
-                    task_storage[task_id]["result"] = result_data.get("result", "No result available")
-            else:
-                task_storage[task_id]["status"] = "error"
-                task_storage[task_id]["error"] = "Output file not generated"
-        else:
-            task_storage[task_id]["status"] = "error"
-            task_storage[task_id]["error"] = stderr.decode('utf-8')
-    except Exception as e:
-        task_storage[task_id]["status"] = "error"
-        task_storage[task_id]["error"] = str(e)
+
+    # Execute task
+    execute_task(task_id, script_path, output_file, records_dir)
 
 @app.route('/api/generate-story', methods=['POST'])
 def api_generate_story():
@@ -709,58 +678,57 @@ def api_stop_task(task_id):
         # First try to find the PID using ps command
         try:
             # For the specific task_id, find the python engine.py process
-            cmd = f"ps -ef | grep '{task_id}' | grep 'engine.py' | grep -v grep | awk '{{print $2}}'"
-            result = subprocess.check_output(cmd, shell=True).decode().strip()
-            
-            if result:
-                pid = int(result)
-                print(f"Found Python engine.py process with PID {pid} for task {task_id}")
-                
-                # Kill the process and its children
-                print(f"Killing process {pid} and its children")
-                if os.name != 'nt':  # Unix/Linux/MacOS
-                    # try:
-                    #     # Try to kill process group first
-                    #     os.killpg(os.getpgid(pid), signal.SIGKILL)
-                    #     print(f"Sent SIGKILL to process group for PID {pid}")
-                    # except Exception as group_err:
-                    #     print(f"Error killing process group: {str(group_err)}")
-                        
-                    # Also try direct kill commands
-                    os.system(f"kill -9 {pid}")
-                    os.system(f"pkill -P {pid}")  # Kill all child processes
-                    print(f"Used kill commands on PID {pid}")
-                else:
-                    # Windows
-                    os.system(f"taskkill /F /PID {pid} /T")
-                    print(f"Used taskkill on PID {pid}")
-            else:
-                print(f"Could not find Python engine.py process for task {task_id}")
-                
-                # Fall back to looking for the run.sh process
-                cmd = f"ps -ef | grep '{task_dir}/run.sh' | grep -v grep | awk '{{print $2}}'"
-                result = subprocess.check_output(cmd, shell=True).decode().strip()
-                
-                if result:
-                    pid = int(result)
-                    print(f"Found run.sh process with PID {pid} for task {task_id}")
-                    
-                    # Kill the process
-                    if os.name != 'nt':
-                        os.system(f"kill -9 {pid}")
-                        # os.system(f"pkill -P {pid}")
+            # Use list form to avoid shell injection
+            ps_result = subprocess.run(
+                ['ps', '-ef'],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+
+            # Parse the output to find matching processes
+            pids_to_kill = []
+            for line in ps_result.stdout.split('\n'):
+                if task_id in line and 'engine.py' in line and 'grep' not in line:
+                    parts = line.split()
+                    if len(parts) >= 2:
+                        try:
+                            pid = int(parts[1])
+                            pids_to_kill.append(pid)
+                            print(f"Found Python engine.py process with PID {pid} for task {task_id}")
+                        except (ValueError, IndexError):
+                            continue
+
+            # Kill found processes
+            for pid in pids_to_kill:
+                try:
+                    print(f"Killing process {pid}")
+                    if os.name != 'nt':  # Unix/Linux/MacOS
+                        # Use signal module for safer process termination
+                        os.kill(pid, signal.SIGTERM)
+                        # Wait a bit and force kill if still running
+                        import time
+                        time.sleep(1)
+                        try:
+                            os.kill(pid, signal.SIGKILL)
+                        except ProcessLookupError:
+                            pass  # Process already terminated
                     else:
-                        os.system(f"taskkill /F /PID {pid} /T")
-                else:
-                    print(f"Could not find run.sh process for task {task_id}")
-                    
+                        # Windows - use subprocess instead of os.system
+                        subprocess.run(['taskkill', '/F', '/PID', str(pid), '/T'],
+                                     capture_output=True, timeout=5)
+                except ProcessLookupError:
+                    print(f"Process {pid} already terminated")
+                except Exception as kill_err:
+                    print(f"Error killing process {pid}: {str(kill_err)}")
+
+            if not pids_to_kill:
+                print(f"Could not find Python engine.py process for task {task_id}")
+
+        except subprocess.TimeoutExpired:
+            print(f"Timeout while searching for processes for task {task_id}")
         except Exception as e:
             print(f"Error finding or killing processes for task {task_id}: {str(e)}")
-            
-            # As a last resort, try to kill any processes related to the task directory
-            if os.name != 'nt':
-                os.system(f"pkill -f '{task_dir}'")
-                print(f"Attempted to kill any processes related to {task_dir}")
         
         # Create a done file to indicate the task is stopped
         with open(os.path.join(task_dir, 'done.txt'), 'w') as f:
@@ -1065,4 +1033,7 @@ def handle_subscribe(data):
     emit('task_update', {'taskId': task_id, 'taskGraph': initial_graph})
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, host="0.0.0.0", port=args.port, allow_unsafe_werkzeug=True)
+    # Note: For production, set debug=False and use a proper WSGI server like gunicorn
+    # Example: gunicorn --worker-class eventlet -w 1 server:app
+    debug_mode = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
+    socketio.run(app, debug=debug_mode, host="0.0.0.0", port=args.port)

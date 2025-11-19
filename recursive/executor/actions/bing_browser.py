@@ -188,7 +188,7 @@ class WebPageHelper:
         call_args_dict = {
             "url": url,
         }
-        
+
         if web_page_cache is not None and not overwrite_cache:
             cache_result = web_page_cache.get_cache(
                 name = cache_name,
@@ -196,10 +196,12 @@ class WebPageHelper:
             )
             if cache_result is not None:
                 return cache_result["result"]
-            
+
         try:
             import random
-            with httpx.Client(verify=False, headers=random.choice(self.header_pools), follow_redirects=True) as client:
+            # Enable SSL verification by default. Set DISABLE_SSL_VERIFY=true env var only if needed for development
+            verify_ssl = os.getenv('DISABLE_SSL_VERIFY', 'false').lower() != 'true'
+            with httpx.Client(verify=verify_ssl, headers=random.choice(self.header_pools), follow_redirects=True) as client:
                 res = client.get(url, timeout=4)
             if res.status_code >= 400:
                 res.raise_for_status()
@@ -442,13 +444,24 @@ class BingBrowser(BaseAction):
                  selector_model = "gpt-4o-mini",
                  summarizer_model = "gpt-4o-mini",
                  **kwargs):
-        
+
         self.searcher_type = searcher_type
         self.select_quota = select_quota
         self.search_max_thread = search_max_thread
         self.language = language
 
-        self.searcher = eval(searcher_type)(topk=topk, **kwargs)
+        # Secure searcher instantiation using a whitelist mapping
+        SEARCHER_MAP = {
+            'SerpApiSearch': SerpApiSearch,
+            'SearXNG': SearXNG,
+            'DuckDuckGoSearch': SerpApiSearch,  # Fallback mapping
+        }
+
+        searcher_class = SEARCHER_MAP.get(searcher_type)
+        if searcher_class is None:
+            raise ValueError(f"Invalid searcher_type: {searcher_type}. Must be one of {list(SEARCHER_MAP.keys())}")
+
+        self.searcher = searcher_class(topk=topk, **kwargs)
         self.search_results = None
         self.pk_quota = pk_quota
         self.selector_max_workers = selector_max_workers
