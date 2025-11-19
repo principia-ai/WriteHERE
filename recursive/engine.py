@@ -53,6 +53,10 @@ class GraphRunEngine:
         root_node_file = "{}/nodes.pkl".format(folder)
         root_node_json_file = "{}/nodes.json".format(folder)
         article_file = "{}/article.txt".format(folder)
+
+        # SECURITY WARNING: Using pickle for serialization
+        # Only load .pkl files from trusted sources as pickle can execute arbitrary code
+        # TODO: Consider migrating to JSON-based serialization for security
         with open(root_node_file, "wb") as f:
             pickle.dump(self.root_node, f)
         
@@ -66,6 +70,17 @@ class GraphRunEngine:
     
     def load(self, folder):
         root_node_file = "{}/nodes.pkl".format(folder)
+
+        # SECURITY WARNING: pickle.load() can execute arbitrary code
+        # Only load .pkl files from trusted sources
+        # Validate the file path to ensure it's in the expected directory
+        import pathlib
+        folder_path = pathlib.Path(folder).resolve()
+        expected_base = pathlib.Path(os.getcwd()).resolve()
+
+        if not str(folder_path).startswith(str(expected_base)):
+            raise ValueError(f"Attempted to load pickle from outside project directory: {folder}")
+
         with open(root_node_file, "rb") as f:
             self.root_node = pickle.load(f)
         
