@@ -283,3 +283,21 @@ If you use this code in your research, please cite our paper:
 [MIT License](LICENSE)
 
 This project is open-source. You are free to use, modify, and distribute the code for research, educational, and personal purposes.
+---
+
+## 📦 Installation & Setup Guide
+
+To run WriteHERE locally:
+
+1. Clone the repository:
+   git clone https://github.com/your-username/WriteHERE.git
+
+2. Install Python dependencies:
+   pip install -r requirements.txt
+
+3. Run the backend:
+   python backend/app.py
+
+4. Start the frontend:
+   npm install
+   npm start
