@@ -4,7 +4,8 @@
 <p align="center">
   <a href="https://arxiv.org/abs/2503.08275"><img src="https://img.shields.io/badge/arXiv-2503.08275-b31b1b.svg" alt="arXiv"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
-  <a href="http://ec2-3-138-117-136.us-east-2.compute.amazonaws.com"><img src="https://img.shields.io/badge/Live_Demo-blue.svg" alt="Live Demo"></a>
+  <a href="https://principia-ai.github.io/WriteHERE/"><img src="https://img.shields.io/badge/Website-blue.svg" alt="Website"></a>
+  <a href="http://ec2-3-138-117-136.us-east-2.compute.amazonaws.com"><img src="https://img.shields.io/badge/Live_Demo-brightgreen.svg" alt="Live Demo"></a>
 </p>
 
 WriteHERE is an open-source framework that revolutionizes long-form writing through human-like adaptive planning. Unlike traditional AI writing tools that follow rigid workflows, WriteHERE dynamically decomposes writing tasks and integrates three fundamental capabilities:
