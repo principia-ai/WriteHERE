@@ -53,6 +53,7 @@ WriteHERE is developed with these core principles:
   - OpenAI (GPT models)
   - Anthropic (Claude models)
   - SerpAPI (for search functionality in report generation)
+  - Or any provider via [LiteLLM](https://github.com/BerriAI/litellm) (100+ providers)
 
 ### Quickstart
 
@@ -90,6 +91,19 @@ Example for generating a report:
 ```bash
 python engine.py --filename ../test_data/qa_test.jsonl --output-filename ./project/qa/result.jsonl --done-flag-file ./project/qa/done.txt --model claude-3-sonnet --mode report
 ```
+
+Example using LiteLLM (access 100+ providers with the `litellm/` prefix):
+```bash
+# AWS Bedrock
+python engine.py --filename ../test_data/meta_fiction.jsonl --output-filename ./project/story/output.jsonl --done-flag-file ./project/story/done.txt --model litellm/bedrock/anthropic.claude-3-sonnet-20240229-v1:0 --mode story
+
+# Azure OpenAI
+python engine.py ... --model litellm/azure/gpt-4 --mode story
+
+# Google Vertex AI
+python engine.py ... --model litellm/vertex_ai/gemini-pro --mode report
+```
+Set the provider's standard API key env var (e.g. `ANTHROPIC_API_KEY`, `AWS_ACCESS_KEY_ID`). Full list: https://docs.litellm.ai/docs/providers
 
 #### Running With Visualization Interface
 

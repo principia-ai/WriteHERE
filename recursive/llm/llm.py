@@ -126,10 +126,68 @@ class OpenAIApiProxy():
         return data
 
 
+    def _call_litellm(self, model, messages, no_cache, overwrite_cache, temperature, **kwargs):
+        import litellm
+
+        params = {
+            "model": model,
+            "messages": messages,
+            "max_tokens": 8192,
+            "drop_params": True,
+        }
+        if temperature is not None:
+            params["temperature"] = temperature
+
+        params.update(kwargs)
+
+        cache_name = "OpenAIApiProxy.call"
+        call_args_dict = copy.deepcopy(params)
+        llm_cache = caches["llm"]
+        if not no_cache and not overwrite_cache:
+            cache_result = llm_cache.get_cache(cache_name, call_args_dict)
+            if cache_result is not None:
+                return cache_result
+
+        response = None
+        for attempt in range(self.MAX_RETRIES):
+            try:
+                response = litellm.completion(**params)
+                break
+            except Exception as e:
+                qualname = f"{type(e).__module__}.{type(e).__name__}"
+                transient = qualname in {
+                    "litellm.exceptions.RateLimitError",
+                    "litellm.exceptions.APIConnectionError",
+                    "litellm.exceptions.Timeout",
+                    "litellm.exceptions.InternalServerError",
+                    "litellm.exceptions.ServiceUnavailableError",
+                }
+                if not transient or attempt == self.MAX_RETRIES - 1:
+                    raise
+                sleep_time = self.BACKOFF_FACTOR
+                logger.warning(f"LiteLLM transient error (attempt {attempt + 1}): {e}")
+                time.sleep(sleep_time)
+
+        content = response.choices[0].message.content
+        usage = response.usage
+        if self.verbose and usage:
+            logger.debug(f"{model} Usage: input={usage.prompt_tokens}, output={usage.completion_tokens}")
+
+        result = [{"message": {"content": content}}]
+
+        if not no_cache:
+            llm_cache.save_cache(cache_name, call_args_dict, result)
+
+        return result
+
     def call(self, model, messages, no_cache = False, overwrite_cache=False, tools=None, temperature=None, headers={}, use_official=None, **kwargs):
         assert tools is None
         messages = copy.deepcopy(messages)
-        
+
+        # LiteLLM route: model starts with "litellm/" prefix
+        if model.startswith("litellm/"):
+            return self._call_litellm(model[len("litellm/"):], messages, no_cache, overwrite_cache, temperature, **kwargs)
+
         # Check if model name includes openrouter model identifier
         if any(provider in model for provider in ["google/", "anthropic/", "meta/", "mistral/"]):
             use_official = "openrouter"
