@@ -557,9 +557,9 @@ class BingBrowser(BaseAction):
             
         Args:
             query_list ({"type"-"array","items"-{"type"-"string"}}): A set of search queries to be searched in parallel
-            user_question ({"type": "string"}): User question
-            think ({"type": "string"}): Thinking
-            global_start_index ({"type": "int"}): start_index
+            user_question ({"type"-"string"}): User question
+            think ({"type"-"string"}): Thinking
+            global_start_index ({"type"-"int"}): start_index
             
         Returns:
             Dict[str, str]: dict of search results
