@@ -34,6 +34,20 @@ export const pingAPI = async () => {
 };
 
 /**
+ * Fetches online and discovered local model options.
+ * @returns {Promise} - Promise that resolves with model metadata
+ */
+export const getModels = async () => {
+  try {
+    const response = await apiClient.get('/models');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching model options:', error);
+    throw error;
+  }
+};
+
+/**
  * Generates a story using the heterogeneous recursive planning engine
  * @param {Object} params - Generation parameters
  * @param {string} params.prompt - The story prompt

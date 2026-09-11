@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Container, 
-  Typography, 
-  TextField, 
-  Button, 
-  Box, 
-  Paper, 
+import {
+  Container,
+  Typography,
+  TextField,
+  Button,
+  Box,
+  Paper,
   Grid,
   FormControl,
   InputLabel,
@@ -33,7 +33,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import InfoIcon from '@mui/icons-material/Info';
-import { generateReport, pingAPI } from '../utils/api';
+import { generateReport, getModels, pingAPI } from '../utils/api';
 import HistoryPanel from '../components/HistoryPanel';
 
 // Recommended model options
@@ -55,6 +55,7 @@ const examplePrompts = [
 const ReportGenerationPage = () => {
   const [prompt, setPrompt] = useState('');
   const [model, setModel] = useState('claude-3-5-sonnet-20241022');
+  const [modelOptions, setModelOptions] = useState(commonModels);
   const [searchEngine, setSearchEngine] = useState('google');
   const [enableSearch, setEnableSearch] = useState(true);
   const [apiKeys, setApiKeys] = useState({
@@ -73,7 +74,7 @@ const ReportGenerationPage = () => {
   const [statusMessage, setStatusMessage] = useState('');
   const [showStatus, setShowStatus] = useState(false);
   const navigate = useNavigate();
-  
+
   // Save API keys to localStorage when they change
   useEffect(() => {
     if (apiKeys.openai) localStorage.setItem('openai_api_key', apiKeys.openai);
@@ -81,7 +82,7 @@ const ReportGenerationPage = () => {
     if (apiKeys.gemini) localStorage.setItem('gemini_api_key', apiKeys.gemini);
     if (apiKeys.serpapi) localStorage.setItem('serpapi_api_key', apiKeys.serpapi);
   }, [apiKeys]);
-  
+
   const handleApiKeyChange = (provider, value) => {
     setApiKeys(prev => ({
       ...prev,
@@ -99,47 +100,63 @@ const ReportGenerationPage = () => {
         setError('Cannot connect to the backend server. Please make sure it is running at http://localhost:' + (process.env.REACT_APP_BACKEND_PORT || '5001') + '.');
       }
     }
-    
+
     checkAPIConnection();
+  }, []);
+
+  useEffect(() => {
+    async function loadModelOptions() {
+      try {
+        const response = await getModels();
+        if (response.models && response.models.length > 0) {
+          setModelOptions(response.models);
+        }
+      } catch (err) {
+        console.warn('Using built-in model options because /api/models failed:', err);
+      }
+    }
+
+    loadModelOptions();
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!prompt) {
       setError('Please provide a prompt for report generation.');
       return;
     }
-    
+
     // Check if the appropriate API keys are provided
     const isOpenAIModel = model.toLowerCase().includes('gpt');
     const isClaudeModel = model.toLowerCase().includes('claude');
     const isGeminiModel = model.toLowerCase().includes('gemini');
-    
-    if (isOpenAIModel && !apiKeys.openai) {
+    const isOllamaModel = model.toLowerCase().startsWith('ollama/');
+
+    if (!isOllamaModel && isOpenAIModel && !apiKeys.openai) {
       setError('Please provide your OpenAI API key in the settings section.');
       setShowApiSection(true);
       return;
     }
-    
-    if (isClaudeModel && !apiKeys.claude) {
+
+    if (!isOllamaModel && isClaudeModel && !apiKeys.claude) {
       setError('Please provide your Anthropic Claude API key in the settings section.');
       setShowApiSection(true);
       return;
     }
-    
-    if (isGeminiModel && !apiKeys.gemini) {
+
+    if (!isOllamaModel && isGeminiModel && !apiKeys.gemini) {
       setError('Please provide your Google Gemini API key in the settings section.');
       setShowApiSection(true);
       return;
     }
-    
+
     if (enableSearch && !apiKeys.serpapi) {
       setError('Please provide your SerpAPI key in the settings section to enable search functionality.');
       setShowApiSection(true);
       return;
     }
-    
+
     // First, check if the server is reachable
     try {
       await pingAPI();
@@ -147,12 +164,12 @@ const ReportGenerationPage = () => {
       setError('Cannot connect to the backend server. Please make sure it is running at http://localhost:' + (process.env.REACT_APP_BACKEND_PORT || '5001') + '.');
       return;
     }
-    
+
     setLoading(true);
     setError('');
     setStatusMessage('Initiating report generation...');
     setShowStatus(true);
-    
+
     try {
       // Call the backend API to start report generation
       const response = await generateReport({
@@ -167,19 +184,19 @@ const ReportGenerationPage = () => {
           serpapi: apiKeys.serpapi
         }
       });
-      
+
       // Navigate to the results page with the task ID
       if (response && response.taskId) {
         setStatusMessage('Report generation started successfully!');
-        navigate(`/results/${response.taskId}`, { 
-          state: { 
+        navigate(`/results/${response.taskId}`, {
+          state: {
             taskId: response.taskId,
             prompt,
             model,
             searchEngine: enableSearch ? searchEngine : 'none',
             type: 'report',
             status: 'generating'
-          } 
+          }
         });
       } else {
         throw new Error('No task ID returned from the server');
@@ -204,7 +221,7 @@ const ReportGenerationPage = () => {
         </Typography>
         <Typography variant="body1" paragraph>
           Generate comprehensive technical reports using our Heterogeneous Recursive Planning framework.
-          The system integrates information retrieval, logical reasoning, and content composition to 
+          The system integrates information retrieval, logical reasoning, and content composition to
           create well-structured and informative reports.
         </Typography>
       </Box>
@@ -214,9 +231,9 @@ const ReportGenerationPage = () => {
           {error}
         </Alert>
       )}
-      
+
       <HistoryPanel />
-      
+
       <Snackbar
         open={showStatus}
         autoHideDuration={6000}
@@ -244,7 +261,7 @@ const ReportGenerationPage = () => {
             <Grid item xs={12} md={4}>
               <Autocomplete
                 freeSolo
-                options={commonModels}
+                options={modelOptions}
                 getOptionLabel={(option) => {
                   if (typeof option === 'string') {
                     return option;
@@ -281,12 +298,12 @@ const ReportGenerationPage = () => {
                     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                       <Typography variant="body1">{option.label}</Typography>
                       <Typography variant="caption" color="text.secondary">
-                        {option.value}
+                        {option.provider ? `${option.provider} - ${option.value}` : option.value}
                       </Typography>
                     </Box>
                   </li>
                 )}
-                renderTags={(value, getTagProps) => 
+                renderTags={(value, getTagProps) =>
                   value.map((option, index) => (
                     <Chip
                       label={option.label}
@@ -301,14 +318,14 @@ const ReportGenerationPage = () => {
             <Grid item xs={12} md={4}>
               <FormControlLabel
                 control={
-                  <Switch 
-                    checked={enableSearch} 
-                    onChange={(e) => setEnableSearch(e.target.checked)} 
+                  <Switch
+                    checked={enableSearch}
+                    onChange={(e) => setEnableSearch(e.target.checked)}
                   />
                 }
                 label="Enable Search"
               />
-              
+
               <FormControl fullWidth sx={{ mt: 1 }} disabled={!enableSearch}>
                 <InputLabel id="search-engine-label">Search Engine</InputLabel>
                 <Select
@@ -336,9 +353,9 @@ const ReportGenerationPage = () => {
                 {loading ? <CircularProgress size={24} color="inherit" /> : 'Generate Report'}
               </Button>
             </Grid>
-            
+
             <Grid item xs={12}>
-              <Accordion 
+              <Accordion
                 expanded={showApiSection}
                 onChange={() => setShowApiSection(!showApiSection)}
                 sx={{
@@ -499,13 +516,13 @@ const ReportGenerationPage = () => {
         <Typography variant="body2" paragraph>
           Click on any example to use it as your prompt:
         </Typography>
-        
+
         <Grid container spacing={3}>
           {examplePrompts.map((example, index) => (
             <Grid item xs={12} md={4} key={index}>
-              <Card 
-                sx={{ 
-                  height: '100%', 
+              <Card
+                sx={{
+                  height: '100%',
                   cursor: 'pointer',
                   transition: 'transform 0.2s',
                   '&:hover': {

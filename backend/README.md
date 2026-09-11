@@ -39,6 +39,8 @@ Request body:
 }
 ```
 
+Use local Ollama models with the `ollama/` prefix, for example `ollama/qwen2.5:7b`. Local models do not require cloud API keys, but Ollama must already be running locally.
+
 ### Generate Report
 ```
 POST /api/generate-report
@@ -67,6 +69,12 @@ GET /api/status/{taskId}
 ```
 GET /api/result/{taskId}
 ```
+
+### List Models
+```
+GET /api/models
+```
+Returns built-in online model suggestions plus local Ollama models discovered from `OLLAMA_MODELS_DIR` or `~/.ollama/models`.
 
 ## Integration with Frontend
 

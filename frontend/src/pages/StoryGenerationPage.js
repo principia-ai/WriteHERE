@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Container, 
-  Typography, 
-  TextField, 
-  Button, 
-  Box, 
-  Paper, 
+import {
+  Container,
+  Typography,
+  TextField,
+  Button,
+  Box,
+  Paper,
   Grid,
   FormControl,
   InputLabel,
@@ -31,7 +31,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import InfoIcon from '@mui/icons-material/Info';
-import { generateStory, pingAPI } from '../utils/api';
+import { generateStory, getModels, pingAPI } from '../utils/api';
 import HistoryPanel from '../components/HistoryPanel';
 
 // Recommended model options
@@ -54,6 +54,7 @@ const examplePrompts = [
 const StoryGenerationPage = () => {
   const [prompt, setPrompt] = useState('');
   const [model, setModel] = useState('claude-3-7-sonnet-20250219');
+  const [modelOptions, setModelOptions] = useState(commonModels);
   const [apiKeys, setApiKeys] = useState({
     openai: localStorage.getItem('openai_api_key') || '',
     claude: localStorage.getItem('claude_api_key') || '',
@@ -68,7 +69,7 @@ const StoryGenerationPage = () => {
   const [statusMessage, setStatusMessage] = useState('');
   const [showStatus, setShowStatus] = useState(false);
   const navigate = useNavigate();
-  
+
   // Save API keys to localStorage when they change
   useEffect(() => {
     if (apiKeys.openai) localStorage.setItem('openai_api_key', apiKeys.openai);
@@ -86,41 +87,57 @@ const StoryGenerationPage = () => {
         setError('Cannot connect to the backend server. Please make sure it is running at http://localhost:' + (process.env.REACT_APP_BACKEND_PORT || '5001') + '.');
       }
     }
-    
+
     checkAPIConnection();
+  }, []);
+
+  useEffect(() => {
+    async function loadModelOptions() {
+      try {
+        const response = await getModels();
+        if (response.models && response.models.length > 0) {
+          setModelOptions(response.models);
+        }
+      } catch (err) {
+        console.warn('Using built-in model options because /api/models failed:', err);
+      }
+    }
+
+    loadModelOptions();
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!prompt) {
       setError('Please provide a prompt for story generation.');
       return;
     }
-    
+
     // Check if the appropriate API key is provided
     const isOpenAIModel = model.toLowerCase().includes('gpt');
     const isClaudeModel = model.toLowerCase().includes('claude');
     const isGeminiModel = model.toLowerCase().includes('gemini');
-    
-    if (isOpenAIModel && !apiKeys.openai) {
+    const isOllamaModel = model.toLowerCase().startsWith('ollama/');
+
+    if (!isOllamaModel && isOpenAIModel && !apiKeys.openai) {
       setError('Please provide your OpenAI API key in the settings section.');
       setShowApiSection(true);
       return;
     }
-    
-    if (isClaudeModel && !apiKeys.claude) {
+
+    if (!isOllamaModel && isClaudeModel && !apiKeys.claude) {
       setError('Please provide your Anthropic Claude API key in the settings section.');
       setShowApiSection(true);
       return;
     }
-    
-    if (isGeminiModel && !apiKeys.gemini) {
+
+    if (!isOllamaModel && isGeminiModel && !apiKeys.gemini) {
       setError('Please provide your Google Gemini API key in the settings section.');
       setShowApiSection(true);
       return;
     }
-    
+
     // First, check if the server is reachable
     try {
       await pingAPI();
@@ -128,12 +145,12 @@ const StoryGenerationPage = () => {
       setError('Cannot connect to the backend server. Please make sure it is running at http://localhost:' + (process.env.REACT_APP_BACKEND_PORT || '5001') + '.');
       return;
     }
-    
+
     setLoading(true);
     setError('');
     setStatusMessage('Initiating story generation...');
     setShowStatus(true);
-    
+
     try {
       // Call the backend API to start story generation
       const response = await generateStory({
@@ -145,18 +162,18 @@ const StoryGenerationPage = () => {
           gemini: apiKeys.gemini
         }
       });
-      
+
       // Navigate to the results page with the task ID
       if (response && response.taskId) {
         setStatusMessage('Story generation started successfully!');
-        navigate(`/results/${response.taskId}`, { 
-          state: { 
+        navigate(`/results/${response.taskId}`, {
+          state: {
             taskId: response.taskId,
             prompt,
             model,
             type: 'story',
             status: 'generating'
-          } 
+          }
         });
       } else {
         throw new Error('No task ID returned from the server');
@@ -168,7 +185,7 @@ const StoryGenerationPage = () => {
       console.error('Story generation error:', err);
     }
   };
-  
+
   const handleApiKeyChange = (provider, value) => {
     setApiKeys(prev => ({
       ...prev,
@@ -187,8 +204,8 @@ const StoryGenerationPage = () => {
           Creative Story Generation
         </Typography>
         <Typography variant="body1" paragraph>
-          Generate creative stories using our Heterogeneous Recursive Planning framework. 
-          Provide a prompt describing the story you want to create, and our system will 
+          Generate creative stories using our Heterogeneous Recursive Planning framework.
+          Provide a prompt describing the story you want to create, and our system will
           recursively plan and generate a cohesive narrative.
         </Typography>
       </Box>
@@ -198,9 +215,9 @@ const StoryGenerationPage = () => {
           {error}
         </Alert>
       )}
-      
+
       <HistoryPanel />
-      
+
       <Snackbar
         open={showStatus}
         autoHideDuration={6000}
@@ -228,7 +245,7 @@ const StoryGenerationPage = () => {
             <Grid item xs={12} md={6}>
               <Autocomplete
                 freeSolo
-                options={commonModels}
+                options={modelOptions}
                 getOptionLabel={(option) => {
                   if (typeof option === 'string') {
                     return option;
@@ -265,12 +282,12 @@ const StoryGenerationPage = () => {
                     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                       <Typography variant="body1">{option.label}</Typography>
                       <Typography variant="caption" color="text.secondary">
-                        {option.value}
+                        {option.provider ? `${option.provider} - ${option.value}` : option.value}
                       </Typography>
                     </Box>
                   </li>
                 )}
-                renderTags={(value, getTagProps) => 
+                renderTags={(value, getTagProps) =>
                   value.map((option, index) => (
                     <Chip
                       label={option.label}
@@ -294,9 +311,9 @@ const StoryGenerationPage = () => {
                 {loading ? <CircularProgress size={24} color="inherit" /> : 'Generate Story'}
               </Button>
             </Grid>
-            
+
             <Grid item xs={12}>
-              <Accordion 
+              <Accordion
                 expanded={showApiSection}
                 onChange={() => setShowApiSection(!showApiSection)}
                 sx={{
@@ -424,13 +441,13 @@ const StoryGenerationPage = () => {
         <Typography variant="body2" paragraph>
           Click on any example to use it as your prompt:
         </Typography>
-        
+
         <Grid container spacing={3}>
           {examplePrompts.map((example, index) => (
             <Grid item xs={12} md={4} key={index}>
-              <Card 
-                sx={{ 
-                  height: '100%', 
+              <Card
+                sx={{
+                  height: '100%',
                   cursor: 'pointer',
                   transition: 'transform 0.2s',
                   '&:hover': {
@@ -462,7 +479,7 @@ const StoryGenerationPage = () => {
               Be Specific
             </Typography>
             <Typography variant="body2">
-              Provide specific details about the characters, setting, and plot elements 
+              Provide specific details about the characters, setting, and plot elements
               you want in your story.
             </Typography>
           </Grid>

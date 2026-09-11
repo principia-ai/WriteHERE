@@ -1,5 +1,20 @@
 #coding:utf8
 
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+if "--list-local-models" in sys.argv:
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "llm"))
+    from local_models import list_ollama_models
+
+    models = list_ollama_models()
+    if models:
+        print("\n".join(models))
+    else:
+        print("No local Ollama models found.")
+    raise SystemExit(0)
+
 from collections import defaultdict, deque
 from typing import List, Dict
 from recursive.graph import TaskStatus, RegularDummyNode, NodeType
@@ -17,7 +32,6 @@ from recursive.memory import caches
 from recursive.cache import Cache
 from recursive.utils.get_index import get_report_with_ref
 from datetime import datetime
-import os
     
     
 class GraphRunEngine:
@@ -586,10 +600,11 @@ def report_writing(input_filename,
                                  
 def define_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--filename", type=str, required=True)
-    parser.add_argument("--mode", type=str, choices=["story", "report"], required=True)
-    parser.add_argument("--output-filename", type=str, required=True)
-    parser.add_argument("--model", type=str, required=True)
+    parser.add_argument("--filename", type=str)
+    parser.add_argument("--mode", type=str, choices=["story", "report"])
+    parser.add_argument("--output-filename", type=str)
+    parser.add_argument("--model", type=str)
+    parser.add_argument("--list-local-models", action="store_true", help="List discovered local Ollama models and exit")
     parser.add_argument("--length", type=int)
     parser.add_argument("--engine-backend", type=str)
     parser.add_argument("--nodes-json-file", type=str, help="Path to save nodes.json for real-time visualization")
@@ -607,6 +622,19 @@ def define_args():
 if __name__ == "__main__":
     parser = define_args()
     args = parser.parse_args()
+
+    required_args = {
+        "--filename": args.filename,
+        "--mode": args.mode,
+        "--output-filename": args.output_filename,
+        "--model": args.model,
+    }
+    missing_args = [name for name, value in required_args.items() if value is None]
+    if missing_args:
+        parser.error("the following arguments are required unless --list-local-models is used: {}".format(
+            ", ".join(missing_args)
+        ))
+
     if args.mode == "story":
         story_writing(args.filename, args.output_filename,
                       args.start, args.end, args.done_flag_file, args.model,

@@ -129,20 +129,23 @@ class OpenAIApiProxy():
     def call(self, model, messages, no_cache = False, overwrite_cache=False, tools=None, temperature=None, headers={}, use_official=None, **kwargs):
         assert tools is None
         messages = copy.deepcopy(messages)
+        headers = headers.copy()
+        is_ollama = model.startswith("ollama/")
+        request_model = model[len("ollama/"):] if is_ollama else model
         
         # Check if model name includes openrouter model identifier
-        if any(provider in model for provider in ["google/", "anthropic/", "meta/", "mistral/"]):
+        if not is_ollama and any(provider in model for provider in ["google/", "anthropic/", "meta/", "mistral/"]):
             use_official = "openrouter"
 
         is_gpt = True if "gpt" in model or "o1" in model else False
     
         params_gpt = {
-            "model": model,
+            "model": request_model,
             "messages": messages,
             "max_tokens": 8192,
         }
         
-        if "claude" in model:
+        if not is_ollama and "claude" in model:
             use_official = "anthropic"
         
         if self.verbose:
@@ -151,7 +154,10 @@ class OpenAIApiProxy():
         if temperature is not None:
             params_gpt["temperature"] = temperature
 
-        if 'o1' in model:
+        if is_ollama:
+            url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1").rstrip("/") + "/chat/completions"
+            api_key = os.getenv("OLLAMA_API_KEY", "ollama")
+        elif 'o1' in model:
             url = ''
             api_key = ""
             params_gpt["max_tokens"] = 32768
@@ -177,7 +183,7 @@ class OpenAIApiProxy():
             genai.configure(api_key=api_key)
             url = None  # Not used for Gemini
 
-        if "o1" in model:
+        if not is_ollama and "o1" in model:
             if "temperature" in params_gpt:
                 del params_gpt["temperature"]
         
@@ -254,7 +260,7 @@ class OpenAIApiProxy():
                 raise
                 
         # Handle Gemini API
-        if "gemini" in model:
+        if not is_ollama and "gemini" in model:
             try:
                 # Process messages for Gemini format
                 gemini_messages = []

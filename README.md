@@ -53,6 +53,7 @@ WriteHERE is developed with these core principles:
   - OpenAI (GPT models)
   - Anthropic (Claude models)
   - SerpAPI (for search functionality in report generation)
+- Optional: a running local Ollama server for local models such as Qwen
 
 ### Quickstart
 
@@ -91,6 +92,16 @@ Example for generating a report:
 python engine.py --filename ../test_data/qa_test.jsonl --output-filename ./project/qa/result.jsonl --done-flag-file ./project/qa/done.txt --model claude-3-sonnet --mode report
 ```
 
+List locally installed Ollama models:
+```bash
+python engine.py --list-local-models
+```
+
+Run with a local Ollama model by using the `ollama/` prefix. WriteHERE only discovers installed models; it does not install Ollama or pull model weights.
+```bash
+OLLAMA_MODELS_DIR="$HOME/.ollama/models" python engine.py --filename ../test_data/meta_fiction.jsonl --output-filename ./project/story/output.jsonl --done-flag-file ./project/story/done.txt --model ollama/qwen2.5:7b --mode story
+```
+
 #### Running With Visualization Interface
 
 This option provides a web interface to visualize and monitor the writing process in real-time.
@@ -104,6 +115,7 @@ This option provides a web interface to visualize and monitor the writing proces
 This will:
 - Create a clean Python virtual environment
 - Install all required dependencies
+- Ask whether to discover local Ollama models without installing or pulling Ollama
 - Start the backend server on port 5001
 - Start the frontend on port 3000
 - Open your browser at http://localhost:3000

@@ -12,8 +12,13 @@ import shutil
 import re
 import signal
 import argparse
+import shlex
+import sys
 from pathlib import Path
 from datetime import datetime
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../recursive/llm")))
+from local_models import build_model_options
 
 # Parse command-line arguments
 parser = argparse.ArgumentParser(description='Backend server for WriteHERE application')
@@ -34,6 +39,36 @@ socketio = SocketIO(app,
 task_storage = {}
 RESULTS_DIR = os.path.join(os.path.dirname(__file__), 'results')
 os.makedirs(RESULTS_DIR, exist_ok=True)
+
+ONLINE_MODEL_OPTIONS = [
+    {"label": "Claude 3.7 Sonnet (Recommended)", "value": "claude-3-7-sonnet-20250219", "provider": "anthropic", "local": False},
+    {"label": "Claude 3.5 Sonnet", "value": "claude-3-5-sonnet-20241022", "provider": "anthropic", "local": False},
+    {"label": "GPT-4o", "value": "gpt-4o", "provider": "openai", "local": False},
+    {"label": "GPT-4o-mini", "value": "gpt-4o-mini", "provider": "openai", "local": False},
+    {"label": "Gemini 2.5 Pro Exp", "value": "gemini-2.5-pro-exp-03-25", "provider": "gemini", "local": False},
+    {"label": "Gemini 2.5 Pro Preview", "value": "gemini-2.5-pro-preview-03-25", "provider": "gemini", "local": False},
+]
+
+
+def write_task_env_file(env_file, api_keys):
+    def write_env_value(file_obj, key, value):
+        file_obj.write(f"{key}={shlex.quote(str(value))}\n")
+
+    with open(env_file, 'w') as f:
+        if 'openai' in api_keys and api_keys['openai']:
+            write_env_value(f, "OPENAI", api_keys['openai'])
+        if 'claude' in api_keys and api_keys['claude']:
+            write_env_value(f, "CLAUDE", api_keys['claude'])
+        if 'gemini' in api_keys and api_keys['gemini']:
+            write_env_value(f, "GEMINI", api_keys['gemini'])
+        if 'serpapi' in api_keys and api_keys['serpapi']:
+            write_env_value(f, "SERPAPI", api_keys['serpapi'])
+        if os.getenv('OLLAMA_BASE_URL'):
+            write_env_value(f, "OLLAMA_BASE_URL", os.getenv('OLLAMA_BASE_URL'))
+        if os.getenv('OLLAMA_API_KEY'):
+            write_env_value(f, "OLLAMA_API_KEY", os.getenv('OLLAMA_API_KEY'))
+        if os.getenv('OLLAMA_MODELS_DIR'):
+            write_env_value(f, "OLLAMA_MODELS_DIR", os.getenv('OLLAMA_MODELS_DIR'))
 
 def reload_task_storage():
     """Reload task storage from the file system"""
@@ -117,24 +152,17 @@ def run_story_generation(task_id, prompt, model, api_keys):
     
     # Create environment file with API keys
     env_file = os.path.join(task_dir, 'api_key.env')
-    with open(env_file, 'w') as f:
-        if 'openai' in api_keys and api_keys['openai']:
-            f.write(f"OPENAI={api_keys['openai']}\n")
-        if 'claude' in api_keys and api_keys['claude']:
-            f.write(f"CLAUDE={api_keys['claude']}\n")
-        if 'gemini' in api_keys and api_keys['gemini']:
-            f.write(f"GEMINI={api_keys['gemini']}\n")
-        if 'serpapi' in api_keys and api_keys['serpapi']:
-            f.write(f"SERPAPI={api_keys['serpapi']}\n")
+    write_task_env_file(env_file, api_keys)
     
     # Create a script to run the engine with the appropriate environment
     script_path = os.path.join(task_dir, 'run.sh')
+    recursive_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../recursive'))
     with open(script_path, 'w') as f:
         f.write(f"""#!/bin/bash
-        cd {os.path.abspath(os.path.join(os.path.dirname(__file__), '../recursive'))}
-        source {env_file}
-        export TASK_ENV_FILE={env_file}
-        python engine.py --filename {input_file} --output-filename {output_file} --done-flag-file {done_file} --model {model} --mode story --nodes-json-file {nodes_file}
+        cd {shlex.quote(recursive_dir)}
+        source {shlex.quote(env_file)}
+        export TASK_ENV_FILE={shlex.quote(env_file)}
+        python engine.py --filename {shlex.quote(input_file)} --output-filename {shlex.quote(output_file)} --done-flag-file {shlex.quote(done_file)} --model {shlex.quote(model)} --mode story --nodes-json-file {shlex.quote(nodes_file)}
         """)
     
     os.chmod(script_path, 0o755)
@@ -210,26 +238,19 @@ def run_report_generation(task_id, prompt, model, enable_search, search_engine, 
     
     # Create environment file with API keys
     env_file = os.path.join(task_dir, 'api_key.env')
-    with open(env_file, 'w') as f:
-        if 'openai' in api_keys and api_keys['openai']:
-            f.write(f"OPENAI={api_keys['openai']}\n")
-        if 'claude' in api_keys and api_keys['claude']:
-            f.write(f"CLAUDE={api_keys['claude']}\n")
-        if 'gemini' in api_keys and api_keys['gemini']:
-            f.write(f"GEMINI={api_keys['gemini']}\n")
-        if 'serpapi' in api_keys and api_keys['serpapi']:
-            f.write(f"SERPAPI={api_keys['serpapi']}\n")
+    write_task_env_file(env_file, api_keys)
     
     # Create a script to run the engine with the appropriate environment
     script_path = os.path.join(task_dir, 'run.sh')
     engine_backend = search_engine if enable_search else "none"
     
+    recursive_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../recursive'))
     with open(script_path, 'w') as f:
         f.write(f"""#!/bin/bash
-        cd {os.path.abspath(os.path.join(os.path.dirname(__file__), '../recursive'))}
-        source {env_file}
-        export TASK_ENV_FILE={env_file}
-        python engine.py --filename {input_file} --output-filename {output_file} --done-flag-file {done_file} --model {model} --engine-backend {engine_backend} --mode report --nodes-json-file {nodes_file}
+        cd {shlex.quote(recursive_dir)}
+        source {shlex.quote(env_file)}
+        export TASK_ENV_FILE={shlex.quote(env_file)}
+        python engine.py --filename {shlex.quote(input_file)} --output-filename {shlex.quote(output_file)} --done-flag-file {shlex.quote(done_file)} --model {shlex.quote(model)} --engine-backend {shlex.quote(engine_backend)} --mode report --nodes-json-file {shlex.quote(nodes_file)}
         """)
     
     os.chmod(script_path, 0o755)
@@ -276,6 +297,17 @@ def run_report_generation(task_id, prompt, model, enable_search, search_engine, 
     except Exception as e:
         task_storage[task_id]["status"] = "error"
         task_storage[task_id]["error"] = str(e)
+
+@app.route('/api/models', methods=['GET'])
+def api_get_models():
+    local_models = build_model_options()
+    return jsonify({
+        "models": ONLINE_MODEL_OPTIONS + local_models,
+        "localModels": local_models,
+        "ollamaModelsDir": os.getenv("OLLAMA_MODELS_DIR", str(Path.home() / ".ollama" / "models")),
+        "ollamaBaseUrl": os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
+    })
+
 
 @app.route('/api/generate-story', methods=['POST'])
 def api_generate_story():

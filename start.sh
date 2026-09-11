@@ -45,6 +45,39 @@ check_api_keys() {
   fi
 }
 
+# Optionally expose locally installed Ollama models to the backend/frontend.
+configure_local_ollama() {
+  default_ollama_models_dir="$HOME/.ollama/models"
+
+  if [ ! -t 0 ]; then
+    log "Non-interactive shell detected; skipping local Ollama model discovery."
+    return
+  fi
+
+  read -r -p "Do you want to enable local Ollama models? [y/N]: " enable_ollama
+  case "$enable_ollama" in
+    y|Y|yes|YES)
+      read -r -p "Ollama models directory [$default_ollama_models_dir]: " ollama_models_dir
+      if [ -z "$ollama_models_dir" ]; then
+        ollama_models_dir="$default_ollama_models_dir"
+      fi
+      ollama_models_dir="${ollama_models_dir/#\~/$HOME}"
+      export OLLAMA_MODELS_DIR="$ollama_models_dir"
+      export OLLAMA_BASE_URL="${OLLAMA_BASE_URL:-http://localhost:11434/v1}"
+
+      if [ -d "$OLLAMA_MODELS_DIR/manifests" ]; then
+        log "Local Ollama discovery enabled: $OLLAMA_MODELS_DIR"
+      else
+        log "Local Ollama discovery enabled, but no manifests directory was found at: $OLLAMA_MODELS_DIR/manifests"
+        log "The app will still start; online models and manual model entry remain available."
+      fi
+      ;;
+    *)
+      log "Local Ollama model discovery disabled."
+      ;;
+  esac
+}
+
 # Check if a port is in use
 is_port_in_use() {
   if command -v nc >/dev/null 2>&1; then
@@ -57,6 +90,11 @@ is_port_in_use() {
     # Default to assuming port is free if we can't check
     return 1
   fi
+}
+
+cleanup_ports() {
+  # Port conflicts are handled in start_backend/start_frontend.
+  return 0
 }
 
 # Function to start the backend server
@@ -182,6 +220,9 @@ cleanup_ports
 
 # Ensure we have API keys or notify the user
 check_api_keys
+
+# Ask once whether local Ollama models should be exposed.
+configure_local_ollama
 
 # Start backend first
 start_backend
